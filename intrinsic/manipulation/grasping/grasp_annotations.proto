@@ -32,6 +32,7 @@ message ManualGraspAnnotation {
   // evenly spread in 360 degrees. E.g., if `num_rotations=6`,
   // then the poses are 60 degree rotations around z-axis of the
   // annotation pose.
+  // Defaults to 1.
   optional int32 num_rotations = 3;
 
   // Score of this grasp annotation that reflects the preference of picking
@@ -49,6 +50,7 @@ message BoxShapedGraspAnnotationParams {
   // The pose of object's center in its mesh frame. Useful when
   // the mesh frame isn't at the center of the box.
   // Used to compute grasp poses with respect to the target object.
+  // Defaults to the identity pose.
   optional intrinsic_proto.Pose obj_t_obj_center = 2;
 
   // Number of grasps to add on each surface. These are grasp poses at the
@@ -56,6 +58,7 @@ message BoxShapedGraspAnnotationParams {
   // 360 degrees. E.g., if `num_rotations=6`, then the grasps are 60 degree
   // rotations around z-axis.
   // Used to compute grasp poses with respect to the target object.
+  // Defaults to 4.
   optional int32 num_rotations = 3;
 
   // The object surfaces to which to add grasps. Defaults to all surfaces if
