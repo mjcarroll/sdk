@@ -131,7 +131,7 @@ class LoopbackFakeArm final {
   // Returns InvalidArgumentError if `dof_positions` has anything but 6 degrees
   // of freedom.
   RealtimeStatusOr<Pose3d> ComputeChainFK(
-      const JointStateP dof_positions) const;
+      const JointStateP& dof_positions) const;
 
   // Returns a 6x6 identity matrix regardless of the values in `dof_positions`,
   // as long as `dof_position` has exactly 6 degrees of freedom.
@@ -139,7 +139,7 @@ class LoopbackFakeArm final {
   // Returns InvalidArgumentError if `dof_positions` has anything but 6 degrees
   // of freedom.
   RealtimeStatusOr<eigenmath::Matrix6Nd> ComputeChainJacobian(
-      const JointStateP dof_positions) const;
+      const JointStateP& dof_positions) const;
 
  private:
   JointPositionCommand current_setpoints_;

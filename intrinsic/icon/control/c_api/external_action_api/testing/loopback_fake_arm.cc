@@ -285,7 +285,7 @@ RealtimeStatus LoopbackFakeArm::Tare() {
 }
 
 RealtimeStatusOr<Pose3d> LoopbackFakeArm::ComputeChainFK(
-    const JointStateP dof_positions) const {
+    const JointStateP& dof_positions) const {
   if (dof_positions.size() != kNdof) {
     return InvalidArgumentError(RealtimeStatus::StrCat(
         "Position setpoints must have 6 DoF, got ", dof_positions.size()));
@@ -301,7 +301,7 @@ RealtimeStatusOr<Pose3d> LoopbackFakeArm::ComputeChainFK(
 }
 
 RealtimeStatusOr<eigenmath::Matrix6Nd> LoopbackFakeArm::ComputeChainJacobian(
-    const JointStateP dof_positions) const {
+    const JointStateP& dof_positions) const {
   if (dof_positions.size() != kNdof) {
     return InvalidArgumentError(RealtimeStatus::StrCat(
         "Position setpoints must have 6 DoF, got ", dof_positions.size()));
