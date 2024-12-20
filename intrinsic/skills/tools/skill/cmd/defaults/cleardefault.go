@@ -9,11 +9,12 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
+	acgrpcpb "intrinsic/assets/catalog/proto/v1/asset_catalog_go_grpc_proto"
+	acpb "intrinsic/assets/catalog/proto/v1/asset_catalog_go_grpc_proto"
 	"intrinsic/assets/clientutils"
 	"intrinsic/assets/cmdutils"
 	"intrinsic/assets/idutils"
-	scgrpcpb "intrinsic/skills/catalog/proto/skill_catalog_go_grpc_proto"
-	scpb "intrinsic/skills/catalog/proto/skill_catalog_go_grpc_proto"
+	atpb "intrinsic/assets/proto/asset_type_go_proto"
 	skillcmd "intrinsic/skills/tools/skill/cmd/cmd"
 )
 
@@ -33,7 +34,10 @@ func clearDefaultVersion(ctx context.Context, cmd *cobra.Command, id string) err
 		return fmt.Errorf("invalid skill ID: %q", id)
 	}
 
-	req := &scpb.ClearDefaultRequest{Id: idProto}
+	req := &acpb.ClearDefaultRequest{
+		AssetType: atpb.AssetType_ASSET_TYPE_SKILL,
+		Id:        idProto,
+	}
 
 	log.Printf("Clearing default version for skill %q from the catalog", id)
 
@@ -45,8 +49,10 @@ func clearDefaultVersion(ctx context.Context, cmd *cobra.Command, id string) err
 
 	if cmdFlags.GetFlagDryRun() {
 		log.Printf("Skipping call to skill catalog (dry-run)")
-	} else if _, err := scgrpcpb.NewSkillCatalogClient(conn).ClearDefault(ctx, req); err != nil {
+	} else if _, err := acgrpcpb.NewAssetCatalogClient(conn).ClearDefault(ctx, req); err != nil {
 		return fmt.Errorf("could not clear the default version for skill %q: %v", id, err)
+	} else {
+		return err
 	}
 	log.Printf("Finished clearing the default version for the skill: %q", id)
 	return nil
