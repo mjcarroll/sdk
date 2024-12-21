@@ -1,0 +1,101 @@
+// Copyright 2023 Intrinsic Innovation LLC
+
+syntax = "proto3";
+
+package intrinsic_proto.data_logger;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "intrinsic/logging/proto/bag_metadata.proto";
+
+// Full record for a single bag stored on the cloud.
+message BagRecord {
+  google.protobuf.Timestamp initialization_time = 1;
+  intrinsic_proto.data_logger.BagMetadata bag_metadata = 2;
+  optional intrinsic_proto.data_logger.BagFileReference bag_file = 3;
+}
+
+// Request to register a new bag generation workflow or update a previously
+// registered bag.
+//
+// Should ONLY be called by the cloud service or on-prem.
+message RegisterBagRequest {
+  intrinsic_proto.data_logger.BagMetadata bag_metadata = 1;
+}
+
+// Request to trigger packaging of a new bag.
+message GenerateBagRequest {
+  message CloudLogItemsReference {
+    // Requested time range.
+    google.protobuf.Timestamp start_time = 1;
+    google.protobuf.Timestamp end_time = 2;
+
+    string workcell_name = 3;
+    repeated intrinsic_proto.data_logger.EventSourceWithTypeHints
+        event_sources = 4;
+  }
+
+  oneof query {
+    string bag_id = 1;                           // Pre-existing registered bag.
+    CloudLogItemsReference cloud_log_items = 2;  // Cloud logs.
+  }
+
+  string organization_id = 3;
+}
+
+message GenerateBagResponse {
+  BagRecord bag = 1;
+}
+
+// Request to list all registered bags.
+message ListBagsRequest {
+  string organization_id = 1;
+  string workcell_name = 2;
+
+  // Requested time range.
+  google.protobuf.Timestamp start_time = 3;
+  google.protobuf.Timestamp end_time = 4;
+
+  optional uint32 max_num_results = 5;
+}
+
+message ListBagsResponse {
+  repeated BagRecord bags = 1;
+  optional bytes next_page_cursor = 2;
+}
+
+// Request to get the metadata of a registered bag.
+message GetBagRequest {
+  string bag_id = 1;
+
+  // If true, generates a signed url to download the bag with.
+  bool with_url = 2;
+}
+
+// Response includes registered and actual metadata, and
+// a link to download the bag (if the bag status is not terminal).
+message GetBagResponse {
+  BagRecord bag = 1;
+
+  // Signed url to download the bag with, if available.
+  // https://cloud.google.com/storage/docs/access-control/signed-urls
+  optional string url = 2;
+
+  // Till when the signed url be valid.
+  optional google.protobuf.Timestamp url_expiry_time = 3;
+}
+
+service BagPackager {
+  // Register a new bag generation or update a previously
+  // registered bag.
+  rpc RegisterBag(RegisterBagRequest) returns (google.protobuf.Empty) {}
+
+  // Trigger conversion and packaging of a new bag.
+  rpc GenerateBag(GenerateBagRequest) returns (GenerateBagResponse) {}
+
+  // List all registered bags, regardless of their status.
+  rpc ListBags(ListBagsRequest) returns (ListBagsResponse) {}
+
+  // Get the metadata (and download link) for a registered bag.
+  rpc GetBag(GetBagRequest) returns (GetBagResponse) {}
+}
