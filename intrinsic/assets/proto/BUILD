@@ -47,7 +47,7 @@ cc_proto_library(
 
 py_proto_library(
     name = "asset_type_py_pb2",
-    visibility = ["//visibility:private"],
+    visibility = ["//intrinsic:__subpackages__"],
     deps = [":asset_type_proto"],
 )
 

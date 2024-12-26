@@ -17,8 +17,7 @@ var (
 	customAssetTypeToName = map[atypepb.AssetType]string{
 		atypepb.AssetType_ASSET_TYPE_UNSPECIFIED: "asset",
 	}
-
-	regexEnumName             = regexp.MustCompile("ASSET_TYPE_(?P<asset_type>[A-Za-z0-9_]+)$")
+	regexEnumName = regexp.MustCompile("ASSET_TYPE_(?P<asset_type>[A-Za-z0-9_]+)$")
 	regexEnumNameGroups       = regexEnumName.SubexpNames()
 	regexEnumNameAssetTypeIdx = slices.Index(regexEnumNameGroups, "asset_type")
 )
