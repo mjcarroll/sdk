@@ -144,10 +144,7 @@ func ProcessService(path string, opts ProcessServiceOpts) (*smpb.ProcessedServic
 	// Initialize handlers for when we walk through the file again now that we
 	// know what we're looking for, but error on unexpected files this time.
 	processedAssets, handlers := makeServiceAssetHandlers(manifest, opts)
-	fallback := func(n string, r io.Reader) error {
-		return fmt.Errorf("unexpected file %q", n)
-	}
-	if err := walkTarFile(tar.NewReader(f), handlers, fallback); err != nil {
+	if err := walkTarFile(tar.NewReader(f), handlers, alwaysErrorAsUnexpected); err != nil {
 		return nil, fmt.Errorf("error in tar file %q: %v", path, err)
 	}
 

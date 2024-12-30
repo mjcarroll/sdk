@@ -68,6 +68,13 @@ func ignoreHandler(r io.Reader) error {
 	return nil
 }
 
+// alwaysErrorAsUnexpected can be used as a fallback handler that will always
+// trigger an unexpected file error.  This forces all files to be handled
+// explicitly.
+func alwaysErrorAsUnexpected(n string, r io.Reader) error {
+	return fmt.Errorf("unexpected file %q", n)
+}
+
 // makeBinaryProtoHandler creates a handler that reads a binary proto file and
 // unmarshals it into a file.  The proto must not be nil.
 func makeBinaryProtoHandler(p proto.Message) handler {
