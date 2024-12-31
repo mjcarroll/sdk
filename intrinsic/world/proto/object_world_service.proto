@@ -67,6 +67,10 @@ service ObjectWorldService {
   rpc CloneWorld(CloneWorldRequest) returns (WorldMetadata) {
   }
 
+  // Swaps worlds in the service.
+  rpc SwapWorld(SwapWorldRequest) returns (google.protobuf.Empty) {
+  }
+
   // Deletes a world from the service.
   rpc DeleteWorld(DeleteWorldRequest) returns (google.protobuf.Empty) {
   }
@@ -616,6 +620,14 @@ message CloneWorldRequest {
   // Arbitrary user tag. If not set, the user tag of the base world is used.
   optional string user_tag = 7;
 
+}
+
+message SwapWorldRequest {
+  // The id of the world to swap.
+  string world_id = 1;
+
+  // The id of the world with which to swap.
+  string target_world_id = 2;
 }
 
 message DeleteWorldRequest {
