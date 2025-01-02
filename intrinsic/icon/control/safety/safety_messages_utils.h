@@ -29,11 +29,10 @@ constexpr auto AsIndex(const EnumType value) ->
 }
 
 void SetSafetyStatusMessage(
-    const ::intrinsic::safety::messages::ModeOfSafeOperation
-        mode_of_safe_operation,
-    const ::intrinsic::safety::messages::ButtonStatus estop_button_status,
-    const ::intrinsic::safety::messages::ButtonStatus enable_button_status,
-    const ::intrinsic::safety::messages::RequestedBehavior requested_behavior,
+    ::intrinsic::safety::messages::ModeOfSafeOperation mode_of_safe_operation,
+    ::intrinsic::safety::messages::ButtonStatus estop_button_status,
+    ::intrinsic::safety::messages::ButtonStatus enable_button_status,
+    ::intrinsic::safety::messages::RequestedBehavior requested_behavior,
     ::intrinsic::safety::messages::SafetyStatusMessage& message);
 
 // Extract ModeOfSafeOperation from safety inputs.
