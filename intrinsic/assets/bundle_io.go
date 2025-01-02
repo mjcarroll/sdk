@@ -105,3 +105,14 @@ func makeCollectInlinedFallbackHandler() (map[string][]byte, fallbackHandler) {
 	}
 	return inlined, fallback
 }
+
+// readBinaryProto reads a binary proto from a reader and unmarshals it into a proto.
+func readBinaryProto(r io.Reader, p proto.Message) error {
+	if b, err := io.ReadAll(r); err != nil {
+		return fmt.Errorf("error reading: %v", err)
+	} else if err := proto.Unmarshal(b, p); err != nil {
+		return fmt.Errorf("error parsing proto: %v", err)
+	}
+
+	return nil
+}
