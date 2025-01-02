@@ -195,12 +195,11 @@ class IconManipulatorKinematics {
 
   // Returns the base to tip transform for the given `dof_positions`. Assumes
   // the kinematic model is a chain and returns an error otherwise.
-  RealtimeStatusOr<Pose3d> ComputeChainFK(
-      const JointStateP dof_positions) const;
+  RealtimeStatusOr<Pose3d> ComputeChainFK(JointStateP dof_positions) const;
   // Returns the base to tip jacobian for the given `dof_positions`. Assumes
   // the kinematic model is a chain and returns an error otherwise.
   RealtimeStatusOr<eigenmath::Matrix6Nd> ComputeChainJacobian(
-      const JointStateP dof_positions) const;
+      JointStateP dof_positions) const;
 
  private:
   const XfaIconFeatureInterfaceManipulatorKinematics*
@@ -234,7 +233,7 @@ struct IconConstFeatureInterfaces {
 // Sets the entries for interfaces whose pointers are nullptr to std::nullopt.
 const IconConstFeatureInterfaces FromCApiFeatureInterfaces(
     XfaIconConstFeatureInterfacesForSlot const_feature_interfaces,
-    const XfaIconFeatureInterfaceVtable feature_interface_vtable);
+    XfaIconFeatureInterfaceVtable feature_interface_vtable);
 
 // Creates instances of the C++ class (see above) for any non-null pointers in
 // `feature_interfaces`, using the function pointers from
