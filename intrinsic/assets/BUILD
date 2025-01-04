@@ -163,6 +163,7 @@ go_library(
     ],
     visibility = ["//intrinsic:internal_api_users"],
     deps = [
+        ":idutils",
         "//intrinsic/assets/proto:asset_type_go_proto",
         "//intrinsic/assets/proto:id_go_proto",
         "//intrinsic/assets/services/proto:service_manifest_go_proto",
