@@ -4,6 +4,7 @@
 
 #include <string>
 
+#include "absl/debugging/leak_check.h"
 #include "absl/log/log.h"
 #include "absl/strings/match.h"
 #include "absl/strings/string_view.h"
@@ -42,6 +43,8 @@ std::string PathResolver::ResolveRunfilesPathForTest(absl::string_view path) {
     LOG(ERROR) << "Error creating Runfiles object for test: " << error;
     return "";
   }
+  // Runfiles::CreateForTest allocates a global Runfiles object using malloc.
+  absl::IgnoreLeak(runfiles);
   std::string runfiles_dir = runfiles->Rlocation(BAZEL_CURRENT_REPOSITORY);
   return file::JoinPath(runfiles_dir, path);
 }
