@@ -9,7 +9,6 @@
 #include "absl/base/optimization.h"
 #include "intrinsic/icon/release/source_location.h"
 #include "intrinsic/util/status/status_builder.h"  // IWYU pragma: export
-#include "intrinsic/util/status/status_macros.h"
 
 namespace grpc {
 // Forward declare to enable checking if gRPC status macros should be used.
