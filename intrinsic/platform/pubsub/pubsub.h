@@ -532,7 +532,7 @@ PubSub::GetResult TryConvertResponseProtoForTypes(
 
   // This fold expression goes over the expected types to note the proto's full
   // name, just to show it to the user.
-  std::vector<std::string> expected_types;
+  std::vector<absl::string_view> expected_types;
   (
       [&] {
         TupleType args;
