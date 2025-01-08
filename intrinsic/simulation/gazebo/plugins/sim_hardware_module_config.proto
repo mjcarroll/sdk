@@ -59,6 +59,15 @@ message JointPositionStateInterface {
   string joint_group_name = 1;
 }
 
+// Reports the current commanded position of the joints in `joint_group_name`
+//
+// The most common name for this interface on real robots is
+// "joint_commanded_position". The simulated hardware module uses this name when
+// `manual_hardware_interfaces` is unset.
+message JointCommandedPositionInterface {
+  string joint_group_name = 1;
+}
+
 // Reports the current simulated velocity of the joints in `joint_group_name`
 //
 // The most common name for this interface on real robots is
@@ -261,6 +270,7 @@ message SimHardwareInterface {
   oneof interface {
     JointPositionCommandInterface joint_position_command = 1;
     JointPositionStateInterface joint_position_state = 2;
+    JointCommandedPositionInterface joint_commanded_position = 18;
     JointVelocityStateInterface joint_velocity_state = 3;
     JointAccelerationStateInterface joint_acceleration_state = 4;
     JointTorqueCommandInterface joint_torque_command = 5;
