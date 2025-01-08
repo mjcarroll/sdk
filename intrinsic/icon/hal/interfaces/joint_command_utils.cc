@@ -7,7 +7,10 @@
 
 #include "flatbuffers/detached_buffer.h"
 #include "flatbuffers/flatbuffer_builder.h"
+#include "intrinsic/icon/flatbuffers/flatbuffer_utils.h"
 #include "intrinsic/icon/hal/interfaces/joint_command.fbs.h"
+#include "intrinsic/icon/utils/realtime_status.h"
+#include "intrinsic/icon/utils/realtime_status_macro.h"
 
 namespace intrinsic_fbs {
 
@@ -56,4 +59,15 @@ flatbuffers::DetachedBuffer BuildHandGuidingCommand() {
   builder.Finish(builder.CreateStruct(HandGuidingCommand(/*unused=*/false)));
   return builder.Release();
 }
+
+intrinsic::icon::RealtimeStatus CopyTo(const JointPositionCommand& src,
+                                       JointPositionCommand& dest) {
+  INTRINSIC_RT_RETURN_IF_ERROR(
+      CopyFbsVector(*src.position(), *dest.mutable_position()));
+  INTRINSIC_RT_RETURN_IF_ERROR(CopyFbsVector(
+      *src.velocity_feedforward(), *dest.mutable_velocity_feedforward()));
+  return CopyFbsVector(*src.acceleration_feedforward(),
+                       *dest.mutable_acceleration_feedforward());
+}
+
 }  // namespace intrinsic_fbs

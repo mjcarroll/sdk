@@ -93,7 +93,10 @@ cc_library(
 cc_library(
     name = "flatbuffer_utils",
     hdrs = ["flatbuffer_utils.h"],
-    deps = ["@com_github_google_flatbuffers//:runtime_cc"],
+    deps = [
+        "//intrinsic/icon/utils:realtime_status",
+        "@com_github_google_flatbuffers//:runtime_cc",
+    ],
 )
 
 cc_test(
@@ -101,7 +104,10 @@ cc_test(
     srcs = ["flatbuffer_utils_test.cc"],
     deps = [
         ":flatbuffer_utils",
+        ":transform_types_fbs_cc",
         "//intrinsic/icon/interprocess/shared_memory_manager:segment_info_fbs_cc",
         "//intrinsic/util/testing:gtest_wrapper_main",
+        "@com_github_google_flatbuffers//:runtime_cc",
+        "@com_google_absl//absl/status",
     ],
 )

@@ -17,6 +17,8 @@ flatbuffers::DetachedBuffer BuildJointAccelerationState(uint32_t num_dof);
 
 flatbuffers::DetachedBuffer BuildJointTorqueState(uint32_t num_dof);
 
+flatbuffers::DetachedBuffer BuildJointCommandedPosition(uint32_t num_dof);
+
 }  // namespace intrinsic_fbs
 
 #endif  // INTRINSIC_ICON_HAL_INTERFACES_JOINT_STATE_UTILS_H_

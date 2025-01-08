@@ -130,6 +130,9 @@ cc_library(
     ],
     deps = [
         ":joint_command_fbs_cc",
+        "//intrinsic/icon/flatbuffers:flatbuffer_utils",
+        "//intrinsic/icon/utils:realtime_status",
+        "//intrinsic/icon/utils:realtime_status_macro",
         "@com_github_google_flatbuffers//:runtime_cc",
     ],
 )

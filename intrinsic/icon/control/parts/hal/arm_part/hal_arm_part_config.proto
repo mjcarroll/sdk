@@ -12,8 +12,10 @@ import "intrinsic/icon/proto/linear_joint_acceleration_filter_config.proto";
 // Config specialization for a HAL arm part.
 // The config is assigning a hardware interface for each required feature
 // interface.
+// Next ID: 26
 message HalArmPartConfig {
   HardwareInterface joint_position_command = 1;
+  HardwareInterface joint_commanded_position = 25;
   HardwareInterface joint_velocity_command = 2;
   HardwareInterface joint_torque_command = 3;
   HardwareInterface joint_position_state = 4;

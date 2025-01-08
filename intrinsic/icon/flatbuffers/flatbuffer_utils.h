@@ -5,8 +5,11 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 
 #include "flatbuffers/array.h"
+#include "flatbuffers/vector.h"
+#include "intrinsic/icon/utils/realtime_status.h"
 namespace intrinsic_fbs {
 
 // Helper function to get the number of elements of a flatbuffer struct's array
@@ -35,6 +38,24 @@ constexpr size_t FlatbufferArrayNumElements(
     const flatbuffers::Array<ArrayT, array_length>* (
         FlatbufferStructT::*array_getter_ptr)() const) {
   return array_length;
+}
+
+// Performs a deep copy of a flatbuffers::Vector.
+//
+// The template parameter `T` must be a simple flatbuffer type that can be
+// copied trough std::copy.
+// Returns OutOfRangeError if the `from` vector and the
+// `to`vector have different sizes.
+template <typename T>
+intrinsic::icon::RealtimeStatus CopyFbsVector(
+    const flatbuffers::Vector<T>& from, flatbuffers::Vector<T>& to) {
+  if (from.size() != to.size()) {
+    return intrinsic::icon::OutOfRangeError(
+        intrinsic::icon::RealtimeStatus::StrCat(
+            "Vector sizes are not equal: ", from.size(), " != ", to.size()));
+  }
+  std::copy(from.data(), from.data() + from.size(), to.data());
+  return intrinsic::icon::OkStatus();
 }
 
 }  // namespace intrinsic_fbs

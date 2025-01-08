@@ -8,6 +8,7 @@ table JointPositionCommand {
   acceleration_feedforward:[double];
 }
 
+
 table JointVelocityCommand {
   velocity:[double];
   acceleration_feedforward:[double];

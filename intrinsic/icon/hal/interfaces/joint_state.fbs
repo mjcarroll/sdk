@@ -17,3 +17,9 @@ table JointAccelerationState {
 table JointTorqueState {
   torque:[double];
 }
+
+table JointCommandedPosition {
+  position:[double];
+  velocity_feedforward:[double];
+  acceleration_feedforward:[double];
+}
