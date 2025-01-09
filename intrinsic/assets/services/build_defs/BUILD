@@ -38,7 +38,9 @@ go_binary(
     srcs = ["servicegen_main.go"],
     deps = [
         ":servicegen",
+        "//intrinsic/assets/services/proto:service_manifest_go_proto",
         "//intrinsic/production:intrinsic",
+        "//intrinsic/util/proto:protoio",
         "@com_github_golang_glog//:go_default_library",
     ],
 )

@@ -23,12 +23,12 @@ import (
 type ServiceData struct {
 	// Optional path to default config proto.
 	DefaultConfig string
-	// Comma separated paths to binary file descriptor set protos to be used to resolve the configuration and behavior tree messages.
-	FileDescriptorSets string
-	// Comma separated full paths to tar archives for images.
-	ImageTars string
-	// Path to a ServiceManifest pbtxt file.
-	Manifest string
+	// Paths to binary file descriptor set protos to be used to resolve the configuration and behavior tree messages.
+	FileDescriptorSets []string
+	// Paths to tar archives for images.
+	ImageTars []string
+	// The deserialized ServiceManifest.
+	Manifest *smpb.ServiceManifest
 	// Bundle tar path.
 	OutputBundle string
 }
@@ -98,20 +98,11 @@ func pruneSourceCodeInfo(defaultConfig *anypb.Any, fds *dpb.FileDescriptorSet) e
 
 // CreateService bundles the data needed for software services.
 func CreateService(d *ServiceData) error {
-	m := new(smpb.ServiceManifest)
-	if err := protoio.ReadTextProto(d.Manifest, m); err != nil {
-		return fmt.Errorf("failed to read manifest: %v", err)
-	}
-
-	if err := validateManifest(m); err != nil {
+	if err := validateManifest(d.Manifest); err != nil {
 		return fmt.Errorf("invalid manifest: %v", err)
 	}
 
-	var fds []string
-	if d.FileDescriptorSets != "" {
-		fds = strings.Split(d.FileDescriptorSets, ",")
-	}
-	set, err := registryutil.LoadFileDescriptorSets(fds)
+	set, err := registryutil.LoadFileDescriptorSets(d.FileDescriptorSets)
 	if err != nil {
 		return fmt.Errorf("unable to build FileDescriptorSet: %v", err)
 	}
@@ -129,12 +120,7 @@ func CreateService(d *ServiceData) error {
 		}
 	}
 
-	var imageTarsList []string
-	if d.ImageTars != "" {
-		imageTarsList = strings.Split(d.ImageTars, ",")
-	}
-
-	if err := validateImageTars(m, imageTarsList); err != nil {
+	if err := validateImageTars(d.Manifest, d.ImageTars); err != nil {
 		return fmt.Errorf("unable to retrieve image tars: %v", err)
 	}
 
@@ -142,10 +128,10 @@ func CreateService(d *ServiceData) error {
 		return fmt.Errorf("unable to process source code info: %v", err)
 	}
 	if err := bundleio.WriteService(d.OutputBundle, bundleio.WriteServiceOpts{
-		Manifest:    m,
+		Manifest:    d.Manifest,
 		Descriptors: set,
 		Config:      defaultConfig,
-		ImageTars:   imageTarsList,
+		ImageTars:   d.ImageTars,
 	}); err != nil {
 		return fmt.Errorf("unable to write service bundle: %v", err)
 	}
