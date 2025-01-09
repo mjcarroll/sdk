@@ -295,6 +295,24 @@ TEST(ReturnIfErrorGrpc, WorksWithLambda) {
   EXPECT_THAT(func().error_message(), Eq("EXPECTED"));
 }
 
+TEST(ReturnIfErrorGrpc, FromGrpcStatusWorks) {
+  auto func = []() -> grpc::Status {
+    INTR_RETURN_IF_ERROR_GRPC(ReturnGrpcError("EXPECTED"));
+    return grpc::Status::OK;
+  };
+
+  EXPECT_THAT(func().error_message(), Eq("EXPECTED"));
+}
+
+TEST(ReturnIfErrorGrpc, FromGrpcStatusWorksForAbslStatusReturn) {
+  auto func = []() -> absl::Status {
+    INTR_RETURN_IF_ERROR_GRPC(ReturnGrpcError("EXPECTED"));
+    return absl::OkStatus();
+  };
+
+  EXPECT_THAT(func().message(), Eq("EXPECTED"));
+}
+
 TEST(ReturnIfErrorGrpc, WorksWithAppend) {
   auto fail_test_if_called = []() -> std::string {
     ADD_FAILURE();

@@ -80,11 +80,23 @@ class StatusAdaptorForMacrosGrpc {
                              intrinsic::SourceLocation loc)
       : builder_(StatusBuilder(std::move(status), loc)) {}
 
+  StatusAdaptorForMacrosGrpc(const grpc::Status& status,
+                             intrinsic::SourceLocation loc)
+      : builder_(StatusBuilder(ToAbslStatus(status), loc)) {}
+
   StatusAdaptorForMacrosGrpc(const intrinsic::StatusBuilder& builder,
                              intrinsic::SourceLocation loc)
       : builder_(StatusBuilder(builder)) {}
 
   StatusAdaptorForMacrosGrpc(intrinsic::StatusBuilder&& builder,
+                             intrinsic::SourceLocation loc)
+      : builder_(std::move(builder)) {}
+
+  StatusAdaptorForMacrosGrpc(const intrinsic::StatusBuilderGrpc& builder,
+                             intrinsic::SourceLocation loc)
+      : builder_(builder) {}
+
+  StatusAdaptorForMacrosGrpc(intrinsic::StatusBuilderGrpc&& builder,
                              intrinsic::SourceLocation loc)
       : builder_(std::move(builder)) {}
 
