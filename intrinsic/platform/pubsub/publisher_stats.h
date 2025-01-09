@@ -7,6 +7,7 @@
 
 #include "absl/base/thread_annotations.h"
 #include "absl/container/flat_hash_map.h"
+#include "absl/debugging/leak_check.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
 
@@ -21,7 +22,7 @@ class PublisherStats {
   void Reset();
 
   static PublisherStats& Singleton() {
-    static PublisherStats* stats = new PublisherStats;
+    static PublisherStats* stats = absl::IgnoreLeak(new PublisherStats);
     return *stats;
   }
 

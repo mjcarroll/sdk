@@ -5,7 +5,6 @@
 exports_files(
     srcs = [
         "BUILD",
-        "libimw_intraprocess_only_asan.so.1",
         "libimw_intraprocess_only_msan.so.1",
         "libimw_intraprocess_only_tsan.so.1",
         "libimw_zenoh.so.1",

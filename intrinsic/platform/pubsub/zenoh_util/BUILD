@@ -16,7 +16,6 @@ cc_library(
     srcs = ["zenoh_handle.cc"],
     hdrs = ["zenoh_handle.h"],
     data = [
-        "//intrinsic/insrc/middleware:libimw_intraprocess_only_asan.so.1",
         "//intrinsic/insrc/middleware:libimw_intraprocess_only_msan.so.1",
         "//intrinsic/insrc/middleware:libimw_intraprocess_only_tsan.so.1",
         "//intrinsic/insrc/middleware:libimw_zenoh.so.1",

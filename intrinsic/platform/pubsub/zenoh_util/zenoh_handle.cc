@@ -20,9 +20,6 @@ namespace intrinsic {
 
 constexpr char libZenohPath[] = "intrinsic/insrc/middleware/libimw_zenoh.so.1";
 // NOLINTBEGIN(clang-diagnostic-unused-const-variable)
-constexpr char libTestAsanZenohPath[] =
-    "intrinsic/insrc/middleware/"
-    "libimw_intraprocess_only_asan.so.1";
 constexpr char libTestMsanZenohPath[] =
     "intrinsic/insrc/middleware/"
     "libimw_intraprocess_only_msan.so.1";
@@ -68,14 +65,11 @@ void ZenohHandle::Initialize() {
     library_path = libTestMsanZenohPath;
 #elif defined(THREAD_SANITIZER)
     library_path = libTestTsanZenohPath;
-#elif defined(ADDRESS_SANITIZER)
-    library_path = libTestAsanZenohPath;
 #else
     library_path = libZenohPath;
 #endif
   } else {
     // These are here to avoid any unused variable linter warnings.
-    (void)libTestAsanZenohPath;
     (void)libTestMsanZenohPath;
     (void)libTestTsanZenohPath;
     library_path = libZenohPath;
