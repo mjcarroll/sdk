@@ -172,6 +172,18 @@ func TestPruningDoesNotAffectNestedFieldCommentMap(t *testing.T) {
 	}
 }
 
+func TestPruningDoesNotCrashWithEmptySourceCodeInfo(t *testing.T) {
+	originalFDS := mustLoadTestFileDescriptor(t)
+	fds := proto.Clone(originalFDS).(*dpb.FileDescriptorSet)
+	for _, f := range fds.GetFile() {
+		f.SourceCodeInfo = nil
+	}
+
+	if err := PruneSourceCodeInfo([]string{"intrinsic.build_def.testing.TestMessage"}, fds); err != nil {
+		t.Fatalf("Unexpected error %v", err)
+	}
+}
+
 func TestDependencyGraph(t *testing.T) {
 	fds := mustLoadTestFileDescriptor(t)
 

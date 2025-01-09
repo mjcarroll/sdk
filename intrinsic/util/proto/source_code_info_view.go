@@ -192,6 +192,11 @@ func PruneSourceCodeInfo(fullNames []string, fds *dpb.FileDescriptorSet) error {
 	depSet := allDependencies(fullNames, depGraph)
 
 	for _, file := range fds.GetFile() {
+		// Skip files that lack source code info. This happens when someone asks protoc to generate a
+		// file descriptor set without the argument --include_source_info.
+		if file.GetSourceCodeInfo() == nil {
+			continue
+		}
 
 		// We keep comments in any file that contains at least one message that
 		// belong to the set of transitive dependencies.
