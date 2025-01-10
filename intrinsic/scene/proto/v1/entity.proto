@@ -11,13 +11,14 @@ import "intrinsic/world/proto/physics_component.proto";
 import "intrinsic/world/proto/sensor_component.proto";
 
 // Frame represents a reference frame local to the model (e.g., a grasp or
-// drop-off position, a tool frame, etc.).
+// drop-off position, a tool frame, etc.). A frame must parent to a `Link` or a
+// `Frame`.
 message Frame {
   bool is_attachment_frame = 1;
 }
 
 // Link represents a rigid segment of the model with geometric and physics
-// properties.
+// properties. A link may parent to no entity, a `Link` or a `Joint`.
 message Link {
   // Visual and collision geometry of this entity.
   intrinsic_proto.world.GeometryComponent geometry_component = 1;
@@ -27,14 +28,14 @@ message Link {
 }
 
 // Joint represents a moveable component of the model, generally connecting two
-// `Links`.
+// `Links`. A joint must parent to a `Link`.
 message Joint {
   // Kinematics properties of the joint.
   intrinsic_proto.world.KinematicsComponent kinematics_component = 1;
 }
 
 // Sensor represents a specific sensing capability of the model.
-// A sensor may be attached to a link or a joint.
+// A sensor must parent to a `Link` or a `Joint`.
 message Sensor {
   intrinsic_proto.world.SensorComponent sensor_component = 1;
 }
@@ -46,6 +47,8 @@ message Entity {
   string name = 1;
 
   // Name of the parent entity. Unset for the root entity.
+  // The parent entity must be a valid `entity_type` for the child entity.
+  // See the documentation of each `entity_type` for details.
   string parent_name = 2;
 
   // Pose of this entity in the space of the parent entity. Unset for the root
