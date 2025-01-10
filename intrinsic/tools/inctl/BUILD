@@ -14,6 +14,7 @@ go_binary(
         "//intrinsic/tools/inctl/cmd/auth",
         "//intrinsic/tools/inctl/cmd/bazel",
         "//intrinsic/tools/inctl/cmd/cluster",
+        "//intrinsic/tools/inctl/cmd/customer",
         "//intrinsic/tools/inctl/cmd/device",
         "//intrinsic/tools/inctl/cmd/logs",
         "//intrinsic/tools/inctl/cmd/notebook",

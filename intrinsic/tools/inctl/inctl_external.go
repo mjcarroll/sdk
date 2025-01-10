@@ -7,6 +7,7 @@ import (
 	_ "intrinsic/tools/inctl/cmd/auth/auth"
 	_ "intrinsic/tools/inctl/cmd/bazel/bazel"
 	_ "intrinsic/tools/inctl/cmd/cluster/cluster"
+	_ "intrinsic/tools/inctl/cmd/customer/customer"
 	_ "intrinsic/tools/inctl/cmd/device/device"
 	_ "intrinsic/tools/inctl/cmd/logs/logs"
 	_ "intrinsic/tools/inctl/cmd/notebook/notebook"
