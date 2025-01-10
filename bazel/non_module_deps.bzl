@@ -10,17 +10,18 @@ def _non_module_deps_impl(ctx):  # @unused
     # Sysroot and libc
     # How to upgrade:
     # - Find image in https://storage.googleapis.com/chrome-linux-sysroot/ for amd64 for
-    #   a stable Linux (here: Debian bullseye), of this pick a current build.
+    #   a stable Linux (here: Debian bullseye), of this pick a current build. You can go to the next
+    #   page by appending `?marker=MARKER` with the key from the `NextMarker` field.
     # - Verify the image contains expected /lib/x86_64-linux-gnu/libc* and defines correct
     #   __GLIBC_MINOR__ in /usr/include/features.h
     # - If system files are not found, add them in ../BUILD.sysroot
     http_archive(
         name = "com_googleapis_storage_chrome_linux_amd64_sysroot",
         build_file = Label("//intrinsic/production/external:BUILD.sysroot"),
-        sha256 = "5df5be9357b425cdd70d92d4697d07e7d55d7a923f037c22dc80a78e85842d2c",
+        sha256 = "11647a4b5ba1a49e13fba5de0135a51097a296aba6cfb780f07607a6091628a2",
         urls = [
             # features.h defines GLIBC 2.31.
-            "https://storage.googleapis.com/chrome-linux-sysroot/toolchain/4f611ec025be98214164d4bf9fbe8843f58533f7/debian_bullseye_amd64_sysroot.tar.xz",
+            "https://storage.googleapis.com/chrome-linux-sysroot/toolchain/692a0bddd6cdb2a96999cd817268d0227c89c731/debian_bullseye_amd64_sysroot.tar.xz",
         ],
     )
 
