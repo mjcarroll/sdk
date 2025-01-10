@@ -116,7 +116,7 @@ go_test(
     deps = [
         ":skilllabelsgen",
         "//intrinsic/skills/proto:skill_manifest_go_proto",
-        "//intrinsic/util/path_resolver:pathresolver",
         "//intrinsic/util/proto:protoio",
+        "//intrinsic/util/testing:testio",
     ],
 )

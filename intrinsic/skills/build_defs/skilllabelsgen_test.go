@@ -11,8 +11,8 @@ import (
 
 	slg "intrinsic/skills/build_defs/skilllabelsgen"
 	smpb "intrinsic/skills/proto/skill_manifest_go_proto"
-	"intrinsic/util/path_resolver/pathresolver"
 	"intrinsic/util/proto/protoio"
+	"intrinsic/util/testing/testio"
 )
 
 const (
@@ -22,10 +22,7 @@ const (
 
 func mustHaveRunfile(t *testing.T, p string) string {
 	t.Helper()
-	rp, err := pathresolver.ResolveRunfilesPath(p)
-	if err != nil {
-		t.Fatalf("Unable to access runfile %v: %v", p, err)
-	}
+	rp := testio.MustCreateRunfilePath(t, p)
 	return rp
 }
 
