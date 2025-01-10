@@ -171,6 +171,7 @@ go_library(
         "//intrinsic/skills/proto:processed_skill_manifest_go_proto",
         "//intrinsic/skills/proto:skill_manifest_go_proto",
         "//intrinsic/util/archive:tartooling",
+        "@com_github_golang_glog//:go_default_library",
         "@io_bazel_rules_go//proto/wkt:descriptor_go_proto",
         "@org_golang_google_protobuf//proto",
         "@org_golang_google_protobuf//types/known/anypb",
