@@ -96,8 +96,9 @@ void StructuredLoggingClient::LogAsync(LogItem&& item) const {
   return LogAsync(std::move(item),
                   [event_source = std::move(event_source)](absl::Status s) {
                     if (!s.ok()) {
-                      LOG(WARNING) << "Failed to log item for event source '"
-                                   << event_source << "' in async call.";
+                      LOG_EVERY_N_SEC(WARNING, 10)
+                          << "Failed to log item for event source '"
+                          << event_source << "' in async call: " << s.message();
                     }
                   });
 }
