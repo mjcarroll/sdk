@@ -219,8 +219,6 @@ proto_library(
     srcs = ["sensor_config.proto"],
     deps = [
         ":camera_params_proto",
-        ":distortion_params_proto",
-        ":intrinsic_params_proto",
         "//intrinsic/math/proto:pose_proto",
     ],
 )
@@ -239,8 +237,6 @@ go_proto_library(
     name = "sensor_config_go_proto",
     go_deps = [
         ":camera_params_go_proto",
-        ":distortion_params_go_proto",
-        ":intrinsic_params_go_proto",
         "//intrinsic/math/proto:pose_go_proto",
     ],
     deps = [":sensor_config"],
