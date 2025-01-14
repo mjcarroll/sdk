@@ -7,19 +7,13 @@
 
 #include <atomic>
 #include <string>
+
 #include "absl/status/status.h"
-#include "intrinsic/icon/testing/realtime_annotations.h"
-#include "intrinsic/logging/proto/log_item.pb.h"
-#include "intrinsic/performance/analysis/proto/performance_metrics.pb.h"
-#include "intrinsic/platform/common/buffers/realtime_write_queue.h"
 #include "intrinsic/util/thread/thread.h"
 
 namespace intrinsic::icon {
 
-using ::intrinsic_proto::data_logger::LogItem;
-using ::intrinsic_proto::performance::analysis::proto::PerformanceMetrics;
-
-// A non-realtime logger that can be used to log messages from realtime
+// A non-real time logger that can be used to log messages from real time
 // contexts.
 class MetricsLogger {
  public:
@@ -31,10 +25,10 @@ class MetricsLogger {
 
   // Starts the metrics logger thread
   absl::Status Start();
+
  private:
   // Thread function
   void LoggerFunction();
-  LogItem BuildMetricsLog();
   //  Thread to publish metrics (non-real-time)
   intrinsic::Thread metrics_publisher_thread_;
   // Atomic flag to enable/disable the metrics thread.
