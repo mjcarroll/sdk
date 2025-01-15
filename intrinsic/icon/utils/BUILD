@@ -309,3 +309,24 @@ cc_library(
         "//intrinsic/platform/common/buffers:rt_promise",
     ],
 )
+
+cc_library(
+    name = "realtime_metrics",
+    srcs = ["realtime_metrics.cc"],
+    hdrs = ["realtime_metrics.h"],
+    deps = [
+        ":log",
+        ":realtime_status",
+        ":realtime_status_macro",
+        "//intrinsic/icon/testing:realtime_annotations",
+        "//intrinsic/performance/analysis/proto:performance_metrics_cc_proto",
+        "//intrinsic/util/status:status_macros",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/time",
+        "@com_google_absl//absl/types:span",
+        "@com_google_googletest//:gtest_prod",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
