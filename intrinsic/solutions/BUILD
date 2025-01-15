@@ -429,14 +429,12 @@ py_library(
     srcs_version = "PY3",
     deps = [
         ":errors",
-        "//intrinsic/math/python:data_types",
         "//intrinsic/math/python:proto_conversion",
         "//intrinsic/simulation/service/proto:simulation_service_py_pb2",
         "//intrinsic/simulation/service/proto:simulation_service_py_pb2_grpc",
         "//intrinsic/util/grpc:error_handling",
         "//intrinsic/world/proto:object_world_service_py_pb2",
         "//intrinsic/world/proto:object_world_service_py_pb2_grpc",
-        "//intrinsic/world/python:object_world_resources",
         requirement("grpcio"),
     ],
 )
