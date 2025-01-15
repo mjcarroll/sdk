@@ -137,6 +137,29 @@ message ListOrganizationInvitationsResponse {
   repeated OrganizationInvitation invitations = 1;
 }
 
+// OrganizationMembership represents a membership of a user in an organization.
+message OrganizationMembership {
+  // 1 reserved for unique name later.
+  reserved 1;
+  // The email of the member.
+  // Later replaced by a full user model.
+  string email = 2;
+  // The organization the member belongs to.
+  // Format: /organizations/{organization}
+  string organization = 3;
+}
+
+message ListOrganizationMembershipsRequest {
+  // The organization parent resource to list members for.
+  // Format: /organizations/{organization}
+  string parent = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message ListOrganizationMembershipsResponse {
+  // The list of memberships
+  repeated OrganizationMembership memberships = 1;
+}
+
 // AccessControlService is the service for managing access to accounts
 // resources.
 service AccessControlService {
@@ -172,6 +195,17 @@ service AccessControlService {
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       operation_id: "ListOrganizationInvitations"
+    };
+  }
+
+  // ListOrganizationMemberships lists all the memberships for an organization.
+  rpc ListOrganizationMemberships(ListOrganizationMembershipsRequest)
+      returns (ListOrganizationMembershipsResponse) {
+    option (google.api.http) = {
+      get: "/accesscontrol/v1/{parent=organizations/*}/memberships"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      operation_id: "ListOrganizationMemberships"
     };
   }
 
