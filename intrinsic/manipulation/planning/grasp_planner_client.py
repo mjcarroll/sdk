@@ -75,9 +75,6 @@ class GraspPlannerClient:
       planner_id: str,
       grasp_planner_params: grasp_planner_params_pb2.GraspPlannerParams,
       grasp_execution_planner_params: grasp_execution_planner_params_pb2.GraspExecutionPlannerParams,
-      scene_perception_info: (
-          grasp_planner_service_pb2.ScenePerceptionInfo | None
-      ) = None,
       continuous_planning_params: (
           grasp_planner_service_pb2.GPSContinuousPlanningParams | None
       ) = None,
@@ -89,8 +86,6 @@ class GraspPlannerClient:
       grasp_planner_params: The parameters used to construct a grasp planner.
       grasp_execution_planner_params: The parameters used to construct a grasp
         execution planner.
-      scene_perception_info: Information to get a scene for grasp planning. If
-        None, do not perceive a scene before planning grasps.
       continuous_planning_params: The parameters used to perform continuous
         grasp planning. If None, do not start continuous grasp planning.
 
@@ -102,7 +97,6 @@ class GraspPlannerClient:
             planner_id=planner_id,
             grasp_planner_params=grasp_planner_params,
             grasp_execution_planner_params=grasp_execution_planner_params,
-            scene_perception_info=scene_perception_info,
             continuous_planning_params=continuous_planning_params,
         ),
         **self._connection_params,
