@@ -534,3 +534,44 @@ class Client:
         )
       request.part_properties_by_part_name[part_name].CopyFrom(properties_proto)
     self._stub.SetPartProperties(request, timeout=self._rpc_timeout_seconds)
+
+  def set_payload(
+      self,
+      payload: robot_payload.RobotPayload,
+      part_name: str,
+      payload_name: str,
+  ) -> None:
+    """Sets a payload of a part.
+
+    After setting the payload, ICON disables and then re-enables all parts.
+
+    Args:
+      payload: The payload to set.
+      part_name: The name of the part to set the payload for.
+      payload_name: The name of the payload to set.
+    """
+    request = service_pb2.SetPayloadRequest(
+        payload=robot_payload.payload_to_proto(payload),
+        part_name=part_name,
+        payload_name=payload_name,
+    )
+    self._stub.SetPayload(request, timeout=self._rpc_timeout_seconds)
+
+  def get_payload(
+      self, part_name: str, payload_name: str
+  ) -> robot_payload.RobotPayload:
+    """Gets a payload of a part.
+
+    Args:
+      part_name: The name of the part to get the payload for.
+      payload_name: The name of the payload to get.
+
+    Returns:
+      The requested payload.
+    """
+    request = service_pb2.GetPayloadRequest(
+        part_name=part_name,
+        payload_name=payload_name,
+    )
+    response = self._stub.GetPayload(request, timeout=self._rpc_timeout_seconds)
+    return robot_payload.payload_from_proto(response.payload)
