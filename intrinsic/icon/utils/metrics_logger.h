@@ -9,11 +9,14 @@
 #include <string>
 
 #include "absl/status/status.h"
+#include "intrinsic/icon/testing/realtime_annotations.h"
+#include "intrinsic/icon/utils/realtime_metrics.h"
+#include "intrinsic/platform/common/buffers/realtime_write_queue.h"
 #include "intrinsic/util/thread/thread.h"
 
 namespace intrinsic::icon {
 
-// A non-real time logger that can be used to log messages from real time
+// A non-real time logger that can be used to publish messages from realtime
 // contexts.
 class MetricsLogger {
  public:
@@ -26,13 +29,29 @@ class MetricsLogger {
   // Starts the metrics logger thread
   absl::Status Start();
 
+  // Copies cycle time metrics into the rt to non-rt queue so they can be
+  // logged.
+  // Returns false if the queue is full.
+  bool AddCycleTimeMetrics(const CycleTimeMetrics& cycle_time_metrics)
+      INTRINSIC_CHECK_REALTIME_SAFE;
+
  private:
-  // Thread function
-  void LoggerFunction();
-  //  Thread to publish metrics (non-real-time)
-  intrinsic::Thread metrics_publisher_thread_;
+  // Cyclically called by the non-rt metrics_publisher_thread_ thread to publish
+  // metrics.
+  void PublishMetrics();
+
+  // Blocks until data is available in the cycle time metrics queue,
+  // Converts the data to a PerformanceMetrics proto and logs it to data logger.
+  void PublishCycleTimeMetrics();
+
   // Atomic flag to enable/disable the metrics thread.
   std::atomic<bool> shutdown_requested_;
+
+  RealtimeWriteQueue<CycleTimeMetrics> cycle_time_metrics_queue_;
+
+  //  Thread to publish metrics (non-real-time)
+  intrinsic::Thread metrics_publisher_thread_;
+
   // The name of the module that is logging metrics
   std::string module_name_;
 };
