@@ -27,18 +27,13 @@ bzl_library(
 )
 
 bzl_library(
-    name = "go_macros",
-    srcs = ["go_macros.bzl"],
-)
-
-bzl_library(
     name = "label",
     srcs = ["label.bzl"],
 )
 
-exports_files(
-    srcs = ["deps_0.bzl"],
-    visibility = ["//intrinsic/production/external:__pkg__"],
+bzl_library(
+    name = "go_macros",
+    srcs = ["go_macros.bzl"],
 )
 
 platform(
