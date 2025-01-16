@@ -24,6 +24,7 @@ var (
 	flagResource string
 	flagRole     string
 	flagSubject  string
+	flagName     string
 )
 
 func rolebindingsInit(root *cobra.Command) {
@@ -37,6 +38,9 @@ func rolebindingsInit(root *cobra.Command) {
 	grantRoleBindingCmd.MarkFlagRequired("subject")
 	grantRoleBindingCmd.MarkFlagRequired("role")
 	root.AddCommand(grantRoleBindingCmd)
+	revokeRoleBindingCmd.Flags().StringVar(&flagName, "name", "", "The name of the role-binding to revoke taken from the output of the list command.")
+	revokeRoleBindingCmd.MarkFlagRequired("name")
+	root.AddCommand(revokeRoleBindingCmd)
 }
 
 var grantRoleBindingCmdHelp = `
@@ -66,6 +70,42 @@ var grantRoleBindingCmd = &cobra.Command{
 			protoPrint(req)
 		}
 		lrop, err := cl.CreateRoleBinding(ctx, req)
+		if err != nil {
+			return err
+		}
+		if flagDebugRequests {
+			protoPrint(lrop)
+		}
+		if err := waitForOperation(ctx, cl.GetOperation, lrop, 10*time.Minute); err != nil {
+			return fmt.Errorf("failed to wait for operation: %w", err)
+		}
+		return nil
+	},
+}
+
+var revokeRoleBindingCmdHelp = `
+Revoke a given role binding.
+
+		inctl customer role-bindings revoke --name=rolebindings/7iawfQMYZAMkx6XdmQdtqJfW+gCZeoT83PcYw0daIrg=
+`
+
+var revokeRoleBindingCmd = &cobra.Command{
+	Use:   "revoke",
+	Short: "Revoke a given role binding.",
+	Long:  revokeRoleBindingCmdHelp,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := cmd.Context()
+		cl, err := newAccessControlV1Client(ctx)
+		if err != nil {
+			return err
+		}
+		req := &pb.DeleteRoleBindingRequest{
+			Name: addPrefix(flagName, "rolebindings/"),
+		}
+		if flagDebugRequests {
+			protoPrint(req)
+		}
+		lrop, err := cl.DeleteRoleBinding(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -112,7 +152,7 @@ var listRoleBindingsCmd = &cobra.Command{
 			protoPrint(ret)
 		}
 		for _, rb := range ret.GetRoleBindings() {
-			fmt.Printf("%s %s %s\n", rb.GetResource(), rb.GetRole(), rb.GetSubject())
+			fmt.Printf("%s %s %s %s\n", rb.GetName(), rb.GetResource(), rb.GetRole(), rb.GetSubject())
 		}
 		return nil
 	},
