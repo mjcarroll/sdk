@@ -162,6 +162,16 @@ absl::Status LoopbackHardwareModule::Init(
     intrinsic::ThreadOptions thread_options = config.GetIconThreadOptions();
     thread_options.SetName("LoopbackHardwareModuleThread");
 
+    // Realtime metrics and warnings are not useful when not executing in a
+    // realtime context.
+    if (thread_options.GetSchedulePolicy() != SCHED_FIFO) {
+      LOG(INFO) << "Not enabling realtime metrics because the module is not "
+                   "running in realtime.";
+    } else {
+      init_context.EnableCycleTimeMetrics(cycle_duration_,
+                                          /*log_cycle_time_warnings=*/true);
+    }
+
     absl::Notification runtime_loop_running;
     INTR_ASSIGN_OR_RETURN(runtime_loop_thread_,
                           CreateRealtimeCapableThread(
