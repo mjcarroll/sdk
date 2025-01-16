@@ -96,6 +96,7 @@ cc_library(
         ":module_config",
         "@com_github_grpc_grpc//:grpc++",
         "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/time",
     ],
 )
 
@@ -190,7 +191,9 @@ cc_library(
         "//intrinsic/icon/utils:async_request",
         "//intrinsic/icon/utils:core_time",
         "//intrinsic/icon/utils:fixed_string",
+        "//intrinsic/icon/utils:metrics_logger",
         "//intrinsic/icon/utils:realtime_guard",
+        "//intrinsic/icon/utils:realtime_metrics",
         "//intrinsic/icon/utils:realtime_status",
         "//intrinsic/icon/utils:realtime_status_macro",
         "//intrinsic/platform/common/buffers:rt_promise",

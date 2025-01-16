@@ -19,6 +19,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
+#include "absl/time/clock.h"
 #include "absl/time/time.h"
 #include "absl/types/span.h"
 #include "grpcpp/server_builder.h"
@@ -42,6 +43,8 @@
 #include "intrinsic/icon/utils/clock.h"
 #include "intrinsic/icon/utils/fixed_string.h"
 #include "intrinsic/icon/utils/log.h"
+#include "intrinsic/icon/utils/metrics_logger.h"
+#include "intrinsic/icon/utils/realtime_metrics.h"
 #include "intrinsic/icon/utils/realtime_status.h"
 #include "intrinsic/icon/utils/realtime_status_macro.h"
 #include "intrinsic/platform/common/buffers/rt_promise.h"
@@ -59,6 +62,8 @@ INTRINSIC_ADD_HARDWARE_INTERFACE(intrinsic_fbs::HardwareModuleState,
                                  intrinsic_fbs::BuildHardwareModuleState,
                                  "intrinsic_fbs.HardwareModuleState")
 }  // namespace hardware_interface_traits
+
+static constexpr absl::Duration kMetricsExportInterval = absl::Seconds(1);
 
 class HardwareModuleRuntime::CallbackHandler final {
   struct AsyncRequestData {
@@ -86,6 +91,14 @@ class HardwareModuleRuntime::CallbackHandler final {
         << "CallbackHandler destroyed while an action is still "
            "ongoing - this is likely a bug in the "
            "HardwareModuleRuntime shutdown logic.";
+  }
+
+  void SetMetricsLogger(MetricsLogger* metrics_logger) {
+    metrics_logger_ = metrics_logger;
+  }
+
+  void SetCycleTimeMetricsHelper(CycleTimeMetricsHelper* metrics_helper) {
+    metrics_helper_ = metrics_helper;
   }
 
   // Server callback to trigger `Prepare` on the hardware module.
@@ -235,6 +248,10 @@ class HardwareModuleRuntime::CallbackHandler final {
 
   // Server callback for trigger `ReadStatus` on the hardware module.
   void OnReadStatus() INTRINSIC_CHECK_REALTIME_SAFE {
+    // Logs realtime metrics on creation and destruction.
+    ReadStatusScope read_status_scope(
+        metrics_helper_, /*is_active=*/hardware_module_state_code_ ==
+                             intrinsic_fbs::StateCode::kMotionEnabled);
     // The HWM state must only be written in the RT thread, when the HWM is
     // activated. Therefore, the processing of requests must take place in this
     // function, which is always called when the HWM is activated.
@@ -263,6 +280,17 @@ class HardwareModuleRuntime::CallbackHandler final {
         CancelPendingRequests("Request cancelled due to error in ReadStatus");
       }
     }
+
+    // Export the current metrics to non-realtime every Second.
+    if (absl::Now() >= next_metrics_export_) {
+      if (metrics_logger_ && metrics_helper_ &&
+          !metrics_logger_->AddCycleTimeMetrics(metrics_helper_->Metrics())) {
+        INTRINSIC_RT_LOG_THROTTLED(WARNING)
+            << "Failed to add cycle time metrics to "
+               "metrics logger. Is the queue full?";
+      }
+      next_metrics_export_ = absl::Now() + kMetricsExportInterval;
+    }
   }
 
   // Server callback for trigger `ApplyCommand` on the hardware module.
@@ -281,6 +309,11 @@ class HardwareModuleRuntime::CallbackHandler final {
       }
       return;
     }
+
+    // Logs realtime metrics on creation and destruction.
+    ApplyCommandScope apply_command_scope(
+        metrics_helper_, /*is_active=*/hardware_module_state_code_ ==
+                             intrinsic_fbs::StateCode::kMotionEnabled);
 
     if (auto ret = instance_->ApplyCommand(); !ret.ok()) {
       INTRINSIC_RT_LOG_THROTTLED(ERROR)
@@ -554,6 +587,14 @@ class HardwareModuleRuntime::CallbackHandler final {
                            /*force=*/false, /*silent=*/true);
         } else {
           INTRINSIC_RT_LOG(INFO) << "Motion Enabled";
+          if (metrics_helper_) {
+            // Only gather metrics when enabled, because we expect the
+            // clock to be ticked correctly only then.
+            //
+            // Consider using ResetReadStatusStart and logging in a
+            // different callback for extended use cases.
+            metrics_helper_->Reset();
+          }
         }
       }
     }
@@ -612,6 +653,10 @@ class HardwareModuleRuntime::CallbackHandler final {
   // futures are ready to be destroyed.
   std::list<std::unique_ptr<intrinsic::NonRealtimeFuture<icon::RealtimeStatus>>>
       future_hospice_ ABSL_GUARDED_BY(non_rt_buffer_lock_);
+
+  intrinsic::icon::MetricsLogger* metrics_logger_ = nullptr;
+  CycleTimeMetricsHelper* metrics_helper_ = nullptr;
+  absl::Time next_metrics_export_ = absl::InfinitePast();
 };
 
 absl::StatusOr<HardwareModuleRuntime> HardwareModuleRuntime::Create(
@@ -730,6 +775,7 @@ absl::Status HardwareModuleRuntime::Connect() {
           .AdvertiseMutableInterface<intrinsic_fbs::HardwareModuleState>(
               "hardware_module_state",
               intrinsic_fbs::BuildHardwareModuleState()));
+
   callback_handler_ = std::make_unique<CallbackHandler>(
       hardware_module_.config.GetName(), hardware_module_.instance.get(),
       *hardware_module_state_interface_);
@@ -854,6 +900,43 @@ absl::Status HardwareModuleRuntime::Run(grpc::ServerBuilder& server_builder,
 
   // Ensures that no methods on the uninitialized module can be called.
   INTR_RETURN_IF_ERROR(init_status);
+
+  if (const absl::Duration cycle_duration =
+          init_context.GetCycleDurationForCycleTimeMetrics();
+      cycle_duration != absl::ZeroDuration()) {
+    auto cycle_time_metrics_helper =
+        intrinsic::icon::CycleTimeMetricsHelper::Create(
+            cycle_duration,
+            /*log_cycle_time_warnings=*/init_context
+                .AreCycleTimeWarningsEnabled());
+
+    if (cycle_time_metrics_helper.ok()) {
+      cycle_time_metrics_helper_ = std::make_unique<CycleTimeMetricsHelper>(
+          std::move(*cycle_time_metrics_helper));
+    } else {
+      LOG(ERROR) << "Failed to create cycle time metrics helper: "
+                 << cycle_time_metrics_helper.status();
+    }
+
+    if (cycle_time_metrics_helper_ != nullptr) {
+      metrics_logger_ =
+          std::make_unique<MetricsLogger>(hardware_module_.config.GetName());
+      if (const auto status = metrics_logger_->Start(); !status.ok()) {
+        LOG(WARNING) << "Failed to start metrics logger: " << status;
+        metrics_logger_ = nullptr;
+      } else {
+        callback_handler_->SetMetricsLogger(metrics_logger_.get());
+        callback_handler_->SetCycleTimeMetricsHelper(
+            cycle_time_metrics_helper_.get());
+        LOG(INFO) << "Cycle time metrics gathering is enabled with a cycle "
+                     "duration of "
+                  << cycle_duration << ". Cycle time warnings are "
+                  << (init_context.AreCycleTimeWarningsEnabled() ? "enabled"
+                                                                 : "disabled ")
+                  << ".";
+      }
+    }
+  }
 
   intrinsic::ThreadOptions state_change_thread_options;
   state_change_thread_options.SetName("StateChange");

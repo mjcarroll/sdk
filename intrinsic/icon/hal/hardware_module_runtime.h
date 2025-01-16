@@ -5,6 +5,7 @@
 
 #include <atomic>
 #include <memory>
+#include <optional>
 #include <string_view>
 #include <vector>
 
@@ -19,6 +20,8 @@
 #include "intrinsic/icon/interprocess/remote_trigger/remote_trigger_server.h"
 #include "intrinsic/icon/interprocess/shared_memory_manager/domain_socket_server.h"
 #include "intrinsic/icon/interprocess/shared_memory_manager/shared_memory_manager.h"
+#include "intrinsic/icon/utils/metrics_logger.h"
+#include "intrinsic/icon/utils/realtime_metrics.h"
 #include "intrinsic/util/thread/thread.h"
 
 namespace intrinsic::icon {
@@ -138,6 +141,9 @@ class HardwareModuleRuntime final {
   // Runs activate, deactivate, enable, disable and clear faults.
   std::unique_ptr<std::atomic<bool>> stop_requested_;
   intrinsic::Thread state_change_thread_;
+
+  std::unique_ptr<MetricsLogger> metrics_logger_;
+  std::unique_ptr<CycleTimeMetricsHelper> cycle_time_metrics_helper_;
 };
 
 }  // namespace intrinsic::icon

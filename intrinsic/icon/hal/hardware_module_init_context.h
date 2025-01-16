@@ -4,6 +4,7 @@
 #define INTRINSIC_ICON_HAL_HARDWARE_MODULE_INIT_CONTEXT_H_
 
 #include "absl/base/attributes.h"
+#include "absl/time/time.h"
 #include "grpcpp/server_builder.h"
 #include "intrinsic/icon/hal/hardware_interface_registry.h"
 #include "intrinsic/icon/hal/module_config.h"
@@ -59,10 +60,33 @@ class HardwareModuleInitContext {
     server_builder_.RegisterService(&service);
   }
 
+  // Enables gathering cycle time metrics.
+  // Call this during Init() of a hardware module, when `cycle_duration` is
+  // known, gather cycle time metrics when the robot is enabled.
+  // Logs warnings when the cycle time is exceeded, or a single operation took
+  // too long when `log_cycle_time_warnings` is true.
+  void EnableCycleTimeMetrics(absl::Duration cycle_duration,
+                              bool log_cycle_time_warnings) {
+    cycle_duration_for_cycle_time_metrics_ = cycle_duration;
+    log_cycle_time_warnings_ = log_cycle_time_warnings;
+  }
+
+  // Returns true if cycle time warnings should be logged.
+  bool AreCycleTimeWarningsEnabled() const { return log_cycle_time_warnings_; }
+  // Returns the cycle duration, or ZeroDuration if not set.
+  absl::Duration GetCycleDurationForCycleTimeMetrics() const {
+    return cycle_duration_for_cycle_time_metrics_;
+  }
+
  private:
   HardwareInterfaceRegistry& interface_registry_;
   grpc::ServerBuilder& server_builder_;
   const ModuleConfig module_config_;
+  // This is the first instance of using the context to communicate data back to
+  // the runtime. If this becomes a more broadly required use case, we might
+  // consider finding a more obvious way to do it.
+  absl::Duration cycle_duration_for_cycle_time_metrics_ = absl::ZeroDuration();
+  bool log_cycle_time_warnings_ = false;
 };
 
 }  // namespace intrinsic::icon
