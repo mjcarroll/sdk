@@ -59,9 +59,12 @@ func setDifference(slice1, slice2 []string) []string {
 // validateImageTars validates the provided images from the BUILD rule match the correct
 // images specified in the manifest.
 func validateImageTars(manifest *smpb.ServiceManifest, imgTarsList []string) error {
-	imagesInManifest := []string{
-		manifest.GetServiceDef().GetSimSpec().GetImage().GetArchiveFilename(),
-		manifest.GetServiceDef().GetRealSpec().GetImage().GetArchiveFilename(),
+	var imagesInManifest []string
+	if name := manifest.GetServiceDef().GetSimSpec().GetImage().GetArchiveFilename(); name != "" {
+		imagesInManifest = append(imagesInManifest, name)
+	}
+	if name := manifest.GetServiceDef().GetRealSpec().GetImage().GetArchiveFilename(); name != "" {
+		imagesInManifest = append(imagesInManifest, name)
 	}
 	basenameImageTarsList := []string{}
 	for _, val := range imgTarsList {
