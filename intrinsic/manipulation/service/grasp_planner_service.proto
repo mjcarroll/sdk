@@ -112,7 +112,7 @@ message GraspPlannerServiceConfig {
   // The list of scene perception resource instance names to use as scene
   // perceivers.
   repeated string scene_perception_resource_instance_names = 2;
-  // The cache size limit per each group. See `PlanGraspsCache`.
+  // The cache size limit per each group. See `PlanGraspExecutionCache`.
   int64 max_cache_size_per_group = 3;
 }
 
