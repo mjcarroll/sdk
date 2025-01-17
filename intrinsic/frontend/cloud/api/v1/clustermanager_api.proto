@@ -122,6 +122,15 @@ message GetClusterRequest {
   string cluster_id = 3 [(google.api.field_behavior) = REQUIRED];
 }
 
+message UpdateVersions {
+  // Accompanying metadata about the update.
+  string user_data = 1 [(google.api.field_behavior) = OPTIONAL];
+  // The version of the Intrinsic OS to update to.
+  string os_version = 2 [(google.api.field_behavior) = OPTIONAL];
+  // The version of the Intrinsic Base to update to.
+  string base_version = 3 [(google.api.field_behavior) = OPTIONAL];
+}
+
 message SchedulePlatformUpdateRequest {
   string project = 1 [(google.api.field_behavior) = REQUIRED];
   string org = 2 [(google.api.field_behavior) = REQUIRED];
@@ -132,9 +141,12 @@ message SchedulePlatformUpdateRequest {
     UPDATE_TYPE_UNSPECIFIED = 0;
     UPDATE_TYPE_FORWARD = 1;
     UPDATE_TYPE_ROLLBACK = 2;
+    UPDATE_TYPE_VERSIONED = 3;
   }
 
   UpdateType update_type = 4 [(google.api.field_behavior) = REQUIRED];
+  // The versions to update to. Only used for UPDATE_TYPE_VERSIONED.
+  UpdateVersions versions = 5 [(google.api.field_behavior) = OPTIONAL];
 }
 
 message SchedulePlatformUpdateResponse {
