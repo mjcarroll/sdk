@@ -3,14 +3,18 @@
 package customer
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
+	"text/tabwriter"
 	"time"
 
 	"github.com/spf13/cobra"
 
 	pb "intrinsic/kubernetes/accounts/service/api/accesscontrol/v1/accesscontrolv1_go_grpc_proto"
+	"intrinsic/tools/inctl/cmd/root"
 	"intrinsic/tools/inctl/util/cobrautil"
+	"intrinsic/tools/inctl/util/printer"
 )
 
 var rolebindingsCmd = cobrautil.ParentOfNestedSubcommands("role-bindings", "List the role bindings on a given resource.")
@@ -119,6 +123,20 @@ var revokeRoleBindingCmd = &cobra.Command{
 	},
 }
 
+type printableRoleBindings []*pb.RoleBinding
+
+func (r printableRoleBindings) String() string {
+	b := new(bytes.Buffer)
+	w := tabwriter.NewWriter(b,
+		/*minwidth=*/ 1 /*tabwidth=*/, 1 /*padding=*/, 1 /*padchar=*/, ' ' /*flags=*/, 0)
+	fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", "Name", "Resource", "Role", "Subject")
+	for _, rb := range r {
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", rb.GetName(), rb.GetResource(), rb.GetRole(), rb.GetSubject())
+	}
+	w.Flush()
+	return strings.TrimSuffix(b.String(), "\n")
+}
+
 var listRoleBindingsCmdHelp = `
 List the role bindings on a given resource.
 
@@ -151,9 +169,11 @@ var listRoleBindingsCmd = &cobra.Command{
 		if flagDebugRequests {
 			protoPrint(ret)
 		}
-		for _, rb := range ret.GetRoleBindings() {
-			fmt.Printf("%s %s %s %s\n", rb.GetName(), rb.GetResource(), rb.GetRole(), rb.GetSubject())
+		prtr, err := printer.NewPrinter(root.FlagOutput)
+		if err != nil {
+			return err
 		}
+		prtr.Print(printableRoleBindings(ret.GetRoleBindings()))
 		return nil
 	},
 }
