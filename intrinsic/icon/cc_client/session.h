@@ -24,6 +24,7 @@
 #include "absl/types/variant.h"
 #include "google/protobuf/any.pb.h"
 #include "google/rpc/status.pb.h"
+#include "grpcpp/client_context.h"
 #include "grpcpp/support/sync_stream.h"
 #include "intrinsic/icon/cc_client/condition.h"
 #include "intrinsic/icon/cc_client/stream.h"
@@ -177,6 +178,8 @@ class ActionDescriptor {
   ActionDescriptor& WithReaction(const ReactionDescriptor& reaction_descriptor);
 
   ActionInstanceId Id() const { return action_id_; }
+
+  std::string ActionTypeName() const { return action_type_name_; }
 
  private:
   friend class Session;
