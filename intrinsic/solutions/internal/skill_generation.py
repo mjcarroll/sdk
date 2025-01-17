@@ -136,10 +136,8 @@ class SkillInfoImpl(provided.SkillInfo):
 
   @property
   def skill_name(self) -> str:
-    if self._skill_proto.skill_name:
-      return self._skill_proto.skill_name
-
-    # Extract from the skill ID if the skill name is not explicitly set.
+    # Use skill ID as ground truth. Don't use the 'skill_name' in the proto
+    # which is a display name that might contain, e.g., spaces.
     return _skill_name_from_id(self._skill_proto.id)
 
   @property

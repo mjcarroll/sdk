@@ -207,10 +207,9 @@ class SkillsTest(parameterized.TestCase):
     ai_intr_intr_skill_two = self._utils.create_parameterless_skill_info(
         'ai.intr.intr_skill_two'
     )
-    # Some skill protos may only have the skill id but not the skill_name or
-    # package_name set.
-    ai_intr_intr_skill_two.skill_name = ''
-    ai_intr_intr_skill_two.package_name = ''
+    # Some skill protos may have a display name in the 'skill_name' field which
+    # is different from the last part of the 'id' field.
+    ai_intr_intr_skill_two.skill_name = 'display name to be ignored'
     skill_infos = [
         self._utils.create_parameterless_skill_info('ai.intr.intr_skill_one'),
         ai_intr_intr_skill_two,
@@ -2011,7 +2010,7 @@ Returns:
   @parameterized.parameters(
       {
           'skill': skills_pb2.Skill(
-              skill_name='my_skill', id='com.foo.some_skill'
+              skill_name='name to be ignored', id='com.foo.my_skill'
           )
       },
       {'skill': skills_pb2.Skill(id='com.foo.my_skill')},
