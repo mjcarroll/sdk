@@ -444,6 +444,11 @@ proto_library(
     deps = ["@com_google_protobuf//:descriptor_proto"],
 )
 
+cc_proto_library(
+    name = "skill_parameter_metadata_cc_proto",
+    deps = [":skill_parameter_metadata_proto"],
+)
+
 go_proto_library(
     name = "skill_parameter_metadata_go_proto",
     deps = [":skill_parameter_metadata_proto"],
