@@ -156,23 +156,26 @@ class SensorConfig:
   @property
   def dimensions(self) -> Optional[Tuple[int, int]]:
     """Sensor intrinsic dimensions (width, height)."""
-    if self.camera_params is None:
+    camera_params = self.camera_params
+    if camera_params is None:
       return None
-    return self.camera_params.dimensions
+    return camera_params.dimensions
 
   @property
   def intrinsic_matrix(self) -> Optional[np.ndarray]:
     """Sensor intrinsic matrix."""
-    if self.camera_params is None:
+    camera_params = self.camera_params
+    if camera_params is None:
       return None
-    return self.camera_params.intrinsic_matrix
+    return camera_params.intrinsic_matrix
 
   @property
   def distortion_params(self) -> Optional[np.ndarray]:
     """Sensor distortion params; (k1, k2, p1, p2, k3, [k4, k5, k6]) or None."""
-    if self.camera_params is None:
+    camera_params = self.camera_params
+    if camera_params is None:
       return None
-    return self.camera_params.distortion_params
+    return camera_params.distortion_params
 
 
 class CameraConfig:
@@ -204,7 +207,9 @@ class CameraConfig:
 
   @property
   def dimensions(self) -> Optional[Tuple[int, int]]:
-    """Camera intrinsic dimensions (width, height)."""
+    """Intrinsic dimensions (width, height) of the first camera sensor."""
+    if self.sensor_configs:
+      return self.sensor_configs[self._proto.sensor_configs[0].id].dimensions
     ip = self._proto.intrinsic_params
     if ip is None:
       return None
@@ -212,7 +217,11 @@ class CameraConfig:
 
   @property
   def intrinsic_matrix(self) -> Optional[np.ndarray]:
-    """Camera intrinsic matrix."""
+    """Intrinsic matrix of the first camera sensor."""
+    if self.sensor_configs:
+      return self.sensor_configs[
+          self._proto.sensor_configs[0].id
+      ].intrinsic_matrix
     ip = self._proto.intrinsic_params
     if ip is None:
       return None
@@ -220,7 +229,11 @@ class CameraConfig:
 
   @property
   def distortion_params(self) -> Optional[np.ndarray]:
-    """Camera distortion params; (k1, k2, p1, p2, k3, [k4, k5, k6]) or None."""
+    """Distortion params of the first camera sensor; (k1, k2, p1, p2, k3, [k4, k5, k6]) or None."""
+    if self.sensor_configs:
+      return self.sensor_configs[
+          self._proto.sensor_configs[0].id
+      ].distortion_params
     dp = self._proto.distortion_params
     if dp is None:
       return None
