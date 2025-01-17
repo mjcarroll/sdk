@@ -36,14 +36,17 @@ message JointConfigurationValidationResult {
 // solution for the defined problem exist and the Cartesian pose was not
 // reachable.
 message ComputeIkDebugInformation {
-  message IkSolution {
-    intrinsic_proto.icon.JointVec joint_configuration = 1;
-    JointConfigurationValidationResult validation_result = 2;
-    intrinsic_proto.world.CollisionCheckingDebugInformation
-        collision_checking_debug_info = 3;
-  }
-
   // All joint configuration of an IK computation and their respective
   // validation results.
   repeated IkSolution ik_solutions = 1;
+}
+
+// Contains a joint configuration and the validation result that details which
+// tests failed. If configuration were rejected due to collision, the collision
+// pairs will be contained in the collision_checking_debug_info.
+message IkSolution {
+  intrinsic_proto.icon.JointVec joint_configuration = 1;
+  JointConfigurationValidationResult validation_result = 2;
+  intrinsic_proto.world.CollisionCheckingDebugInformation
+      collision_checking_debug_info = 3;
 }
