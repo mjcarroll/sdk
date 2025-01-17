@@ -17,10 +17,8 @@ go_library(
         "skill_service_main.py.tmpl",
         "skill_service_main_tmpl.cc",
     ],
-    deps = [
-        "//intrinsic/skills/proto:skill_manifest_go_proto",
-        "@org_golang_google_protobuf//proto",
-    ],
+    visibility = ["//intrinsic/tools/inbuild:__subpackages__"],
+    deps = ["//intrinsic/skills/proto:skill_manifest_go_proto"],
 )
 
 go_binary(
@@ -30,7 +28,9 @@ go_binary(
     deps = [
         ":gen",
         "//intrinsic/production:intrinsic",
+        "//intrinsic/skills/proto:skill_manifest_go_proto",
         "@com_github_golang_glog//:go_default_library",
+        "@org_golang_google_protobuf//proto",
     ],
 )
 

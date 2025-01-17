@@ -11,7 +11,6 @@ import (
 	"strings"
 	"text/template"
 
-	"google.golang.org/protobuf/proto"
 	manifestpb "intrinsic/skills/proto/skill_manifest_go_proto"
 )
 
@@ -71,18 +70,6 @@ func writePyTemplateOutput(parameters templatePyParameters, out string) error {
 	return w.Flush()
 }
 
-func readSkillManifest(path string) (*manifestpb.SkillManifest, error) {
-	manifestBinary, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("cannot read file: %v", err)
-	}
-	manifest := &manifestpb.SkillManifest{}
-	if err := proto.Unmarshal(manifestBinary, manifest); err != nil {
-		return nil, fmt.Errorf("cannot unmarshal binary to proto: %v", err)
-	}
-	return manifest, nil
-}
-
 func lastString(parts []string) string {
 	if len(parts) == 0 {
 		return ""
@@ -109,12 +96,7 @@ func pyDescriptorFrom(protoModule, protoMessageFullName string) string {
 // protobuf schema(s). out is the file path to write the generated service main to.
 //
 // The template is specified at skill_service_main_tmpl.cc
-func WriteSkillServiceCC(manifestPath string, ccHeaderPaths []string, out string) error {
-	manifest, err := readSkillManifest(manifestPath)
-	if err != nil {
-		return fmt.Errorf("cannot read manifest: %v", err)
-	}
-
+func WriteSkillServiceCC(manifest *manifestpb.SkillManifest, ccHeaderPaths []string, out string) error {
 	return writeCCTemplateOutput(
 		templateCCParameters{
 			CCHeaderPaths:     ccHeaderPaths,
@@ -132,12 +114,7 @@ func WriteSkillServiceCC(manifestPath string, ccHeaderPaths []string, out string
 // out is the file path to write the generated service main to.
 //
 // The template is specified at skill_service_main_tmpl.py
-func WriteSkillServicePy(manifestPath string, out string) error {
-	manifest, err := readSkillManifest(manifestPath)
-	if err != nil {
-		return fmt.Errorf("cannot read manifest: %v", err)
-	}
-
+func WriteSkillServicePy(manifest *manifestpb.SkillManifest, out string) error {
 	return writePyTemplateOutput(
 		templatePyParameters{
 			PythonModules: []string{

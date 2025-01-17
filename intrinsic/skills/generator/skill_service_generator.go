@@ -6,12 +6,15 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"flag"
 	log "github.com/golang/glog"
+	"google.golang.org/protobuf/proto"
 	intrinsic "intrinsic/production/intrinsic"
 	gen "intrinsic/skills/generator/gen"
+	manifestpb "intrinsic/skills/proto/skill_manifest_go_proto"
 )
 
 type stringArray []string
@@ -53,14 +56,23 @@ var (
 func main() {
 	intrinsic.Init()
 
+	manifestBinary, err := os.ReadFile(*manifestPath)
+	if err != nil {
+		log.Exitf("cannot read file: %v", err)
+	}
+	manifest := &manifestpb.SkillManifest{}
+	if err := proto.Unmarshal(manifestBinary, manifest); err != nil {
+		log.Exitf("cannot unmarshal binary to proto: %v", err)
+	}
+
 	switch *lang {
 	case "cpp":
-		if err := gen.WriteSkillServiceCC(*manifestPath, *ccHeaderPaths, *out); err != nil {
+		if err := gen.WriteSkillServiceCC(manifest, *ccHeaderPaths, *out); err != nil {
 			log.Exitf("Cannot write cc skill service file: %v.", err)
 		}
 		return
 	case "python":
-		if err := gen.WriteSkillServicePy(*manifestPath, *out); err != nil {
+		if err := gen.WriteSkillServicePy(manifest, *out); err != nil {
 			log.Exitf("Cannot write py skill service file: %v.", err)
 		}
 		return
