@@ -161,6 +161,8 @@ oci.pull(
     image = "gcr.io/distroless/python3",
     platforms = ["linux/amd64"],
 )
+
+# BUG Bazel reports wrong repo usage: https://github.com/bazel-contrib/rules_oci/issues/727
 use_repo(
     oci,
     "distroless_base",
