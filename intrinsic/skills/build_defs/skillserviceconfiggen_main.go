@@ -8,8 +8,11 @@ import (
 
 	"flag"
 	log "github.com/golang/glog"
+	dpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
 	intrinsic "intrinsic/production/intrinsic"
 	sscg "intrinsic/skills/build_defs/skillserviceconfiggen"
+	smpb "intrinsic/skills/proto/skill_manifest_go_proto"
+	"intrinsic/util/proto/protoio"
 )
 
 var (
@@ -37,7 +40,23 @@ func main() {
 	if err := checkArguments(); err != nil {
 		log.Exitf("Invalid arguments: %v", err)
 	}
-	if err := sscg.GenerateSkillServiceConfig(*flagManifestPbbinFilename, *flagProtoDescriptorFilename, *flagOutputConfigFilename); err != nil {
+
+	fileDescriptorSet := new(dpb.FileDescriptorSet)
+	if err := protoio.ReadBinaryProto(*flagProtoDescriptorFilename, fileDescriptorSet); err != nil {
+		log.Exitf("Unable to read FileDescriptorSet: %v", err)
+	}
+
+	manifest := new(smpb.SkillManifest)
+	if err := protoio.ReadBinaryProto(*flagManifestPbbinFilename, manifest); err != nil {
+		log.Exitf("Unable to read manifest: %v", err)
+	}
+
+	skillServiceConfig, err := sscg.ExtractSkillServiceConfigFromManifest(manifest, fileDescriptorSet)
+	if err != nil {
+		log.Exitf("Unable to extract SkillServiceConfig: %v", err)
+	}
+
+	if err := protoio.WriteBinaryProto(*flagOutputConfigFilename, skillServiceConfig, protoio.WithDeterministic(true)); err != nil {
 		log.Exitf("Unable to generate SkillServiceConfig: %v", err)
 	}
 }

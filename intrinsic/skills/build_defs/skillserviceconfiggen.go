@@ -4,15 +4,12 @@
 package skillserviceconfiggen
 
 import (
-	"fmt"
-
 	dpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
 	"google.golang.org/protobuf/proto"
 	"intrinsic/assets/idutils"
 	smpb "intrinsic/skills/proto/skill_manifest_go_proto"
 	sscpb "intrinsic/skills/proto/skill_service_config_go_proto"
 	spb "intrinsic/skills/proto/skills_go_proto"
-	"intrinsic/util/proto/protoio"
 	sciv "intrinsic/util/proto/sourcecodeinfoview"
 )
 
@@ -92,8 +89,8 @@ func buildSkillProto(manifest *smpb.SkillManifest, skillProtoDescriptor *dpb.Fil
 	return skill, nil
 }
 
-// Extract a SkillServiceConfig from a SkillManifest.
-func getSkillServiceConfigFromManifest(manifest *smpb.SkillManifest, skillProtoDescriptor *dpb.FileDescriptorSet) (*sscpb.SkillServiceConfig, error) {
+// ExtractSkillServiceConfigFromManifest extracts a SkillServiceConfig from a SkillManifest.
+func ExtractSkillServiceConfigFromManifest(manifest *smpb.SkillManifest, skillProtoDescriptor *dpb.FileDescriptorSet) (*sscpb.SkillServiceConfig, error) {
 	config := new(sscpb.SkillServiceConfig)
 
 	if manifest.GetOptions().GetCancellationReadyTimeout() != nil {
@@ -114,24 +111,4 @@ func getSkillServiceConfigFromManifest(manifest *smpb.SkillManifest, skillProtoD
 	}
 	config.SkillDescription = skillDescription
 	return config, nil
-}
-
-// GenerateSkillServiceConfig generates a SkillServiceConfig file
-func GenerateSkillServiceConfig(manifestFilename string, descriptorFilename string, outputFilename string) error {
-	fileDescriptorSet := new(dpb.FileDescriptorSet)
-	if err := protoio.ReadBinaryProto(descriptorFilename, fileDescriptorSet); err != nil {
-		return fmt.Errorf("unable to read FileDescriptorSet: %v", err)
-	}
-
-	manifest := new(smpb.SkillManifest)
-	if err := protoio.ReadBinaryProto(manifestFilename, manifest); err != nil {
-		return fmt.Errorf("unable to read manifest: %v", err)
-	}
-
-	skillServiceConfig, err := getSkillServiceConfigFromManifest(manifest, fileDescriptorSet)
-	if err != nil {
-		return fmt.Errorf("unable to extract SkillServiceConfig: %v", err)
-	}
-
-	return protoio.WriteBinaryProto(outputFilename, skillServiceConfig, protoio.WithDeterministic(true))
 }
