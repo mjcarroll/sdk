@@ -9,15 +9,11 @@ import (
 
 	"flag"
 	log "github.com/golang/glog"
-	dpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
-	"google.golang.org/protobuf/reflect/protoregistry"
-	"intrinsic/assets/idutils"
-	"intrinsic/assets/metadatafieldlimits"
 	intrinsic "intrinsic/production/intrinsic"
+	"intrinsic/skills/internal/skillmanifest"
 	smpb "intrinsic/skills/proto/skill_manifest_go_proto"
 	"intrinsic/util/proto/protoio"
 	"intrinsic/util/proto/registryutil"
-	"intrinsic/util/proto/sourcecodeinfoview"
 )
 
 var (
@@ -26,50 +22,6 @@ var (
 	flagFileDescriptorSetOut = flag.String("file_descriptor_set_out", "", "Output path for the file descriptor set.")
 	flagFileDescriptorSets   = flag.String("file_descriptor_sets", "", "Comma separated paths to binary file descriptor set protos.")
 )
-
-func validateManifest(m *smpb.SkillManifest, types *protoregistry.Types) error {
-	id, err := idutils.IDFromProto(m.GetId())
-	if err != nil {
-		return fmt.Errorf("invalid name or package: %v", err)
-	}
-	if m.GetDisplayName() == "" {
-		return fmt.Errorf("missing display name for skill %q", id)
-	}
-	if m.GetVendor().GetDisplayName() == "" {
-		return fmt.Errorf("missing vendor display name")
-	}
-	if name := m.GetParameter().GetMessageFullName(); name != "" {
-		if _, err := types.FindMessageByURL(name); err != nil {
-			return fmt.Errorf("problem with parameter message name %q: %w", name, err)
-		}
-	}
-	if name := m.GetReturnType().GetMessageFullName(); name != "" {
-		if _, err := types.FindMessageByURL(name); err != nil {
-			return fmt.Errorf("problem with return message name %q: %w", name, err)
-		}
-	}
-	if err := metadatafieldlimits.ValidateNameLength(m.GetId().GetName()); err != nil {
-		return fmt.Errorf("invalid name for skill: %v", err)
-	}
-	if err := metadatafieldlimits.ValidateDescriptionLength(m.GetDocumentation().GetDescription()); err != nil {
-		return fmt.Errorf("invalid description for skill: %v", err)
-	}
-	if err := metadatafieldlimits.ValidateDisplayNameLength(m.GetDisplayName()); err != nil {
-		return fmt.Errorf("invalid display name for skill: %v", err)
-	}
-	return nil
-}
-
-func pruneSourceCodeInfo(m *smpb.SkillManifest, fds *dpb.FileDescriptorSet) {
-	var fullNames []string
-	if name := m.GetParameter().GetMessageFullName(); name != "" {
-		fullNames = append(fullNames, name)
-	}
-	if name := m.GetReturnType().GetMessageFullName(); name != "" {
-		fullNames = append(fullNames, name)
-	}
-	sourcecodeinfoview.PruneSourceCodeInfo(fullNames, fds)
-}
 
 func createSkillManifest() error {
 	var fds []string
@@ -90,14 +42,14 @@ func createSkillManifest() error {
 	if err := protoio.ReadTextProto(*flagManifest, m, protoio.WithResolver(types)); err != nil {
 		return fmt.Errorf("failed to read manifest: %v", err)
 	}
-	if err := validateManifest(m, types); err != nil {
+	if err := skillmanifest.ValidateManifest(m, types); err != nil {
 		return err
 	}
 	if err := protoio.WriteBinaryProto(*flagOutput, m, protoio.WithDeterministic(true)); err != nil {
 		return fmt.Errorf("could not write skill manifest proto: %v", err)
 	}
 
-	pruneSourceCodeInfo(m, set)
+	skillmanifest.PruneSourceCodeInfo(m, set)
 	if err := protoio.WriteBinaryProto(*flagFileDescriptorSetOut, set, protoio.WithDeterministic(true)); err != nil {
 		return fmt.Errorf("could not write file descriptor set proto: %v", err)
 	}

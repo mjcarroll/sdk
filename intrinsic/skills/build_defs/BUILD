@@ -29,16 +29,12 @@ go_binary(
     srcs = ["skillmanifestgen.go"],
     visibility = ["//visibility:public"],
     deps = [
-        "//intrinsic/assets:idutils",
-        "//intrinsic/assets:metadatafieldlimits",
         "//intrinsic/production:intrinsic",
+        "//intrinsic/skills/internal:skillmanifest",
         "//intrinsic/skills/proto:skill_manifest_go_proto",
         "//intrinsic/util/proto:protoio",
         "//intrinsic/util/proto:registryutil",
-        "//intrinsic/util/proto:sourcecodeinfoview",
         "@com_github_golang_glog//:go_default_library",
-        "@io_bazel_rules_go//proto/wkt:descriptor_go_proto",
-        "@org_golang_google_protobuf//reflect/protoregistry:go_default_library",
     ],
 )
 
