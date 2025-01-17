@@ -23,15 +23,11 @@ message CameraConfig {
   // camera.
   CameraIdentifier identifier = 2;
 
-  // Intrinsic camera parameters of the camera.
-  // The parameters contain the image size, focal length and principal point.
-  // If the parameters are not specified, the camera is uncalibrated.
-  optional IntrinsicParams intrinsic_params = 3;
+  // Deprecated. Use sensor_configs of size one with camera_params instead.
+  optional IntrinsicParams intrinsic_params = 3 [deprecated = true];
 
-  // The lense distortion parameters.
-  // If these are not specified, the camera is either uncalibrated or a
-  // synthetic camera which serves undistorted images.
-  optional DistortionParams distortion_params = 4;
+  // Deprecated. Use sensor_configs of size one with camera_params instead.
+  optional DistortionParams distortion_params = 4 [deprecated = true];
 
   // A list of camera settings. Camera settings are applied in the order in
   // which they are defined. The specification of camera settings is optional.

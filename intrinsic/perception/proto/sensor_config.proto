@@ -15,7 +15,8 @@ message SensorConfig {
   reserved 3, 4;
   reserved "intrinsic_params", "distortion_params";
 
-  // SourceIDValue for Genicam, sensor number for other cameras (e.g. IPS PU)
+  // ComponentIDValue or 0 for GenICam, sensor number for other cameras (e.g.
+  // IPS PU)
   int64 id = 1;
   // Transforms the sensor data into the reference coordinate system of the
   // camera.
