@@ -3,7 +3,6 @@
 #include "intrinsic/icon/equipment/channel_factory.h"
 
 #include <memory>
-#include <utility>
 
 #include "absl/status/statusor.h"
 #include "absl/time/time.h"
