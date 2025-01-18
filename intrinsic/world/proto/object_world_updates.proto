@@ -192,25 +192,6 @@ message CreateObjectRequest {
   reserved 8;
 }
 
-message CreateObjectsRequest {
-  // Id of the world to be updated.
-  string world_id = 1;
-
-  // The parent object, including an entity filter specifying to which part of
-  // the parent object the created objects shall be attached to. The entity
-  // filter must be set and match exactly one object entity.
-  ObjectReferenceWithEntityFilter parent_object = 2;
-
-  // If the objects created will have names that are global alias.
-  // In case of name conflicts, the request will automatically choose unique
-  // object names for the newly created objects. See Object.name_is_global_alias
-  // for more info.
-  bool name_is_global_alias = 6;
-
-  // Requested object view for the returned created objects.
-  ObjectView view = 5;
-}
-
 // Request to delete an object including any frames that are grouped under it.
 message DeleteObjectRequest {
   // Id of the world to be queried.

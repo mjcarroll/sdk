@@ -689,11 +689,6 @@ message ListObjectsResponse {
   repeated Object objects = 1;
 }
 
-message CreateObjectsResponse {
-  // The created objects.
-  Objects objects = 1;
-}
-
 message GetFrameRequest {
   // Id of the world to be queried.
   string world_id = 1;
