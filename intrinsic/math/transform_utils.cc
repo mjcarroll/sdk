@@ -3,6 +3,7 @@
 #include "intrinsic/math/transform_utils.h"
 
 #include "intrinsic/math/pose3.h"
+#include "intrinsic/math/twist.h"
 
 namespace intrinsic {
 
