@@ -23,7 +23,6 @@ import (
 	"intrinsic/assets/baseclientutils"
 	clustermanagergrpcpb "intrinsic/frontend/cloud/api/v1/clustermanager_api_go_grpc_proto"
 	clustermanagerpb "intrinsic/frontend/cloud/api/v1/clustermanager_api_go_grpc_proto"
-	"intrinsic/frontend/cloud/devicemanager/info"
 	"intrinsic/frontend/cloud/devicemanager/messages"
 	inversiongrpcpb "intrinsic/kubernetes/inversion/v1/inversion_go_grpc_proto"
 	inversionpb "intrinsic/kubernetes/inversion/v1/inversion_go_grpc_proto"
@@ -80,20 +79,43 @@ func (c *client) runReq(ctx context.Context, method string, url url.URL, body io
 	return rb, nil
 }
 
+type clusterInfo struct {
+	rollback    bool
+	mode        string
+	state       string
+	currentBase string
+	currentOS   string
+}
+
 // status queries the update status of a cluster
-func (c *client) status(ctx context.Context) (*info.Info, error) {
-	v := url.Values{}
-	v.Set("cluster", c.cluster)
-	u := newClusterUpdateURL(c.project, "/state", v)
-	b, err := c.runReq(ctx, http.MethodGet, u, nil)
+func (c *client) status(ctx context.Context) (*clusterInfo, error) {
+	req := clustermanagerpb.GetClusterRequest{
+		Project:   c.project,
+		Org:       c.org,
+		ClusterId: c.cluster,
+	}
+	cluster, err := c.grpcClient.GetCluster(ctx, &req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cluster status: %w", err)
 	}
-	ui := &info.Info{}
-	if err := json.Unmarshal(b, ui); err != nil {
-		return nil, fmt.Errorf("unmarshal json response for status: %w", err)
+	var cp *clustermanagerpb.IPCNode
+	for _, n := range cluster.GetIpcNodes() {
+		if n.GetIsControlPlane() {
+			cp = n
+			break
+		}
 	}
-	return ui, nil
+	if cp == nil {
+		return nil, fmt.Errorf("control plane not found in cluster list: %q", c.cluster)
+	}
+	info := &clusterInfo{
+		rollback:    cluster.GetRollbackAvailable(),
+		mode:        decodeUpdateMode(cluster.GetUpdateMode()),
+		state:       decodeUpdateState(cluster.GetUpdateState()),
+		currentBase: cluster.GetPlatformVersion(),
+		currentOS:   cp.GetOsVersion(),
+	}
+	return info, nil
 }
 
 // setMode runs a request to set the update mode
@@ -148,6 +170,25 @@ func decodeUpdateMode(mode clustermanagerpb.PlatformUpdateMode) string {
 		return m
 	}
 	return "unknown"
+}
+
+func decodeUpdateState(state clustermanagerpb.UpdateState) string {
+	switch state {
+	case clustermanagerpb.UpdateState_UPDATE_STATE_UPDATING:
+		return "Updating"
+	case clustermanagerpb.UpdateState_UPDATE_STATE_PENDING:
+		// While we handle this UpdateState it is not actually returned by the backend.
+		// It gets translated to UPDATE_STATE_DEPLOYED.
+		return "Pending"
+	case clustermanagerpb.UpdateState_UPDATE_STATE_FAULT:
+		return "Fault"
+	case clustermanagerpb.UpdateState_UPDATE_STATE_DEPLOYED:
+		return "Deployed"
+	// We no longer expose the "Blocked" state to the user.
+	// It gets translated to UPDATE_STATE_DEPLOYED.
+	default:
+		return "Unknown"
+	}
 }
 
 // getMode runs a request to read the update mode
@@ -401,9 +442,8 @@ var clusterUpgradeCmd = &cobra.Command{
 			return fmt.Errorf("cluster status:\n%w", err)
 		}
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
-		rollback := ui.RollbackOS != "" && ui.RollbackBase != ""
 		fmt.Fprintf(w, "project\tcluster\tmode\tstate\trollback available\tflowstate\tos\n")
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%v\t%s\t%s\n", projectName, clusterName, ui.Mode, ui.State, rollback, ui.CurrentBase, ui.CurrentOS)
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%v\t%s\t%s\n", projectName, clusterName, ui.mode, ui.state, ui.rollback, ui.currentBase, ui.currentOS)
 		w.Flush()
 		return nil
 	},
