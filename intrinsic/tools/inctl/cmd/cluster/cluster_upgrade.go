@@ -183,14 +183,20 @@ func (c *client) clusterProjectTarget(ctx context.Context) (*messages.ClusterPro
 
 // run runs an update if one is pending
 func (c *client) run(ctx context.Context, rollback bool) error {
-	v := url.Values{}
-	v.Set("cluster", c.cluster)
-	if rollback {
-		v.Set("rollback", "y")
+	req := clustermanagerpb.SchedulePlatformUpdateRequest{
+		Project:    c.project,
+		Org:        c.org,
+		ClusterId:  c.cluster,
+		UpdateType: clustermanagerpb.SchedulePlatformUpdateRequest_UPDATE_TYPE_FORWARD,
 	}
-	u := newClusterUpdateURL(c.project, "/run", v)
-	_, err := c.runReq(ctx, http.MethodPost, u, nil)
-	return err
+	if rollback {
+		req.UpdateType = clustermanagerpb.SchedulePlatformUpdateRequest_UPDATE_TYPE_ROLLBACK
+	}
+	_, err := c.grpcClient.SchedulePlatformUpdate(ctx, &req)
+	if err != nil {
+		return fmt.Errorf("cluster upgrade run: %w", err)
+	}
+	return nil
 }
 
 func (c *client) close() error {
