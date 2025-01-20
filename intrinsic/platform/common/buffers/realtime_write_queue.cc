@@ -7,8 +7,8 @@
 #include <algorithm>
 #include <array>
 #include <cerrno>
-#include <cstdint>
 #include <cstring>
+#include <ctime>
 
 #include "absl/log/check.h"
 #include "absl/log/log.h"
