@@ -26,6 +26,12 @@ func ResolveRunfilesFs() (fs.FS, error) {
 	return baseDirFs, nil
 }
 
+// RunfilesWithRepo returns the runfiles dir for the current repo based on the given runfiles directory.
+// This is a helper as Go runfiles works differently in Bazel and Bazel.
+func RunfilesWithRepo(root string) string {
+	return path.Join(root, "ai_intrinsic_sdks")
+}
+
 // ResolveRunfilesPath gets the runfiles location of a file.
 //
 // Use the typical runfiles path without the repository name.
