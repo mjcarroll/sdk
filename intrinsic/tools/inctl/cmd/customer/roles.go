@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	accaccesscontrolv1pb "intrinsic/kubernetes/accounts/service/api/accesscontrol/v1/accesscontrolv1_go_grpc_proto"
+	accaccesscontrolv1pb "intrinsic/kubernetes/accounts/service/api/accesscontrol/v1/accesscontrol_go_grpc_proto"
 	"intrinsic/tools/inctl/util/cobrautil"
 )
 

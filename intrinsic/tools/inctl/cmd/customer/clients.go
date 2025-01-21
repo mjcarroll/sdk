@@ -16,7 +16,7 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"intrinsic/config/environments"
-	accaccesscontrolv1grpcpb "intrinsic/kubernetes/accounts/service/api/accesscontrol/v1/accesscontrolv1_go_grpc_proto"
+	accaccesscontrolgrpcpb "intrinsic/kubernetes/accounts/service/api/accesscontrol/v1/accesscontrol_go_grpc_proto"
 	accresourcemanagerv1grpcpb "intrinsic/kubernetes/accounts/service/api/resourcemanager/v1/resourcemanagerv1_go_grpc_proto"
 	"intrinsic/tools/inctl/auth/auth"
 	"intrinsic/tools/inctl/util/orgutil"
@@ -46,14 +46,14 @@ var newAccessControlV1Client = func(ctx context.Context) (accessControlV1Client,
 
 // Aliases for convenience
 type resourceManagerV1Client = accresourcemanagerv1grpcpb.ResourceManagerServiceClient
-type accessControlV1Client = accaccesscontrolv1grpcpb.AccessControlServiceClient
+type accessControlV1Client = accaccesscontrolgrpcpb.AccessControlServiceClient
 
-func newSecureAccountsAccessControlAPIKeyClient(ctx context.Context, env, org string) (accaccesscontrolv1grpcpb.AccessControlServiceClient, error) {
+func newSecureAccountsAccessControlAPIKeyClient(ctx context.Context, env, org string) (accaccesscontrolgrpcpb.AccessControlServiceClient, error) {
 	conn, err := newConnAuthStore(ctx, environments.AccountsDomain(env), org)
 	if err != nil {
 		return nil, err
 	}
-	return accaccesscontrolv1grpcpb.NewAccessControlServiceClient(conn), nil
+	return accaccesscontrolgrpcpb.NewAccessControlServiceClient(conn), nil
 }
 
 // newSecureAccountsTokensServiceAPIKeyClient creates a new secure ResourceManagerClient using API keys.

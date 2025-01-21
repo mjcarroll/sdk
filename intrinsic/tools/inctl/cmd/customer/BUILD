@@ -15,7 +15,7 @@ go_library(
     visibility = ["//intrinsic/tools/inctl:__pkg__"],
     deps = [
         "//intrinsic/config:environments",
-        "//intrinsic/kubernetes/accounts/service/api/accesscontrol/v1:accesscontrolv1_go_grpc_proto",
+        "//intrinsic/kubernetes/accounts/service/api/accesscontrol/v1:accesscontrol_go_grpc_proto",
         "//intrinsic/kubernetes/accounts/service/api/resourcemanager/v1:resourcemanagerv1_go_grpc_proto",
         "//intrinsic/tools/inctl/auth",
         "//intrinsic/tools/inctl/cmd:root",

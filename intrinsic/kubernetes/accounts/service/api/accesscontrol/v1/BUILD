@@ -8,8 +8,8 @@ package(default_visibility = [
 ])
 
 proto_library(
-    name = "accesscontrolv1_proto",
-    srcs = ["accesscontrolv1.proto"],
+    name = "accesscontrol_proto",
+    srcs = ["accesscontrol.proto"],
     deps = [
         "@com_github_grpc_ecosystem_grpc_gateway_v2//protoc-gen-openapiv2/options:options_proto",
         "@com_google_googleapis//google/api:annotations_proto",
@@ -20,18 +20,18 @@ proto_library(
 )
 
 go_proto_library(
-    name = "accesscontrolv1_go_proto",
+    name = "accesscontrol_go_proto",
     go_deps = [
         "@com_github_grpc_ecosystem_grpc_gateway_v2//protoc-gen-openapiv2/options:options",
         "@org_golang_google_genproto_googleapis_api//annotations",
         "@com_google_cloud_go_longrunning//autogen/longrunningpb",
     ],
-    deps = [":accesscontrolv1_proto"],
+    deps = [":accesscontrol_proto"],
 )
 
 go_grpc_library(
-    name = "accesscontrolv1_go_grpc_proto",
-    srcs = [":accesscontrolv1_proto"],
+    name = "accesscontrol_go_grpc_proto",
+    srcs = [":accesscontrol_proto"],
     deps = [
         "@com_github_grpc_ecosystem_grpc_gateway_v2//protoc-gen-openapiv2/options",
         "@com_google_cloud_go_longrunning//autogen/longrunningpb",
