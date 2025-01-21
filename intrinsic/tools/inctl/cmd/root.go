@@ -35,6 +35,8 @@ const (
 	HardwareDeviceCmdName = "hardware_device"
 	// ProcessCmdName is the name of the `inctl process` command.
 	ProcessCmdName = "process"
+	// SceneObjectCmdName is the name of the `inctl scene_object` command.
+	SceneObjectCmdName = "scene_object"
 	// ServiceCmdName is the name of the `inctl service` command.
 	ServiceCmdName = "service"
 	// SolutionCmdName is the name of the `inctl solution` command.
