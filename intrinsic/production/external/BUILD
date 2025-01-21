@@ -32,6 +32,4 @@ py_test(
         "//:requirements.txt",
     ],
     main = "grpc_synchronized_test.py",
-    python_version = "PY3",
-    srcs_version = "PY3",
 )

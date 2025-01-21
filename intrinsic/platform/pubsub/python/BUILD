@@ -29,8 +29,6 @@ pybind_extension(
 py_test(
     name = "pubsub_test",
     srcs = ["pubsub_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     tags = [
         "noasan",
         "nomsan",
