@@ -19,6 +19,19 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "any_test",
+    size = "small",
+    srcs = ["any_test.cc"],
+    deps = [
+        ":any",
+        "//intrinsic/util/proto/testing:param_message_cc_proto",
+        "//intrinsic/util/testing:gtest_wrapper_main",
+        "@com_google_absl//absl/status",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
+
 cc_library(
     name = "descriptors",
     srcs = ["descriptors.cc"],

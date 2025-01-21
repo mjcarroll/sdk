@@ -201,3 +201,14 @@ go_library(
         "@org_golang_google_protobuf//types/known/anypb",
     ],
 )
+
+proto_library(
+    name = "param_message_proto",
+    srcs = ["param_message.proto"],
+    deps = ["@com_google_protobuf//:any_proto"],
+)
+
+cc_proto_library(
+    name = "param_message_cc_proto",
+    deps = [":param_message_proto"],
+)

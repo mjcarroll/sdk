@@ -1,0 +1,39 @@
+// Copyright 2023 Intrinsic Innovation LLC
+
+syntax = "proto3";
+
+package intrinsic_proto.test;
+
+import "google/protobuf/any.proto";
+
+message ParamMessageParameters {
+  int64 number = 1;
+}
+
+message ParamMessageParametersB {
+  string docstring = 1;
+}
+
+message SubMessage {
+  int64 num = 1;
+}
+
+message ParamMessageDefaultsTestMessage {
+  optional string my_string = 1;
+  optional double my_double = 2;
+  SubMessage sub_message = 3;
+  repeated double double_vector = 4;
+  int32 my_non_optional_int = 5;
+
+  google.protobuf.Any any_message = 6;
+  repeated SubMessage sub_messages = 7;
+
+  oneof MaybeFields {
+    int32 maybe_int32 = 10;
+    int64 maybe_int64 = 11;
+  }
+}
+
+message ParamsWithSubMessage {
+  SubMessage sub_message = 1;
+}
