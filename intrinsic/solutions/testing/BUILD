@@ -43,7 +43,6 @@ proto_source_code_info_transitive_descriptor_set(
 py_library(
     name = "compare",
     srcs = ["compare.py"],
-    srcs_version = "PY3",
     visibility = ["//intrinsic:public_api_users"],
     deps = [
         "@com_google_absl_py//absl/testing:absltest",
@@ -54,8 +53,6 @@ py_library(
 py_test(
     name = "compare_test",
     srcs = ["compare_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":compare",
         "//intrinsic/executive/proto:test_message_py_pb2",
@@ -68,7 +65,6 @@ py_library(
     name = "skill_test_utils",
     testonly = True,
     srcs = ["skill_test_utils.py"],
-    srcs_version = "PY3",
     visibility = ["//intrinsic/solutions:__subpackages__"],
     deps = [
         ":test_skill_params_py_pb2",

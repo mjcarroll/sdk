@@ -82,7 +82,6 @@ go_proto_library(
 py_library(
     name = "no_op_skill_py",
     srcs = ["no_op_skill.py"],
-    srcs_version = "PY3",
     visibility = [
         "//intrinsic/skills/build_defs/tests:__pkg__",
         "//intrinsic/skills/internal:__pkg__",

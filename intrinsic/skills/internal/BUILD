@@ -42,7 +42,6 @@ cc_library(
 py_library(
     name = "default_parameters_py",
     srcs = ["default_parameters.py"],
-    srcs_version = "PY3",
     deps = [
         "//intrinsic/skills/internal:error_bindings",
         "@com_google_protobuf//:protobuf_python",
@@ -96,7 +95,6 @@ cc_library(
 py_library(
     name = "error_utils_py",
     srcs = ["error_utils.py"],
-    srcs_version = "PY3",
     deps = [
         "//intrinsic/skills/proto:error_py_pb2",
         requirement("grpcio"),
@@ -255,7 +253,6 @@ py_library(
 py_library(
     name = "skill_service_impl_py",
     srcs = ["skill_service_impl.py"],
-    srcs_version = "PY3",
     deps = [
         ":default_parameters_py",
         ":error_bindings",
@@ -296,7 +293,6 @@ py_library(
 py_library(
     name = "proto_utils",
     srcs = ["proto_utils.py"],
-    srcs_version = "PY3",
     visibility = [
         "//visibility:public",
     ],
@@ -432,7 +428,6 @@ cc_library(
 py_library(
     name = "skill_init_py",
     srcs = ["skill_init.py"],
-    srcs_version = "PY3",
     visibility = ["//visibility:public"],
     deps = [
         ":skill_repository_py",

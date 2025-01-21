@@ -12,7 +12,6 @@ package(default_visibility = [
 py_library(
     name = "object_world_resources",
     srcs = ["object_world_resources.py"],
-    srcs_version = "PY3",
     deps = [
         ":object_world_ids",
         "//intrinsic/icon/proto:cart_space_py_pb2",
@@ -32,7 +31,6 @@ py_library(
 py_test(
     name = "object_world_resources_test",
     srcs = ["object_world_resources_test.py"],
-    srcs_version = "PY3",
     deps = [
         ":object_world_ids",
         ":object_world_resources",
@@ -52,13 +50,11 @@ py_test(
 py_library(
     name = "object_world_ids",
     srcs = ["object_world_ids.py"],
-    srcs_version = "PY3",
 )
 
 py_test(
     name = "object_world_ids_test",
     srcs = ["object_world_ids_test.py"],
-    srcs_version = "PY3",
     deps = [
         ":object_world_ids",
         "@com_google_absl_py//absl/testing:absltest",
@@ -68,7 +64,6 @@ py_test(
 py_library(
     name = "object_world_client",
     srcs = ["object_world_client.py"],
-    srcs_version = "PY3",
     deps = [
         ":object_world_ids",
         ":object_world_resources",

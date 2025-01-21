@@ -48,7 +48,6 @@ cc_library(
 py_library(
     name = "descriptors_py",
     srcs = ["descriptors.py"],
-    srcs_version = "PY3",
     deps = ["@com_google_protobuf//:protobuf_python"],
 )
 

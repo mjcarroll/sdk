@@ -50,7 +50,6 @@ py_library(
     srcs = [
         "connection.py",
     ],
-    srcs_version = "PY3",
 )
 
 cc_library(
@@ -77,7 +76,6 @@ cc_library(
 py_library(
     name = "interceptor",
     srcs = ["interceptor.py"],
-    srcs_version = "PY3",
     deps = [
         "//intrinsic/util:decorators",
         requirement("grpcio"),
@@ -87,7 +85,6 @@ py_library(
 py_library(
     name = "error_handling",
     srcs = ["error_handling.py"],
-    srcs_version = "PY3",
     deps = [
         "@ai_intrinsic_sdks_pip_deps//retrying",
         requirement("grpcio"),
@@ -97,8 +94,6 @@ py_library(
 py_test(
     name = "error_handling_test",
     srcs = ["error_handling_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":error_handling",
         requirement("grpcio"),

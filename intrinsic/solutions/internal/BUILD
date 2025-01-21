@@ -31,8 +31,6 @@ py_library(
 py_test(
     name = "behavior_tree_providing_test",
     srcs = ["behavior_tree_providing_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":behavior_tree_providing",
         "//intrinsic/executive/proto:behavior_tree_py_pb2",
@@ -46,7 +44,6 @@ py_test(
 py_library(
     name = "actions",
     srcs = ["actions.py"],
-    srcs_version = "PY3",
     deps = [
         "//intrinsic/executive/proto:behavior_call_py_pb2",
         "//intrinsic/math/python:data_types",
@@ -57,7 +54,6 @@ py_library(
 py_library(
     name = "behavior_call",
     srcs = ["behavior_call.py"],
-    srcs_version = "PY3",
     deps = [
         ":actions",
         "//intrinsic/executive/proto:behavior_call_py_pb2",
@@ -70,8 +66,6 @@ py_test(
     data = [
         "//intrinsic/solutions/testing:test_skill_params_proto_descriptors",
     ],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":actions",
         ":behavior_call",
@@ -85,7 +79,6 @@ py_test(
 py_library(
     name = "resources",
     srcs = ["resources.py"],
-    srcs_version = "PY3",
     deps = [
         "//intrinsic/resources/client:resource_registry_client",
         "//intrinsic/resources/proto:resource_handle_py_pb2",
@@ -97,8 +90,6 @@ py_library(
 py_test(
     name = "resources_test",
     srcs = ["resources_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":resources",
         "//intrinsic/resources/proto:resource_handle_py_pb2",
@@ -122,7 +113,6 @@ py_test(
     data = [
         "//intrinsic/solutions/testing:test_skill_params_proto_descriptors",
     ],
-    srcs_version = "PY3",
     deps = [
         ":skill_parameters",
         "//intrinsic/math/python:data_types",
@@ -138,7 +128,6 @@ py_test(
 py_library(
     name = "skill_utils",
     srcs = ["skill_utils.py"],
-    srcs_version = "PY3",
     deps = [
         ":skill_parameters",
         "//intrinsic/icon/proto:joint_space_py_pb2",
@@ -185,7 +174,6 @@ py_test(
 py_library(
     name = "skill_generation",
     srcs = ["skill_generation.py"],
-    srcs_version = "PY3",
     deps = [
         ":actions",
         ":skill_utils",
@@ -202,7 +190,6 @@ py_library(
 py_library(
     name = "skill_providing",
     srcs = ["skill_providing.py"],
-    srcs_version = "PY3",
     deps = [
         ":resources",
         ":skill_generation",
@@ -220,8 +207,6 @@ py_test(
     data = [
         "//intrinsic/solutions/testing:test_skill_params_proto_descriptors",
     ],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":skill_generation",
         ":skill_providing",
@@ -313,7 +298,6 @@ py_test(
     data = [
         ":stubs_test_proto_descriptors",
     ],
-    srcs_version = "PY3",
     deps = [
         ":skill_providing",
         ":stubs",

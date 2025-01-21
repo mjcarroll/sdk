@@ -13,7 +13,6 @@ package(default_visibility = [
 py_library(
     name = "behavior_tree",
     srcs = ["behavior_tree.py"],
-    srcs_version = "PY3",
     deps = [
         ":blackboard_value",
         ":cel",
@@ -44,8 +43,6 @@ py_test(
     data = [
         "//intrinsic/solutions/testing:test_skill_params_proto_descriptors",
     ],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":behavior_tree",
         ":blackboard_value",
@@ -74,7 +71,6 @@ py_test(
 py_library(
     name = "blackboard_value",
     srcs = ["blackboard_value.py"],
-    srcs_version = "PY3",
     deps = [
         "@com_google_protobuf//:protobuf_python",
     ],
@@ -88,7 +84,6 @@ py_library(
 py_library(
     name = "deployments",
     srcs = ["deployments.py"],
-    srcs_version = "PY3",
     deps = [
         ":auth",
         ":dialerutil",
@@ -125,8 +120,6 @@ py_library(
 py_test(
     name = "deployments_test",
     srcs = ["deployments_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":auth",
         ":deployments",
@@ -149,7 +142,6 @@ py_test(
 py_library(
     name = "userconfig",
     srcs = ["userconfig.py"],
-    srcs_version = "PY3",
 )
 
 py_test(
@@ -164,7 +156,6 @@ py_test(
 py_library(
     name = "errors",
     srcs = ["errors.py"],
-    srcs_version = "PY3",
     deps = [
         "@ai_intrinsic_sdks_pip_deps//retrying",
     ],
@@ -173,7 +164,6 @@ py_library(
 py_library(
     name = "error_processing",
     srcs = ["error_processing.py"],
-    srcs_version = "PY3",
     deps = [
         ":errors",
         ":ipython",
@@ -190,8 +180,6 @@ py_library(
 py_test(
     name = "error_processing_test",
     srcs = ["error_processing_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":error_processing",
         "//intrinsic/kubernetes/workcell_spec/proto:installer_py_pb2",
@@ -206,7 +194,6 @@ py_test(
 py_library(
     name = "execution",
     srcs = ["execution.py"],
-    srcs_version = "PY3",
     deps = [
         ":behavior_tree",
         ":blackboard_value",
@@ -238,8 +225,6 @@ py_library(
 py_test(
     name = "execution_test",
     srcs = ["execution_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":behavior_tree",
         ":blackboard_value",
@@ -272,7 +257,6 @@ py_test(
 py_library(
     name = "ipython",
     srcs = ["ipython.py"],
-    srcs_version = "PY3",
     deps = [
         "//intrinsic/util/status:status_exception",
         "@ai_intrinsic_sdks_pip_deps//ipywidgets",
@@ -282,8 +266,6 @@ py_library(
 py_test(
     name = "ipython_test",
     srcs = ["ipython_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":ipython",
         "@com_google_absl_py//absl/testing:absltest",
@@ -294,8 +276,6 @@ py_test(
 py_binary(
     name = "main",
     srcs = ["main.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":solutions_lib",
     ],
@@ -304,7 +284,6 @@ py_binary(
 # Collection of all "public" modules for packaging.
 py_library(
     name = "solutions_lib",
-    srcs_version = "PY3",
     deps = [
         ":blackboard_value",
         ":cel",
@@ -323,7 +302,6 @@ py_library(
 py_library(
     name = "perception",
     srcs = ["perception.py"],
-    srcs_version = "PY3",
     deps = [
         ":deployments",
         ":execution",
@@ -355,7 +333,6 @@ py_test(
 py_library(
     name = "pose_estimation",
     srcs = ["pose_estimation.py"],
-    srcs_version = "PY3",
     deps = [
         ":ipython",
         "//intrinsic/resources/client:resource_registry_client",
@@ -366,8 +343,6 @@ py_library(
 py_test(
     name = "pose_estimation_test",
     srcs = ["pose_estimation_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":pose_estimation",
         "//intrinsic/resources/proto:resource_registry_py_pb2",
@@ -378,7 +353,6 @@ py_test(
 py_library(
     name = "proto_building",
     srcs = ["proto_building.py"],
-    srcs_version = "PY3",
     deps = [
         ":errors",
         "//intrinsic/executive/proto:proto_builder_py_pb2",
@@ -395,8 +369,6 @@ py_library(
 py_test(
     name = "proto_building_test",
     srcs = ["proto_building_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":behavior_tree",
         ":errors",
@@ -411,7 +383,6 @@ py_test(
 py_library(
     name = "pbt_registration",
     srcs = ["pbt_registration.py"],
-    srcs_version = "PY3",
     deps = [
         ":behavior_tree",
         "//intrinsic/executive/proto:behavior_tree_py_pb2",
@@ -426,7 +397,6 @@ py_library(
 py_library(
     name = "simulation",
     srcs = ["simulation.py"],
-    srcs_version = "PY3",
     deps = [
         ":errors",
         "//intrinsic/math/python:proto_conversion",
@@ -453,7 +423,6 @@ py_test(
 py_library(
     name = "provided",
     srcs = ["provided.py"],
-    srcs_version = "PY3",
     deps = [
         ":blackboard_value",
         ":cel",
@@ -469,7 +438,6 @@ py_library(
 py_library(
     name = "providers",
     srcs = ["providers.py"],
-    srcs_version = "PY3",
     deps = [
         ":behavior_tree",
         ":provided",
@@ -480,7 +448,6 @@ py_library(
 py_library(
     name = "auth",
     srcs = ["auth.py"],
-    srcs_version = "PY3",
     deps = [
         ":userconfig",
     ],
@@ -489,7 +456,6 @@ py_library(
 py_library(
     name = "dialerutil",
     srcs = ["dialerutil.py"],
-    srcs_version = "PY3",
     deps = [
         ":auth",
         requirement("grpcio"),
@@ -520,15 +486,12 @@ py_test(
 py_library(
     name = "utils",
     srcs = ["utils.py"],
-    srcs_version = "PY3",
     deps = [":errors"],
 )
 
 py_test(
     name = "utils_test",
     srcs = ["utils_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":utils",
         "@com_google_absl_py//absl/testing:absltest",
@@ -538,7 +501,6 @@ py_test(
 py_library(
     name = "worlds",
     srcs = ["worlds.py"],
-    srcs_version = "PY3",
     deps = [
         ":utils",
         "//intrinsic/geometry/service:geometry_service_py_pb2_grpc",

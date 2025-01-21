@@ -50,7 +50,6 @@ cc_library(
 py_library(
     name = "decorators",
     srcs = ["decorators.py"],
-    srcs_version = "PY3",
 )
 
 cc_library(

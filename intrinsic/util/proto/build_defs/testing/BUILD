@@ -46,8 +46,6 @@ py_test(
     data = [
         ":test_message_proto_descriptors",
     ],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         "@com_google_absl_py//absl/flags",
         "@com_google_absl_py//absl/testing:absltest",

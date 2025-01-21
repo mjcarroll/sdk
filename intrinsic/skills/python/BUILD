@@ -8,7 +8,6 @@ package(default_visibility = ["//visibility:public"])
 py_library(
     name = "skill_interface",
     srcs = ["skill_interface.py"],
-    srcs_version = "PY3",
     deps = [
         ":execute_context",
         ":execute_request",
@@ -108,7 +107,6 @@ py_library(
 py_library(
     name = "proto_utils",
     srcs = ["proto_utils.py"],
-    srcs_version = "PY3",
     deps = ["@com_google_protobuf//:protobuf_python"],
 )
 
