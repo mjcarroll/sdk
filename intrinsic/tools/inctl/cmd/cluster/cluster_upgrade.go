@@ -5,14 +5,9 @@ package cluster
 import (
 	"bufio"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
 	"os"
-	"path/filepath"
 	"strings"
 	"text/tabwriter"
 
@@ -23,7 +18,6 @@ import (
 	"intrinsic/assets/baseclientutils"
 	clustermanagergrpcpb "intrinsic/frontend/cloud/api/v1/clustermanager_api_go_grpc_proto"
 	clustermanagerpb "intrinsic/frontend/cloud/api/v1/clustermanager_api_go_grpc_proto"
-	"intrinsic/frontend/cloud/devicemanager/messages"
 	inversiongrpcpb "intrinsic/kubernetes/inversion/v1/inversion_go_grpc_proto"
 	inversionpb "intrinsic/kubernetes/inversion/v1/inversion_go_grpc_proto"
 	"intrinsic/skills/tools/skill/cmd/dialerutil"
@@ -38,45 +32,12 @@ var (
 
 // client helps run auth'ed requests for a specific cluster
 type client struct {
-	client      *http.Client
 	tokenSource *auth.ProjectToken
 	cluster     string
 	project     string
 	org         string
 	grpcConn    *grpc.ClientConn
 	grpcClient  clustermanagergrpcpb.ClustersServiceClient
-}
-
-// do wraps http.Client.Do with Auth
-func (c *client) do(req *http.Request) (*http.Response, error) {
-	req, err := c.tokenSource.HTTPAuthorization(req)
-	if err != nil {
-		return nil, fmt.Errorf("auth token for %q %s: %w", req.Method, req.URL.String(), err)
-	}
-	return c.client.Do(req)
-}
-
-// runReq runs a |method| request with url and returns the response/error
-func (c *client) runReq(ctx context.Context, method string, url url.URL, body io.Reader) ([]byte, error) {
-	req, err := http.NewRequestWithContext(ctx, method, url.String(), body)
-	if err != nil {
-		return nil, fmt.Errorf("create %q request for %s: %w", method, url.String(), err)
-	}
-	resp, err := c.do(req)
-	if err != nil {
-		return nil, fmt.Errorf("%q request for %s: %w", req.Method, req.URL.String(), err)
-	}
-	// read body first as error response might also be in the body
-	rb, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("response %q request for %s: %w", req.Method, req.URL.String(), err)
-	}
-	switch resp.StatusCode {
-	case http.StatusOK:
-	default:
-		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, rb)
-	}
-	return rb, nil
 }
 
 type clusterInfo struct {
@@ -206,22 +167,6 @@ func (c *client) getMode(ctx context.Context) (string, error) {
 	return decodeUpdateMode(mode), nil
 }
 
-// clusterProjectTarget queries the update target for a cluster in a project
-func (c *client) clusterProjectTarget(ctx context.Context) (*messages.ClusterProjectTargetResponse, error) {
-	v := url.Values{}
-	v.Set("cluster", c.cluster)
-	u := newClusterUpdateURL(c.project, "/projecttarget", v)
-	b, err := c.runReq(ctx, http.MethodGet, u, nil)
-	if err != nil {
-		return nil, err
-	}
-	r := &messages.ClusterProjectTargetResponse{}
-	if err := json.Unmarshal(b, r); err != nil {
-		return nil, fmt.Errorf("unmarshal json response for status: %w", err)
-	}
-	return r, nil
-}
-
 // run runs an update if one is pending
 func (c *client) run(ctx context.Context, rollback bool) error {
 	req := clustermanagerpb.SchedulePlatformUpdateRequest{
@@ -265,15 +210,6 @@ func newTokenSource(project string) (*auth.ProjectToken, error) {
 	return token, nil
 }
 
-func newClusterUpdateURL(project string, subPath string, values url.Values) url.URL {
-	return url.URL{
-		Scheme:   "https",
-		Host:     fmt.Sprintf("www.endpoints.%s.cloud.goog", project),
-		Path:     filepath.Join("/api/clusterupdate/", subPath),
-		RawQuery: values.Encode(),
-	}
-}
-
 func newClient(ctx context.Context, org, project, cluster string) (context.Context, client, error) {
 	ts, err := newTokenSource(project)
 	if err != nil {
@@ -289,7 +225,6 @@ func newClient(ctx context.Context, org, project, cluster string) (context.Conte
 		return nil, client{}, fmt.Errorf("create grpc client: %w", err)
 	}
 	return ctx, client{
-		client:      http.DefaultClient,
 		tokenSource: ts,
 		cluster:     cluster,
 		project:     project,
@@ -344,45 +279,6 @@ var modeCmd = &cobra.Command{
 		default:
 			return fmt.Errorf("invalid number of arguments. At most 1: %d", len(args))
 		}
-	},
-}
-
-const showTargetCmdDesc = `
-Show the upgrade target version.
-
-This command indicates for this cluster, what version it should be running to be considered up to
-date for its environment.
-Please use
-- 'cluster upgrade' to inspect whether it is at the target and
-- 'cluster upgrade run' to execute a pending update if there is one.
-`
-
-// showTargetCmd is the command to execute an update if available
-var showTargetCmd = &cobra.Command{
-	Use: "show-target",
-
-	Short: "Show the upgrade target version.",
-	Long:  showTargetCmdDesc,
-	Args:  cobra.NoArgs,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := cmd.Context()
-
-		projectName := ClusterCmdViper.GetString(orgutil.KeyProject)
-		orgName := ClusterCmdViper.GetString(orgutil.KeyOrganization)
-		ctx, c, err := newClient(ctx, orgName, projectName, clusterName)
-		if err != nil {
-			return fmt.Errorf("cluster upgrade client:\n%w", err)
-		}
-		defer c.close()
-		r, err := c.clusterProjectTarget(ctx)
-		if err != nil {
-			return fmt.Errorf("cluster status:\n%w", err)
-		}
-		w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
-		fmt.Fprintf(w, "flowstate\tos\n")
-		fmt.Fprintf(w, "%s\t%s\n", r.Base, r.OS)
-		w.Flush()
-		return nil
 	},
 }
 
@@ -538,6 +434,5 @@ func init() {
 	clusterUpgradeCmd.AddCommand(runCmd)
 	runCmd.PersistentFlags().BoolVar(&rollbackFlag, "rollback", false, "Whether to trigger a rollback update instead")
 	clusterUpgradeCmd.AddCommand(modeCmd)
-	clusterUpgradeCmd.AddCommand(showTargetCmd)
 	clusterUpgradeCmd.AddCommand(acceptCmd)
 }
