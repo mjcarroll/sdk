@@ -109,11 +109,11 @@ message PlanGraspExecutionRequest {
 message GraspPlannerServiceConfig {
   // The ingress address for connecting to all services.
   string ingress_address = 1;
-  // The list of scene perception resource instance names to use as scene
-  // perceivers.
-  repeated string scene_perception_resource_instance_names = 2;
   // The cache size limit per each group. See `PlanGraspExecutionCache`.
   int64 max_cache_size_per_group = 3;
+
+  reserved 2;
+  reserved "scene_perception_resource_instance_names";
 }
 
 message RankGraspsRequest {
