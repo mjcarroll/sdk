@@ -18,7 +18,9 @@ import (
 	"golang.org/x/exp/maps"
 	"intrinsic/assets/imagetransfer"
 	"intrinsic/assets/imageutils"
+	atypepb "intrinsic/assets/proto/asset_type_go_proto"
 	iapb "intrinsic/assets/proto/installed_assets_go_grpc_proto"
+	"intrinsic/assets/typeutils"
 	"intrinsic/tools/inctl/util/orgutil"
 )
 
@@ -27,6 +29,8 @@ const (
 	KeyAddress = "address"
 	// KeyAPIKey is the name of the arg to specify the api-key to use.
 	KeyAPIKey = "api_key"
+	// KeyAssetType is the name of the asset type flag.
+	KeyAssetType = "asset_type"
 	// KeyAuthUser is the name of the auth user flag.
 	KeyAuthUser = "auth_user"
 	// KeyAuthPassword is the name of the auth password flag.
@@ -117,6 +121,22 @@ func NewCmdFlagsWithViper(viperLocal *viper.Viper) *CmdFlags {
 // The command must be set before any flags are added.
 func (cf *CmdFlags) SetCommand(cmd *cobra.Command) {
 	cf.cmd = cmd
+}
+
+// AddFlagAssetType adds a flag for the asset type.
+func (cf *CmdFlags) AddFlagAssetType() {
+	types := typeutils.AllAssetTypes()
+	names := make([]string, len(types))
+	for i, t := range types {
+		names[i] = typeutils.NameFromAssetType(t)
+	}
+
+	cf.RequiredString(KeyAssetType, fmt.Sprintf("The asset type. One of: %v.", strings.Join(names, ", ")))
+}
+
+// GetFlagAssetType gets the (enum) value of the asset type flag added by AddFlagAssetType.
+func (cf *CmdFlags) GetFlagAssetType() (atypepb.AssetType, error) {
+	return typeutils.AssetTypeFromName(cf.GetString(KeyAssetType))
 }
 
 // AddFlagsCatalogInProcEnvironment adds flags for using an in-proc catalog and specifying the

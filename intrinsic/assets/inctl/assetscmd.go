@@ -5,6 +5,8 @@ package assetscmd
 
 import (
 	"github.com/spf13/cobra"
+	"intrinsic/assets/inctl/listreleased"
+	"intrinsic/assets/inctl/listreleasedversions"
 	"intrinsic/tools/inctl/cmd/root"
 )
 
@@ -15,6 +17,8 @@ var assetsCmd = &cobra.Command{
 }
 
 func init() {
+	assetsCmd.AddCommand(listreleased.GetCommand())
+	assetsCmd.AddCommand(listreleasedversions.GetCommand())
 
 	root.RootCmd.AddCommand(assetsCmd)
 }
