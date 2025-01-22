@@ -39,6 +39,6 @@ go_proto_library(
 )
 
 py_proto_library(
-    name = "scebe_object_manifest_py_proto",
+    name = "scene_object_manifest_py_proto",
     deps = [":scene_object_manifest_proto"],
 )
