@@ -6,16 +6,6 @@ package(default_visibility = [
     "//visibility:public",
 ])
 
-exports_files(
-    srcs = [
-        "BUILD",
-        "safety_status.fbs",
-    ],
-    visibility = [
-        "//intrinsic/production:__pkg__",
-    ],
-)
-
 flatbuffers_library(
     name = "safety_status_fbs",
     srcs = [
