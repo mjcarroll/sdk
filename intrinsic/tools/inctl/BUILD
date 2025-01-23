@@ -8,7 +8,7 @@ go_binary(
     name = "inctl_external",
     srcs = ["inctl_external.go"],
     deps = [
-        "//intrinsic/assets/inctl:assetscmd",
+        "//intrinsic/assets/inctl:assetcmd",
         "//intrinsic/assets/services/inctl:service",
         "//intrinsic/tools/inctl/cmd:root",
         "//intrinsic/tools/inctl/cmd:skill",

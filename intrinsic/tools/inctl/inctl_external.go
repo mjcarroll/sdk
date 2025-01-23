@@ -3,7 +3,7 @@
 package main
 
 import (
-	_ "intrinsic/assets/inctl/assetscmd"
+	_ "intrinsic/assets/inctl/assetcmd"
 	_ "intrinsic/assets/services/inctl/service"
 	_ "intrinsic/tools/inctl/cmd/auth/auth"
 	_ "intrinsic/tools/inctl/cmd/bazel/bazel"

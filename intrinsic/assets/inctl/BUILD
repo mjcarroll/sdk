@@ -5,8 +5,8 @@ load("//bazel:go_macros.bzl", "go_library")
 package(default_visibility = ["//visibility:public"])
 
 go_library(
-    name = "assetscmd",
-    srcs = ["assetscmd.go"],
+    name = "assetcmd",
+    srcs = ["assetcmd.go"],
     deps = [
         ":listreleased",
         ":listreleasedversions",
