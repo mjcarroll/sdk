@@ -20,6 +20,7 @@ go_library(
         "//intrinsic/frontend/cloud/api:clusterdeletion_api_go_grpc_proto",
         "//intrinsic/frontend/cloud/api:clusterdiscovery_api_go_grpc_proto",
         "//intrinsic/frontend/cloud/api/v1:clustermanager_api_go_grpc_proto",
+        "//intrinsic/frontend/cloud/devicemanager:version",
         "//intrinsic/kubernetes/inversion/v1:inversion_go_grpc_proto",
         "//intrinsic/skills/tools/skill/cmd:dialerutil",
         "//intrinsic/tools/inctl/auth",

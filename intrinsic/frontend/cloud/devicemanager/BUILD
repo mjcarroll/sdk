@@ -24,6 +24,7 @@ go_library(
 go_library(
     name = "version",
     srcs = ["version.go"],
+    visibility = ["//intrinsic/tools/inctl/cmd/cluster:__subpackages__"],
 )
 
 go_test(

@@ -18,6 +18,7 @@ import (
 	"intrinsic/assets/baseclientutils"
 	clustermanagergrpcpb "intrinsic/frontend/cloud/api/v1/clustermanager_api_go_grpc_proto"
 	clustermanagerpb "intrinsic/frontend/cloud/api/v1/clustermanager_api_go_grpc_proto"
+	"intrinsic/frontend/cloud/devicemanager/version"
 	inversiongrpcpb "intrinsic/kubernetes/inversion/v1/inversion_go_grpc_proto"
 	inversionpb "intrinsic/kubernetes/inversion/v1/inversion_go_grpc_proto"
 	"intrinsic/skills/tools/skill/cmd/dialerutil"
@@ -339,7 +340,7 @@ var clusterUpgradeCmd = &cobra.Command{
 		}
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
 		fmt.Fprintf(w, "project\tcluster\tmode\tstate\trollback available\tflowstate\tos\n")
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%v\t%s\t%s\n", projectName, clusterName, ui.mode, ui.state, ui.rollback, ui.currentBase, ui.currentOS)
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%v\t%s\t%s\n", projectName, clusterName, ui.mode, ui.state, ui.rollback, version.TranslateBaseAPIToUI(ui.currentBase), version.TranslateOSAPIToUI(ui.currentOS))
 		w.Flush()
 		return nil
 	},
