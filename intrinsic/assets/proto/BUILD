@@ -140,6 +140,9 @@ proto_library(
         ":id_proto",
         ":release_tag_proto",
         ":vendor_proto",
+        "@com_google_googleapis//google/api:annotations_proto",
+        "@com_google_googleapis//google/api:field_behavior_proto",
+        "@com_google_protobuf//:descriptor_proto",
         "@com_google_protobuf//:timestamp_proto",
     ],
 )
@@ -165,6 +168,7 @@ go_proto_library(
         ":id_go_proto",
         ":release_tag_go_proto",
         ":vendor_go_proto",
+        "@org_golang_google_genproto_googleapis_api//annotations",
     ],
     visibility = ["//intrinsic:__subpackages__"],
     deps = [":metadata_proto"],

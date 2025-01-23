@@ -4,6 +4,8 @@ syntax = "proto3";
 
 package intrinsic_proto.assets;
 
+import "google/api/field_behavior.proto";
+import "google/protobuf/descriptor.proto";
 import "google/protobuf/timestamp.proto";
 import "intrinsic/assets/proto/asset_tag.proto";
 import "intrinsic/assets/proto/asset_type.proto";
@@ -40,4 +42,8 @@ message Metadata {
 
   // A tag identifying the category of the asset.
   AssetTag asset_tag = 9;
+
+  // A descriptor set for the asset's protos.
+  google.protobuf.FileDescriptorSet file_descriptor_set = 10
+      [(google.api.field_behavior) = OUTPUT_ONLY];
 }
