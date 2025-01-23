@@ -223,9 +223,9 @@ var releaseCmd = &cobra.Command{
 			return err
 		}
 		idVersion := idutils.IDVersionFromProtoUnchecked(asset.GetMetadata().GetIdVersion())
-		printer.PrintSf("Releasing skill %q to the skill catalog", idVersion)
+		printer.PrintSf("Releasing skill %q to the asset catalog", idVersion)
 		if dryRun {
-			printer.PrintS("Skipping call to skill catalog (dry-run)")
+			printer.PrintS("Skipping call to asset catalog (dry-run)")
 			return nil
 		}
 		client := acgrpcpb.NewAssetCatalogClient(conn)

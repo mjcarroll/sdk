@@ -155,12 +155,12 @@ func GetCommand() *cobra.Command {
 				return err
 			}
 			idVersion := idutils.IDVersionFromProtoUnchecked(asset.GetMetadata().GetIdVersion())
-			printer.PrintSf("Releasing service %q to the service catalog", idVersion)
+			printer.PrintSf("Releasing service %q to the asset catalog", idVersion)
 			if err != nil {
 				return errors.Wrap(err, "could not dial catalog")
 			}
 			if dryRun {
-				printer.PrintS("Skipping call to service catalog (dry-run)")
+				printer.PrintS("Skipping call to asset catalog (dry-run)")
 				return nil
 			}
 			client := acgrpcpb.NewAssetCatalogClient(conn)
