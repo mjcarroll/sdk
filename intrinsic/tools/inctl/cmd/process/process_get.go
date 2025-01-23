@@ -12,8 +12,8 @@ import (
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/prototext"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/reflect/protodesc"
 	"google.golang.org/protobuf/reflect/protoregistry"
+	"intrinsic/executive/go/behaviortree"
 	btpb "intrinsic/executive/proto/behavior_tree_go_proto"
 	execgrpcpb "intrinsic/executive/proto/executive_service_go_grpc_proto"
 	sgrpcpb "intrinsic/frontend/solution_service/proto/solution_service_go_grpc_proto"
@@ -108,13 +108,29 @@ type serializer interface {
 }
 
 type textSerializer struct {
-	pt *protoregistry.Types
+	commonFiles *protoregistry.Files
 }
 
 // Serialize serializes the given behavior tree to textproto.
 func (t *textSerializer) Serialize(bt *btpb.BehaviorTree) ([]byte, error) {
+	files := *t.commonFiles
+
+	collector := fileDescriptorSetCollector{}
+	behaviortree.Walk(bt, &collector)
+
+	for _, fileDescriptorSet := range collector.fileDescriptorSets {
+		if err := addFileDescriptorSetToFiles(fileDescriptorSet, &files); err != nil {
+			return nil, errors.Wrap(err, "failed adding file descriptor set to files")
+		}
+	}
+
+	types := new(protoregistry.Types)
+	if err := registryutil.PopulateTypesFromFiles(types, &files); err != nil {
+		return nil, errors.Wrapf(err, "failed to populate types from files")
+	}
+
 	marshaller := prototext.MarshalOptions{
-		Resolver:  t.pt,
+		Resolver:  types,
 		Indent:    "  ",
 		Multiline: true,
 	}
@@ -128,22 +144,14 @@ func newTextSerializer(ctx context.Context, srC skillregistrygrpcpb.SkillRegistr
 		return nil, errors.Wrapf(err, "could not list skills")
 	}
 
-	r := new(protoregistry.Files)
+	files := new(protoregistry.Files)
 	for _, skill := range skills {
-		for _, parameterDescriptorFile := range skill.GetParameterDescription().GetParameterDescriptorFileset().GetFile() {
-			fd, err := protodesc.NewFile(parameterDescriptorFile, r)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to add file to registry")
-			}
-			r.RegisterFile(fd)
+		if err := addFileDescriptorSetToFiles(skill.GetParameterDescription().GetParameterDescriptorFileset(), files); err != nil {
+			return nil, errors.Wrap(err, "failed adding file descriptor set to files")
 		}
 	}
 
-	pt := new(protoregistry.Types)
-	if err := registryutil.PopulateTypesFromFiles(pt, r); err != nil {
-		return nil, errors.Wrapf(err, "failed to populate types from files")
-	}
-	return &textSerializer{pt: pt}, nil
+	return &textSerializer{commonFiles: files}, nil
 }
 
 type binarySerializer struct {

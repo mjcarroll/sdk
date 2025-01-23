@@ -19,7 +19,9 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protodesc"
 	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/reflect/protoregistry"
 	apb "intrinsic/executive/proto/annotations_go_proto"
 	btpb "intrinsic/executive/proto/behavior_tree_go_proto"
 	execgrpcpb "intrinsic/executive/proto/executive_service_go_grpc_proto"
@@ -220,6 +222,50 @@ func getSkills(ctx context.Context, srC skillregistrygrpcpb.SkillRegistryClient)
 		}
 	}
 	return skills, nil
+}
+
+// fileDescriptorSetCollector is a behavior tree visitor that collects all file descriptor sets in a
+// behavior tree.
+type fileDescriptorSetCollector struct {
+	fileDescriptorSets []*descriptorpb.FileDescriptorSet
+}
+
+func (c *fileDescriptorSetCollector) VisitCondition(cond *btpb.BehaviorTree_Condition) error {
+	return nil
+}
+
+func (c *fileDescriptorSetCollector) VisitNode(node *btpb.BehaviorTree_Node) error {
+	fileDescriptorSet := node.GetTask().GetExecuteCode().GetFileDescriptorSet()
+	if fileDescriptorSet != nil {
+		c.fileDescriptorSets = append(c.fileDescriptorSets, fileDescriptorSet)
+	}
+	return nil
+}
+
+func addFileDescriptorSetToFiles(fileDescriptorSet *descriptorpb.FileDescriptorSet, files *protoregistry.Files) error {
+	for _, fileDescriptor := range fileDescriptorSet.GetFile() {
+		file, err := protodesc.NewFile(fileDescriptor, files)
+		if err != nil {
+			return errors.Wrap(err, "failed creating file from file descriptor")
+		}
+		// Add file if not already present. The error returned by RegisterFile() below cannot easily be
+		// classified into "not found" vs "other error". So we check for the file's presence first using
+		// FindFileByPath() which does return a specific error for "not found".
+		fileExists := true
+		_, err = files.FindFileByPath(file.Path())
+		if errors.Is(err, protoregistry.NotFound) {
+			fileExists = false
+		} else if err != nil {
+			return errors.Wrap(err, "failed finding file by path")
+		}
+
+		if !fileExists {
+			if err = files.RegisterFile(file); err != nil {
+				return errors.Wrap(err, "failed registering file")
+			}
+		}
+	}
+	return nil
 }
 
 var processCmd = orgutil.WrapCmd(&cobra.Command{

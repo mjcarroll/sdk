@@ -12,6 +12,7 @@ go_library(
         "process_set.go",
     ],
     deps = [
+        "//intrinsic/executive/go:behaviortree",
         "//intrinsic/executive/proto:annotations_go_proto",
         "//intrinsic/executive/proto:behavior_tree_go_proto",
         "//intrinsic/executive/proto:executive_service_go_grpc_proto",
@@ -36,5 +37,6 @@ go_library(
         "@org_golang_google_protobuf//reflect/protodesc:go_default_library",
         "@org_golang_google_protobuf//reflect/protoreflect:go_default_library",
         "@org_golang_google_protobuf//reflect/protoregistry:go_default_library",
+        "@org_golang_google_protobuf//types/known/emptypb",
     ],
 )

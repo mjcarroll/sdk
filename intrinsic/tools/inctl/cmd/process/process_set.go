@@ -12,8 +12,10 @@ import (
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/prototext"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/reflect/protodesc"
+	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
+	"intrinsic/executive/go/behaviortree"
 	btpb "intrinsic/executive/proto/behavior_tree_go_proto"
 	execgrpcpb "intrinsic/executive/proto/executive_service_go_grpc_proto"
 	sgrpcpb "intrinsic/frontend/solution_service/proto/solution_service_go_grpc_proto"
@@ -25,6 +27,32 @@ import (
 
 var allowedSetFormats = []string{TextProtoFormat, BinaryProtoFormat}
 
+// resolverToEmpty is a dummy implementation of prototext.UnmarshalOptions.Resolver that always
+// returns the Empty message type for any type name or type URL.
+type resolverToEmpty struct {
+	empty *emptypb.Empty
+}
+
+func newResolverToEmpty() *resolverToEmpty {
+	return &resolverToEmpty{empty: &emptypb.Empty{}}
+}
+
+func (d *resolverToEmpty) FindMessageByName(message protoreflect.FullName) (protoreflect.MessageType, error) {
+	return d.empty.ProtoReflect().Type(), nil
+}
+
+func (d *resolverToEmpty) FindMessageByURL(url string) (protoreflect.MessageType, error) {
+	return d.empty.ProtoReflect().Type(), nil
+}
+
+func (d *resolverToEmpty) FindExtensionByName(field protoreflect.FullName) (protoreflect.ExtensionType, error) {
+	return nil, errors.New("dummyResolver.FindExtensionByName is not implemented")
+}
+
+func (d *resolverToEmpty) FindExtensionByNumber(message protoreflect.FullName, field protoreflect.FieldNumber) (protoreflect.ExtensionType, error) {
+	return nil, errors.New("dummyResolver.FindExtensionByNumber is not implemented")
+}
+
 type deserializer interface {
 	deserialize(ctx context.Context, content []byte) (*btpb.BehaviorTree, error)
 }
@@ -34,37 +62,66 @@ type textDeserializer struct {
 }
 
 func (t *textDeserializer) deserialize(ctx context.Context, content []byte) (*btpb.BehaviorTree, error) {
+	// Collect all file descriptor sets from skills.
 	skills, err := getSkills(ctx, t.srC)
 	if err != nil {
 		return nil, errors.Wrapf(err, "could not list skills")
 	}
 
-	r := new(protoregistry.Files)
+	files := new(protoregistry.Files)
 	for _, skill := range skills {
-		for _, parameterDescriptorFile := range skill.GetParameterDescription().GetParameterDescriptorFileset().GetFile() {
-			fd, err := protodesc.NewFile(parameterDescriptorFile, r)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to add file to registry")
-			}
-			r.RegisterFile(fd)
+		if err := addFileDescriptorSetToFiles(skill.GetParameterDescription().GetParameterDescriptorFileset(), files); err != nil {
+			return nil, errors.Wrap(err, "failed adding file descriptor set to files")
 		}
 	}
 
-	pt := new(protoregistry.Types)
-	if err := registryutil.PopulateTypesFromFiles(pt, r); err != nil {
+	// To unmarshal expanded Any protos in the given behavior tree correctly, we need all the file
+	// descriptor sets from the behavior tree. But to get the file descriptor sets from the behavior
+	// tree, we need to unmarshal it first. We solve this by unmarshalling the behavior tree in two
+	// passes.
+	//
+	// Pass 1: Unmarshal with a dummy resolver. All expanded Any protos are unmarshalled to empty
+	// messages (more precisely, to Any protos with a correct 'type_url' and empty 'data') but the
+	// file descriptor sets in the behavior tree are unmarshalled correctly.
+	dummyUnmarshaller := prototext.UnmarshalOptions{
+		Resolver:       newResolverToEmpty(),
+		AllowPartial:   true,
+		DiscardUnknown: true, // To unmarshal any text format to an Empty proto without errors
+	}
+
+	btWithEmptyAnys := &btpb.BehaviorTree{}
+	if err := dummyUnmarshaller.Unmarshal(content, btWithEmptyAnys); err != nil {
+		return nil, errors.Wrapf(err, "could not parse input file in first pass")
+	}
+
+	// Collect all file descriptor sets from the behavior tree.
+	collector := fileDescriptorSetCollector{}
+	behaviortree.Walk(btWithEmptyAnys, &collector)
+
+	for _, fileDescriptorSet := range collector.fileDescriptorSets {
+		if err := addFileDescriptorSetToFiles(fileDescriptorSet, files); err != nil {
+			return nil, errors.Wrap(err, "failed adding file descriptor set to files")
+		}
+	}
+
+	types := new(protoregistry.Types)
+	if err := registryutil.PopulateTypesFromFiles(types, files); err != nil {
 		return nil, errors.Wrapf(err, "failed to populate types from files")
 	}
 
+	// Pass 2: Unmarshal with a proper resolver that now uses the file descriptors sets from all
+	// skills and from the behavior tree.
 	unmarshaller := prototext.UnmarshalOptions{
-		Resolver:       pt,
+		Resolver:       types,
 		AllowPartial:   true,
 		DiscardUnknown: true,
 	}
 
 	bt := &btpb.BehaviorTree{}
 	if err := unmarshaller.Unmarshal(content, bt); err != nil {
-		return nil, errors.Wrapf(err, "could not parse input file")
+		return nil, errors.Wrapf(err, "could not parse input file in second pass")
 	}
+
 	return bt, nil
 }
 
