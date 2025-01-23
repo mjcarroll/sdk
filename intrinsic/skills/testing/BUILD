@@ -101,7 +101,6 @@ cc_library(
     srcs = ["no_op_skill.cc"],
     hdrs = ["no_op_skill.h"],
     visibility = [
-        "//intrinsic/performance/qa/apps:__pkg__",
         "//intrinsic/skills/build_defs/tests:__pkg__",
         "//intrinsic/skills/internal:__pkg__",
     ],
