@@ -3,6 +3,8 @@
 #ifndef INTRINSIC_ICON_HAL_INTERFACES_JOINT_COMMAND_UTILS_H_
 #define INTRINSIC_ICON_HAL_INTERFACES_JOINT_COMMAND_UTILS_H_
 
+#include <cstdint>
+
 #include "flatbuffers/detached_buffer.h"
 #include "intrinsic/icon/hal/interfaces/joint_command.fbs.h"
 #include "intrinsic/icon/utils/realtime_status.h"
