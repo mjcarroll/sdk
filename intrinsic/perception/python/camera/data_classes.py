@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import datetime
 from typing import Dict, List, Mapping, Optional, Tuple
+import warnings
 
 from intrinsic.math.python import pose3
 from intrinsic.math.python import proto_conversion as math_proto_conversion
@@ -207,7 +208,16 @@ class CameraConfig:
 
   @property
   def dimensions(self) -> Optional[Tuple[int, int]]:
-    """Intrinsic dimensions (width, height) of the first camera sensor."""
+    """Deprecated: Use the dimensions from the desired sensor config instead.
+
+    Intrinsic dimensions (width, height) of the first camera sensor.
+    """
+    warnings.warn(
+        "dimensions() is deprecated. Use the dimensions from the desired sensor"
+        " config instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     if self.sensor_configs:
       return self.sensor_configs[self._proto.sensor_configs[0].id].dimensions
     ip = self._proto.intrinsic_params
@@ -217,7 +227,16 @@ class CameraConfig:
 
   @property
   def intrinsic_matrix(self) -> Optional[np.ndarray]:
-    """Intrinsic matrix of the first camera sensor."""
+    """Deprecated: Use the intrinsic matrix from the desired sensor config instead.
+
+    Intrinsic matrix of the first camera sensor.
+    """
+    warnings.warn(
+        "intrinsic_matrix() is deprecated. Use the intrinsic matrix from the"
+        " desired sensor config instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     if self.sensor_configs:
       return self.sensor_configs[
           self._proto.sensor_configs[0].id
@@ -229,7 +248,17 @@ class CameraConfig:
 
   @property
   def distortion_params(self) -> Optional[np.ndarray]:
-    """Distortion params of the first camera sensor; (k1, k2, p1, p2, k3, [k4, k5, k6]) or None."""
+    """Deprecated: Use the distortion parameters from the desired sensor config instead.
+
+    Distortion params of the first camera sensor; (k1, k2, p1, p2, k3, [k4, k5,
+    k6]) or None.
+    """
+    warnings.warn(
+        "distortion_params() is deprecated. Use the distortion parameters from"
+        " the desired sensor config instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     if self.sensor_configs:
       return self.sensor_configs[
           self._proto.sensor_configs[0].id

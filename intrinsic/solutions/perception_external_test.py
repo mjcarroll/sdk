@@ -12,7 +12,7 @@ class CamerasTest(absltest.TestCase):
   def test_camera_init_smoke(self):
     _ = perception.Camera(
         channel=mock.MagicMock(),
-        handle=mock.MagicMock(),
+        resource_handle=mock.MagicMock(),
         resource_registry=mock.MagicMock(),
         executive=mock.MagicMock(),
         is_simulated=False,

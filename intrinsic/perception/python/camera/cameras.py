@@ -5,49 +5,25 @@
 from __future__ import annotations
 
 import datetime
-from typing import List, Mapping, Optional, Tuple, Union
+from typing import List, Mapping, Optional, Tuple, Union, cast
+import warnings
 
 from absl import logging
 from google.protobuf import empty_pb2
 import grpc
 from intrinsic.hardware.proto import settings_pb2
 from intrinsic.math.python import pose3
-from intrinsic.perception.proto import camera_config_pb2
+from intrinsic.perception.python.camera import _camera_utils
 from intrinsic.perception.python.camera import camera_client
 from intrinsic.perception.python.camera import data_classes
+from intrinsic.resources.client import resource_registry_client
 from intrinsic.resources.proto import resource_handle_pb2
 from intrinsic.skills.proto import equipment_pb2
-from intrinsic.skills.python import proto_utils
 from intrinsic.skills.python import skill_interface
 from intrinsic.util.grpc import connection
 from intrinsic.world.python import object_world_client
 from intrinsic.world.python import object_world_resources
 import numpy as np
-
-_CONFIG_EQUIPMENT_IDENTIFIER = "CameraConfig"
-
-
-def _unpack_camera_config(
-    camera_equipment: resource_handle_pb2.ResourceHandle,
-) -> Optional[camera_config_pb2.CameraConfig]:
-  """Returns the camera config from a camera resource handle or None if equipment is not a camera."""
-  data: Mapping[str, resource_handle_pb2.ResourceHandle.ResourceData] = (
-      camera_equipment.resource_data
-  )
-  config = None
-  if _CONFIG_EQUIPMENT_IDENTIFIER in data:
-    config = data[_CONFIG_EQUIPMENT_IDENTIFIER]
-
-  if config is None:
-    return None
-
-  try:
-    camera_config = camera_config_pb2.CameraConfig()
-    proto_utils.unpack_any(config.contents, camera_config)
-  except TypeError:
-    return None
-
-  return camera_config
 
 
 def make_camera_resource_selector() -> equipment_pb2.ResourceSelector:
@@ -60,7 +36,7 @@ def make_camera_resource_selector() -> equipment_pb2.ResourceSelector:
   """
   return equipment_pb2.ResourceSelector(
       capability_names=[
-          _CONFIG_EQUIPMENT_IDENTIFIER,
+          _camera_utils.CAMERA_RESOURCE_CAPABILITY,
       ]
   )
 
@@ -110,10 +86,11 @@ class Camera:
     ...
   """
 
-  _camera_equipment: resource_handle_pb2.ResourceHandle
-  _world_client: Optional[object_world_client.ObjectWorldClient]
-  _world_object: Optional[object_world_resources.WorldObject]
   _client: camera_client.CameraClient
+  _resource_registry: Optional[resource_registry_client.ResourceRegistryClient]
+  _world_client: Optional[object_world_client.ObjectWorldClient]
+  _resource_handle: resource_handle_pb2.ResourceHandle
+  _world_object: Optional[object_world_resources.WorldObject]
   _sensor_id_to_name: Mapping[int, str]
 
   config: data_classes.CameraConfig
@@ -136,78 +113,139 @@ class Camera:
     Returns:
       A connected Camera object with sensor information cached.
     """
-    camera_equipment = context.resource_handles[slot]
+    resource_handle = context.resource_handles[slot]
     world_client = context.object_world
-
-    return cls(
-        camera_equipment=camera_equipment,
+    return cls.create_from_resource_handle(
+        resource_handle=resource_handle,
         world_client=world_client,
     )
 
   @classmethod
+  def create_from_resource_registry(
+      cls,
+      resource_registry: resource_registry_client.ResourceRegistryClient,
+      resource_name: str,
+      world_client: Optional[object_world_client.ObjectWorldClient] = None,
+      channel: Optional[grpc.Channel] = None,
+      channel_creds: Optional[grpc.ChannelCredentials] = None,
+  ) -> Camera:
+    """Creates a Camera object from the given resource registry and resource name.
+
+    Args:
+      resource_registry: The resource registry client.
+      resource_name: The resource name of the camera.
+      world_client: Optional. The current world client, for camera pose
+        information.
+      channel: Optional. The gRPC channel to the camera service.
+      channel_creds: Optional. The gRPC channel credentials to use for the
+        connection.
+
+    Returns:
+      A connected Camera object with sensor information cached. If no object or
+      world information is available, an identity pose will be used for
+      world_t_camera and all the world update methods will be a no-op.
+    """
+    resource_handle = resource_registry.get_resource_instance(
+        resource_name
+    ).resource_handle
+    return cls.create_from_resource_handle(
+        resource_handle=resource_handle,
+        world_client=world_client,
+        resource_registry=resource_registry,
+        channel=channel,
+        channel_creds=channel_creds,
+    )
+
+  @classmethod
   def create_from_resource_handle(
-      cls, resource_handle: resource_handle_pb2.ResourceHandle
+      cls,
+      resource_handle: resource_handle_pb2.ResourceHandle,
+      world_client: Optional[object_world_client.ObjectWorldClient] = None,
+      resource_registry: Optional[
+          resource_registry_client.ResourceRegistryClient
+      ] = None,
+      channel: Optional[grpc.Channel] = None,
+      channel_creds: Optional[grpc.ChannelCredentials] = None,
   ) -> Camera:
     """Creates a Camera object from the given resource handle.
 
     Args:
       resource_handle: The resource handle with which to connect to the camera.
+      world_client: Optional. The current world client, for camera pose
+        information.
+      resource_registry: Optional. The resource registry client.
+      channel: Optional. The gRPC channel to the camera service.
+      channel_creds: Optional. The gRPC channel credentials to use for the
+        connection.
 
     Returns:
-      A connected Camera object with sensor information cached. No object or
-      world information is available, so an identity pose will be used for
+      A connected Camera object with sensor information cached. If no object or
+      world information is available, an identity pose will be used for
       world_t_camera and all the world update methods will be a no-op.
     """
-    camera_equipment = resource_handle
-
+    if channel is None:
+      channel = _camera_utils.initialize_camera_grpc_channel(
+          resource_handle,
+          channel_creds,
+      )
     return cls(
-        camera_equipment=camera_equipment,
+        channel=channel,
+        resource_handle=resource_handle,
+        resource_registry=resource_registry,
+        world_client=world_client,
     )
 
   def __init__(
       self,
-      camera_equipment: resource_handle_pb2.ResourceHandle,
+      channel: grpc.Channel,
+      resource_handle: resource_handle_pb2.ResourceHandle,
+      resource_registry: Optional[
+          resource_registry_client.ResourceRegistryClient
+      ] = None,
       world_client: Optional[object_world_client.ObjectWorldClient] = None,
   ):
     """Creates a Camera object from the given camera equipment and world.
 
     Args:
-      camera_equipment: The resource handle with which to connect to the camera.
-      world_client: The current world client, for camera pose information.
+      channel: The gRPC channel to the camera service.
+      resource_handle: The resource handle with which to connect to the camera.
+      resource_registry: Optional. The resource registry client.
+      world_client: Optional. The current world client, for camera pose
+        information.
 
     Raises:
       RuntimeError: The camera's config could not be parsed from the
         resource handle.
     """
-    self._camera_equipment = camera_equipment
+    self._resource_registry = resource_registry
     self._world_client = world_client
+    self._resource_handle = resource_handle
     self._world_object = (
-        self._world_client.get_object(camera_equipment)
+        self._world_client.get_object(resource_handle)
         if self._world_client
         else None
     )
     self._sensor_id_to_name = {}
 
-    # use unlimited message size for receiving images (e.g. -1)
-    options = [("grpc.max_receive_message_length", -1)]
-    grpc_info = camera_equipment.connection_info.grpc
-    camera_channel = grpc.insecure_channel(grpc_info.address, options=options)
-    connection_params = connection.ConnectionParams(
-        grpc_info.address, grpc_info.server_instance, grpc_info.header
-    )
-
     # parse config
-    camera_config = _unpack_camera_config(self._camera_equipment)
+    camera_config = _camera_utils.unpack_camera_config(self._resource_handle)
     if not camera_config:
-      raise RuntimeError("Could not parse camera config from resource handle.")
-
-    self._client = camera_client.CameraClient(
-        camera_channel, connection_params, camera_config
-    )
-
+      raise RuntimeError(
+          "Could not parse camera config from resource handle: %s."
+          % self.resource_name
+      )
     self.config = data_classes.CameraConfig(camera_config)
     self.factory_config = None
     self.factory_sensor_info = {}
+
+    # create camera client
+    grpc_info = resource_handle.connection_info.grpc
+    connection_params = connection.ConnectionParams(
+        grpc_info.address, grpc_info.server_instance, grpc_info.header
+    )
+    self._client = camera_client.CameraClient(
+        channel, connection_params, camera_config
+    )
 
     # attempt to describe cameras to get factory configurations
     try:
@@ -227,8 +265,36 @@ class Camera:
           sensor_info.sensor_id: sensor_name
           for sensor_name, sensor_info in self.factory_sensor_info.items()
       }
-    except grpc.RpcError:
-      logging.warning("Could not load factory configuration.")
+    except grpc.RpcError as e:
+      logging.warning("Could not load factory configuration: %s", e)
+
+    if not self.created:
+      self._client.create_camera(camera_config)
+
+  def _reinitialize(
+      self,
+      error: grpc.RpcError,
+      deadline: Optional[datetime.datetime] = None,
+  ) -> None:
+    """Create camera handle from resources."""
+    if self._resource_registry is not None:
+      self._resource_handle = self._resource_registry.get_resource_instance(
+          self.resource_name
+      ).resource_handle
+      camera_config = _camera_utils.unpack_camera_config(
+          self._resource_handle.resource_data
+      )
+      if camera_config is None:
+        raise ValueError(
+            "CameraConfig not found in resource handle %s" % self.resource_name
+        ) from error
+      self.config = data_classes.CameraConfig(camera_config)
+    self._client.create_camera(self.config.proto, deadline=deadline)
+
+  @property
+  def created(self) -> bool:
+    """Returns whether the camera client is created."""
+    return self._client.created
 
   @property
   def identifier(self) -> Optional[str]:
@@ -237,12 +303,38 @@ class Camera:
 
   @property
   def equipment_name(self) -> str:
-    """Camera equipment name."""
-    return self._camera_equipment.name
+    """Deprecated: Use resource_name instead.
+
+    Camera equipment name.
+    """
+    warnings.warn(
+        "equipment_name() is deprecated. Use resource_name() instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return self._resource_handle.name
+
+  @property
+  def resource_name(self) -> str:
+    """Camera resource name."""
+    return self._resource_handle.name
+
+  @property
+  def resource_handle(self) -> resource_handle_pb2.ResourceHandle:
+    """Camera resource handle."""
+    return self._resource_handle
 
   @property
   def dimensions(self) -> Optional[Tuple[int, int]]:
-    """Camera intrinsic dimensions (width, height)."""
+    """Deprecated: Use the sensor_dimensions property instead.
+
+    Camera intrinsic dimensions (width, height).
+    """
+    warnings.warn(
+        "dimensions() is deprecated. Use sensor_dimensions() instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return self.config.dimensions
 
   @property
@@ -253,10 +345,12 @@ class Camera:
   @property
   def sensor_ids(self) -> List[int]:
     """List of sensor ids."""
-    return [
-        sensor_info.sensor_id
-        for _, sensor_info in self.factory_sensor_info.items()
-    ]
+    return list(self.sensor_id_to_name.keys())
+
+  @property
+  def sensor_id_to_name(self) -> Mapping[int, str]:
+    """Mapping of sensor ids to sensor names."""
+    return self._sensor_id_to_name
 
   @property
   def sensor_dimensions(self) -> Mapping[str, Tuple[int, int]]:
@@ -267,18 +361,25 @@ class Camera:
     }
 
   def intrinsic_matrix(
-      self, sensor_name: Optional[str] = None
+      self,
+      sensor_name: Optional[str] = None,
   ) -> Optional[np.ndarray]:
     """Get the camera intrinsic matrix or that of a specific sensor (for multisensor cameras), falling back to factory settings or the camera intrinsic matrix if intrinsic params are missing from the requested sensor config.
 
     Args:
       sensor_name: The desired sensor name, or None for the camera intrinsic
-        matrix.
+        matrix (deprecated).
 
     Returns:
       The sensor's intrinsic matrix or None if it couldn't be found.
     """
     if sensor_name is None:
+      warnings.warn(
+          "Calling camera.intrinsic_matrix() without a sensor name is"
+          " deprecated. Please provide a sensor name.",
+          DeprecationWarning,
+          stacklevel=2,
+      )
       return self.config.intrinsic_matrix
 
     if sensor_name not in self.factory_sensor_info:
@@ -298,22 +399,29 @@ class Camera:
       factory_camera_params = sensor_info.factory_camera_params
       if factory_camera_params is not None:
         return factory_camera_params.intrinsic_matrix
-    return self.config.intrinsic_matrix
+    return None
 
   def distortion_params(
-      self, sensor_name: Optional[str] = None
+      self,
+      sensor_name: Optional[str] = None,
   ) -> Optional[np.ndarray]:
     """Get the camera distortion params or that of a specific sensor (for multisensor cameras), falling back to factory settings if distortion params are missing from the sensor config.
 
     Args:
       sensor_name: The desired sensor name, or None for the camera distortion
-        params.
+        params (deprecated).
 
     Returns:
       The distortion params (k1, k2, p1, p2, k3, [k4, k5, k6]) or None if it
         couldn't be found.
     """
     if sensor_name is None:
+      warnings.warn(
+          "Calling camera.distortion_params() without a sensor name is"
+          " deprecated. Please provide a sensor name.",
+          DeprecationWarning,
+          stacklevel=2,
+      )
       return self.config.distortion_params
 
     if sensor_name not in self.factory_sensor_info:
@@ -333,7 +441,7 @@ class Camera:
       factory_camera_params = sensor_info.factory_camera_params
       if factory_camera_params is not None:
         return factory_camera_params.distortion_params
-    return self.config.distortion_params
+    return None
 
   @property
   def world_object(self) -> Optional[object_world_resources.WorldObject]:
@@ -344,6 +452,7 @@ class Camera:
   def world_t_camera(self) -> pose3.Pose3:
     """Camera world pose."""
     if self._world_client is None:
+      logging.warning("World client is None, returning identity pose.")
       return pose3.Pose3()
     return self._world_client.get_transform(
         node_a=self._world_client.root,
@@ -448,10 +557,40 @@ class Camera:
         node_to_update=self._world_object,
     )
 
+  def _capture(
+      self,
+      timeout: Optional[datetime.timedelta] = None,
+      deadline: Optional[datetime.datetime] = None,
+      sensor_ids: Optional[List[int]] = None,
+      skip_undistortion: bool = False,
+  ) -> data_classes.CaptureResult:
+    """Capture from the camera and return a CaptureResult."""
+    deadline = deadline or (
+        datetime.datetime.now() + timeout if timeout is not None else None
+    )
+    try:
+      capture_result_proto = self._client.capture(
+          timeout=timeout,
+          deadline=deadline,
+          sensor_ids=sensor_ids,
+          skip_undistortion=skip_undistortion,
+      )
+      return data_classes.CaptureResult(
+          capture_result_proto, self._sensor_id_to_name, self.world_t_camera
+      )
+    except grpc.RpcError as e:
+      if cast(grpc.Call, e).code() != grpc.StatusCode.NOT_FOUND:
+        raise
+      # If the camera was not found, recreate the camera. This can happen when
+      # switching between sim/real or when a service restarts.
+      self._reinitialize(e, deadline)
+      return self._capture(timeout, deadline, sensor_ids, skip_undistortion)
+
   def capture(
       self,
       sensor_name: Optional[str] = None,
       timeout: Optional[datetime.timedelta] = None,
+      skip_undistortion: bool = False,
   ) -> data_classes.SensorImage:
     """Capture from the camera and return a SensorImage from the selected sensor or the primary sensor if None.
 
@@ -469,6 +608,7 @@ class Camera:
         case of intermittent network errors users can try to increase the
         timeout. The default timeout (if None) of 500 ms works well in common
         setups.
+      skip_undistortion: Whether to skip undistortion.
 
     Returns:
       A SensorImage from the selected sensor.
@@ -491,11 +631,10 @@ class Camera:
       else:
         sensor_ids = None
 
-      capture_result_proto = self._client.capture(
-          timeout=timeout, sensor_ids=sensor_ids
-      )
-      capture_result = data_classes.CaptureResult(
-          capture_result_proto, self._sensor_id_to_name, self.world_t_camera
+      capture_result = self._capture(
+          timeout=timeout,
+          sensor_ids=sensor_ids,
+          skip_undistortion=skip_undistortion,
       )
       first_sensor_name = capture_result.sensor_names[0]
       return capture_result.sensor_images[first_sensor_name]
@@ -507,14 +646,15 @@ class Camera:
       self,
       sensor_names: Optional[List[str]] = None,
       timeout: Optional[datetime.timedelta] = None,
+      skip_undistortion: bool = False,
   ) -> data_classes.CaptureResult:
     """Capture from the camera and return a CaptureResult.
 
     Args:
       sensor_names: An optional list of sensor names that will be transmitted in
         the response, if data was collected for them. This acts as a mask to
-        limit the number of transmitted `SensorImage`s. If it is None, all
-        `SensorImage`s will be transferred.
+        limit the number of transmitted `SensorImage`s. If it is None or empty,
+        all `SensorImage`s will be transferred.
       timeout: An optional timeout which is used for retrieving sensor images
         from the underlying driver implementation. If this timeout is
         implemented by the underlying camera driver, it will not spend more than
@@ -526,6 +666,7 @@ class Camera:
         case of intermittent network errors users can try to increase the
         timeout. The default timeout (if None) of 500 ms works well in common
         setups.
+      skip_undistortion: Whether to skip undistortion.
 
     Returns:
       A CaptureResult which contains the selected sensor images.
@@ -551,11 +692,10 @@ class Camera:
       else:
         sensor_ids = None
 
-      capture_result_proto = self._client.capture(
-          timeout=timeout, sensor_ids=sensor_ids
-      )
-      return data_classes.CaptureResult(
-          capture_result_proto, self._sensor_id_to_name, self.world_t_camera
+      return self._capture(
+          timeout=timeout,
+          sensor_ids=sensor_ids,
+          skip_undistortion=skip_undistortion,
       )
     except grpc.RpcError as e:
       logging.warning("Could not capture from camera.")

@@ -4,13 +4,19 @@
 
 from __future__ import annotations
 
-from typing import Optional, Tuple
+from typing import Mapping, Optional, Tuple
 
+from absl import logging
+import grpc
 from intrinsic.perception.proto import camera_config_pb2
 from intrinsic.perception.proto import dimensions_pb2
 from intrinsic.perception.proto import distortion_params_pb2
 from intrinsic.perception.proto import intrinsic_params_pb2
+from intrinsic.resources.proto import resource_handle_pb2
+from intrinsic.skills.python import proto_utils
 import numpy as np
+
+CAMERA_RESOURCE_CAPABILITY = "CameraConfig"
 
 
 def extract_identifier(config: camera_config_pb2.CameraConfig) -> Optional[str]:
@@ -67,3 +73,42 @@ def extract_distortion_params(
     return np.array([dp.k1, dp.k2, dp.p1, dp.p2, dp.k3, dp.k4, dp.k5, dp.k6])
   else:
     return np.array([dp.k1, dp.k2, dp.p1, dp.p2, dp.k3])
+
+
+def unpack_camera_config(
+    resource_handle: resource_handle_pb2.ResourceHandle,
+) -> Optional[camera_config_pb2.CameraConfig]:
+  """Returns the camera config from a camera resource handle or None if equipment is not a camera."""
+  data: Mapping[str, resource_handle_pb2.ResourceHandle.ResourceData] = (
+      resource_handle.resource_data
+  )
+  config = data.get(CAMERA_RESOURCE_CAPABILITY, None)
+
+  if config is None:
+    return None
+
+  try:
+    camera_config = camera_config_pb2.CameraConfig()
+    proto_utils.unpack_any(config.contents, camera_config)
+  except TypeError as e:
+    logging.exception("Failed to unpack camera config: %s", e)
+    return None
+
+  return camera_config
+
+
+def initialize_camera_grpc_channel(
+    resource_handle: resource_handle_pb2.ResourceHandle,
+    channel_creds: Optional[grpc.ChannelCredentials] = None,
+) -> grpc.Channel:
+  """Initializes a gRPC channel to the camera service."""
+  # use unlimited message size for receiving images (e.g. -1)
+  options = [("grpc.max_receive_message_length", -1)]
+  grpc_info = resource_handle.connection_info.grpc
+  if channel_creds is not None:
+    channel = grpc.secure_channel(
+        grpc_info.address, channel_creds, options=options
+    )
+  else:
+    channel = grpc.insecure_channel(grpc_info.address, options=options)
+  return channel

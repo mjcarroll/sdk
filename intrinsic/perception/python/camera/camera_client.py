@@ -14,6 +14,7 @@ from intrinsic.perception.proto import capture_result_pb2
 from intrinsic.perception.service.proto import camera_server_pb2
 from intrinsic.perception.service.proto import camera_server_pb2_grpc
 from intrinsic.util.grpc import connection
+from intrinsic.util.grpc import error_handling
 from intrinsic.util.grpc import interceptor
 
 
@@ -26,7 +27,7 @@ class CameraClient:
 
   camera_config: camera_config_pb2.CameraConfig
   _camera_stub: camera_server_pb2_grpc.CameraServerStub
-  _camera_handle: str
+  _camera_handle: Optional[str]
 
   def __init__(
       self,
@@ -36,6 +37,7 @@ class CameraClient:
   ):
     """Creates a CameraClient object."""
     self.camera_config = camera_config
+    self._camera_handle = None
 
     # Create stub.
     intercepted_camera_channel = grpc.intercept_channel(
@@ -46,13 +48,59 @@ class CameraClient:
         intercepted_camera_channel
     )
 
-    # Access a camera instance.
+  @property
+  def created(self) -> bool:
+    """Returns whether the camera client is created."""
+    return self._camera_handle is not None
+
+  def reset(
+      self,
+      camera_config: camera_config_pb2.CameraConfig,
+  ):
+    """Resets the camera client to be created on the next API call."""
+    self.camera_config = camera_config
+    self._camera_handle = None
+
+  def create_camera(
+      self,
+      camera_config: camera_config_pb2.CameraConfig,
+      timeout: Optional[datetime.timedelta] = None,
+      deadline: Optional[datetime.datetime] = None,
+  ) -> str:
+    """Creates a camera instance."""
+    deadline = deadline or (
+        datetime.datetime.now() + timeout if timeout is not None else None
+    )
+    self.reset(camera_config)
+    return self._create_camera(deadline)
+
+  def _create_camera(
+      self,
+      deadline: Optional[datetime.datetime] = None,
+  ) -> str:
+    """Initializes the camera handle."""
+    handle = self._create_camera_with_retry(self.camera_config, deadline)
+    if not handle:
+      raise grpc.RpcError(
+          grpc.StatusCode.FAILED_PRECONDITION, "Could not create camera handle."
+      )
+    self._camera_handle = handle
+    return handle
+
+  @error_handling.retry_on_grpc_unavailable
+  def _create_camera_with_retry(
+      self,
+      camera_config: camera_config_pb2.CameraConfig,
+      deadline: Optional[datetime.datetime] = None,
+  ) -> Optional[str]:
+    """Creates a camera instance."""
+    if deadline is not None:
+      timeout = deadline - datetime.datetime.now()
+      if timeout <= datetime.timedelta(seconds=0):
+        raise grpc.RpcError(grpc.StatusCode.DEADLINE_EXCEEDED)
     request = camera_server_pb2.CreateCameraRequest(camera_config=camera_config)
     response = self._camera_stub.CreateCamera(request)
-    self._camera_handle = response.camera_handle
-
-    if not self._camera_handle:
-      raise RuntimeError("Could not create camera.")
+    return response.camera_handle or None
 
   def describe_camera(
       self,
@@ -66,6 +114,9 @@ class CameraClient:
     Raises:
       grpc.RpcError: A gRPC error occurred.
     """
+    if self._camera_handle is None:
+      self._create_camera()
+
     request = camera_server_pb2.DescribeCameraRequest(
         camera_handle=self._camera_handle
     )
@@ -75,7 +126,9 @@ class CameraClient:
   def capture(
       self,
       timeout: Optional[datetime.timedelta] = None,
+      deadline: Optional[datetime.datetime] = None,
       sensor_ids: Optional[List[int]] = None,
+      skip_undistortion: bool = False,
   ) -> capture_result_pb2.CaptureResult:
     """Captures image data from the requested sensors of the specified camera.
 
@@ -90,8 +143,11 @@ class CameraClient:
         of intermittent network errors users can try to increase the timeout.
         The default timeout (if unspecified) of 500 ms works well in common
         setups.
+      deadline: Optional. The deadline corresponding to the timeout. This takes
+        priority over the timeout.
       sensor_ids: Optional. Request data only for the following sensor ids (i.e.
         transmit mask). Empty returns all sensor images.
+      skip_undistortion: Whether to skip undistortion.
 
     Returns:
       A capture_result_pb2.CaptureResult with the requested sensor images.
@@ -99,14 +155,42 @@ class CameraClient:
     Raises:
       grpc.RpcError: A gRPC error occurred.
     """
+    deadline = deadline or (
+        datetime.datetime.now() + timeout if timeout is not None else None
+    )
+    sensor_ids = sensor_ids or []
+
+    if self._camera_handle is None:
+      self._create_camera(deadline=deadline)
+    return self._capture(deadline, sensor_ids, skip_undistortion)
+
+  @error_handling.retry_on_grpc_unavailable
+  def _capture(
+      self,
+      deadline: Optional[datetime.datetime],
+      sensor_ids: List[int],
+      skip_undistortion: bool,
+  ) -> capture_result_pb2.CaptureResult:
+    """Captures image data from the requested sensors of the specified camera."""
+    timeout = None
+    if deadline is not None:
+      timeout = deadline - datetime.datetime.now()
+      if timeout <= datetime.timedelta(seconds=0):
+        raise grpc.RpcError(grpc.StatusCode.DEADLINE_EXCEEDED)
     request = camera_server_pb2.CaptureRequest(
         camera_handle=self._camera_handle
     )
     if timeout is not None:
       request.timeout.FromTimedelta(timeout)
-    if sensor_ids is not None:
-      request.sensor_ids[:] = sensor_ids
-    response = self._camera_stub.Capture(request)
+    request.sensor_ids[:] = sensor_ids
+    request.post_processing.skip_undistortion = skip_undistortion
+    if timeout is not None:
+      response, _ = self._camera_stub.Capture.with_call(
+          request,
+          timeout=timeout.seconds,
+      )
+    else:
+      response = self._camera_stub.Capture(request)
     return response.capture_result
 
   def read_camera_setting_properties(
@@ -132,6 +216,9 @@ class CameraClient:
     Raises:
       grpc.RpcError: A gRPC error occurred.
     """
+    if self._camera_handle is None:
+      self._create_camera()
+
     request = camera_server_pb2.ReadCameraSettingPropertiesRequest(
         camera_handle=self._camera_handle,
         name=name,
@@ -157,6 +244,9 @@ class CameraClient:
     Raises:
       grpc.RpcError: A gRPC error occurred.
     """
+    if self._camera_handle is None:
+      self._create_camera()
+
     request = camera_server_pb2.ReadCameraSettingRequest(
         camera_handle=self._camera_handle,
         name=name,
@@ -181,6 +271,9 @@ class CameraClient:
     Raises:
       grpc.RpcError: A gRPC error occurred.
     """
+    if self._camera_handle is None:
+      self._create_camera()
+
     request = camera_server_pb2.UpdateCameraSettingRequest(
         camera_handle=self._camera_handle,
         setting=setting,
