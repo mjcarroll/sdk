@@ -3,7 +3,6 @@
 #include "intrinsic/icon/control/c_api/wrappers/string_wrapper.h"
 
 #include <cstring>
-#include <string>
 
 #include "absl/strings/string_view.h"
 #include "intrinsic/icon/control/c_api/c_types.h"
