@@ -3,7 +3,6 @@
 #include "intrinsic/world/objects/object_world_client_utils.h"
 
 #include <optional>
-#include <type_traits>
 
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
