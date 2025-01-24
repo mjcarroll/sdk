@@ -153,3 +153,16 @@ py_library(
         "@com_google_absl_py//absl/logging",
     ],
 )
+
+proto_library(
+    name = "schmalz_multi_axis_grasp_proto",
+    srcs = ["schmalz_multi_axis_grasp.proto"],
+    visibility = ["//intrinsic:public_api_users"],
+    deps = ["//intrinsic/math/proto:pose_proto"],
+)
+
+py_proto_library(
+    name = "schmalz_multi_axis_grasp_py_pb2",
+    visibility = ["//intrinsic:public_api_users"],
+    deps = [":schmalz_multi_axis_grasp_proto"],
+)

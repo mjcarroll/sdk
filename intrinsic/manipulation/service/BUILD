@@ -60,3 +60,24 @@ py_grpc_library(
     grpc_library = requirement("grpcio"),
     deps = [":grasp_annotator_service_py_pb2"],
 )
+
+proto_library(
+    name = "multi_axis_auto_annotator_service_proto",
+    srcs = ["multi_axis_auto_annotator_service.proto"],
+    deps = [
+        "//intrinsic/geometry/proto:triangle_mesh_proto",
+        "//intrinsic/manipulation/grasping:schmalz_multi_axis_grasp_proto",
+    ],
+)
+
+py_proto_library(
+    name = "multi_axis_auto_annotator_service_py_pb2",
+    deps = [":multi_axis_auto_annotator_service_proto"],
+)
+
+py_grpc_library(
+    name = "multi_axis_auto_annotator_service_py_pb2_grpc",
+    srcs = [":multi_axis_auto_annotator_service_proto"],
+    grpc_library = requirement("grpcio"),
+    deps = [":multi_axis_auto_annotator_service_py_pb2"],
+)
