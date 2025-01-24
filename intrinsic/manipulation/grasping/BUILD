@@ -166,3 +166,15 @@ py_proto_library(
     visibility = ["//intrinsic:public_api_users"],
     deps = [":schmalz_multi_axis_grasp_proto"],
 )
+
+py_library(
+    name = "multi_axis_auto_annotator_client",
+    srcs = ["multi_axis_auto_annotator_client.py"],
+    deps = [
+        ":schmalz_multi_axis_grasp_py_pb2",
+        "//intrinsic/manipulation/service:multi_axis_auto_annotator_service_py_pb2",
+        "//intrinsic/manipulation/service:multi_axis_auto_annotator_service_py_pb2_grpc",
+        requirement("grpcio"),
+        "@com_google_absl_py//absl/logging",
+    ],
+)
