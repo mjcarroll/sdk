@@ -248,10 +248,6 @@ class HardwareModuleRuntime::CallbackHandler final {
 
   // Server callback for trigger `ReadStatus` on the hardware module.
   void OnReadStatus() INTRINSIC_CHECK_REALTIME_SAFE {
-    // Logs realtime metrics on creation and destruction.
-    ReadStatusScope read_status_scope(
-        metrics_helper_, /*is_active=*/hardware_module_state_code_ ==
-                             intrinsic_fbs::StateCode::kMotionEnabled);
     // The HWM state must only be written in the RT thread, when the HWM is
     // activated. Therefore, the processing of requests must take place in this
     // function, which is always called when the HWM is activated.
@@ -266,6 +262,13 @@ class HardwareModuleRuntime::CallbackHandler final {
     CheckAndTriggerEnabledTransitionHook(
         previous_cycle_hardware_module_state_code_,
         hardware_module_state_code_);
+
+    // Logs realtime metrics on creation and destruction.
+    // After the potential metrics reset
+    // in`CheckAndTriggerEnabledTransitionHook`.
+    ReadStatusScope read_status_scope(
+        metrics_helper_, /*is_active=*/hardware_module_state_code_ ==
+                             intrinsic_fbs::StateCode::kMotionEnabled);
 
     if (auto ret = instance_->ReadStatus();
         !ret.ok() && hardware_module_state_code_ !=
