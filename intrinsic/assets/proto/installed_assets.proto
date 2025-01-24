@@ -61,7 +61,11 @@ service InstalledAssets {
 
 message ListInstalledAssetsRequest {
   message Filter {
-    optional AssetType asset_type = 1;
+    // Deprecated: use asset_types instead.
+    optional AssetType asset_type = 1 [deprecated = true];
+
+    // Filter assets by type (OR).
+    repeated AssetType asset_types = 2;
   }
 
   int64 page_size = 1;
