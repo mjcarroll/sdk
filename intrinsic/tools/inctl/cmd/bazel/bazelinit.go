@@ -22,10 +22,11 @@ import (
 var embeddedTemplates embed.FS
 
 const (
-	keySDKRepository = "sdk_repository"
-	keyLocalSDKPath  = "local_sdk_path"
-	keyOverride      = "override"
-	keyBazelrcOnly   = "bazelrc_only"
+	keySDKRepository     = "sdk_repository"
+	keyLocalSDKPath      = "local_sdk_path"
+	keyOverride          = "override"
+	keyBazelrcOnly       = "bazelrc_only"
+	defaultSDKRepository = "https://github.com/intrinsic-ai/sdk.git"
 )
 
 var (
@@ -113,6 +114,12 @@ func RunInitCmd(params *InitCmdParams) (InitSuccessMessage, error) {
 	}
 
 	SDKStripPrefix := "sdk-" + SDKVersion + "/"
+
+	// Local SDK path takes precedence over the SDK repository.
+	if params.LocalSDKPath != "" {
+		SDKRepository = ""
+		SDKVersion = ""
+	}
 
 	templateParams := &templateParams{
 		WorkspaceName:          filepath.Base(workspaceRoot),
@@ -221,13 +228,6 @@ $ inctl bazel init --sdk_repository=<repo url> --bazelrc-only --override
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, _ []string) error {
 
-		if flagLocalSDKPath == "" && flagSDKRepository == "" {
-			// Cobra does not (yet) support "mutualExclusiveButRequired" flag groups so we need to make
-			// that check manually (https://github.com/spf13/cobra/issues/1216).
-			// Only report --sdk_repository as missing because the local sdk path flag is internal/hidden.
-			return fmt.Errorf("missing required flag --%s", keySDKRepository)
-		}
-
 		params := &InitCmdParams{
 			WorkspaceRoot: flagWorkspaceRoot,
 			SdkRepository: flagSDKRepository,
@@ -258,9 +258,9 @@ func init() {
 		"which to initialize the Bazel workspace. Defaults to the current working directory. "+
 		"Can either be a relative path (to the current working directory) or an absolute filesystem "+
 		"path. Non-existing folders will be created automatically.")
-	initCmd.Flags().StringVar(&flagSDKRepository, keySDKRepository, "", "Git repository from which "+
-		"to fetch the Intrinsic SDK, e.g., "+
-		"\"https://github.com/intrinsic-ai/sdk.git\".")
+	initCmd.Flags().StringVar(&flagSDKRepository, keySDKRepository,
+		defaultSDKRepository,
+		"Git repository from which to fetch the Intrinsic SDK.")
 
 	// In the case that a development version of the SDK is used, we want to pin the workspace to the
 	// latest version of the SDK.  In released versions, the version.SDKVersion is set to the
@@ -276,15 +276,13 @@ func init() {
 		"pinned to a fixed version of the Intrinsic SDK but instead always depend on the newest "+
 		"version available in the SDK repository (see --sdk_repository).")
 	initCmd.Flags().StringVar(&flagLocalSDKPath, keyLocalSDKPath, "", "An absolute path to a local "+
-		"Intrinsic SDK folder.")
+		"Intrinsic SDK folder.  Overrides the --sdk_repository flag.")
 	initCmd.Flags().BoolVar(&flagDryRun, "dry_run", false, "(optional) If set, no files will be "+
 		"created or modified.")
 	initCmd.Flags().BoolVar(&flagOverride, keyOverride, false, "If set, existing workspace files will "+
 		"be overridden.")
 	initCmd.Flags().BoolVar(&flagBazelrcOnly, keyBazelrcOnly, false, "If set, only the .bazelrc "+
 		"file will be generated.")
-
-	initCmd.MarkFlagsMutuallyExclusive(keySDKRepository, keyLocalSDKPath)
 
 	// This flag is not intended to be used externally. We use it for testing against unreleased
 	// Intrinsic SDKs.
