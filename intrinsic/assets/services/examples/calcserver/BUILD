@@ -14,6 +14,17 @@ package(default_visibility = [
     "//visibility:public",
 ])
 
+exports_files(
+    srcs = [
+        "calc_default_config.textproto",
+        "calc_server.proto",
+    ],
+    visibility = [
+        "//intrinsic/resources/examples:__subpackages__",
+        "//visibility:public",
+    ],
+)
+
 proto_library(
     name = "calc_server_proto",
     srcs = ["calc_server.proto"],
