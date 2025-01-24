@@ -3,6 +3,7 @@
 #ifndef INTRINSIC_ICON_COMMON_STATE_VARIABLE_PATH_UTIL_H_
 #define INTRINSIC_ICON_COMMON_STATE_VARIABLE_PATH_UTIL_H_
 
+#include <cstddef>
 #include <optional>
 #include <string>
 

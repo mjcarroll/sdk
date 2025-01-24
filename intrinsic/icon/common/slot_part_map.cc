@@ -2,9 +2,6 @@
 
 #include "intrinsic/icon/common/slot_part_map.h"
 
-#include <string>
-#include <utility>
-
 #include "intrinsic/icon/proto/types.pb.h"
 
 namespace intrinsic::icon {
