@@ -9,6 +9,7 @@
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
 #include "grpcpp/channel.h"
+#include "intrinsic/util/grpc/channel_interface.h"
 #include "intrinsic/util/grpc/connection_params.h"
 #include "intrinsic/util/grpc/grpc.h"
 #include "intrinsic/util/status/status_macros.h"

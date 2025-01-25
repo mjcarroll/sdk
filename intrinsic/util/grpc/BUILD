@@ -63,6 +63,7 @@ cc_library(
         "//intrinsic/util/thread",
         "@com_github_grpc_grpc//:grpc++",
         "@com_github_grpc_grpc//src/proto/grpc/health/v1:health_cc_grpc",
+        "@com_github_grpc_grpc//src/proto/grpc/health/v1:health_cc_proto",
         "@com_google_absl//absl/log",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",

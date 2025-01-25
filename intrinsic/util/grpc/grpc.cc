@@ -3,7 +3,6 @@
 #include "intrinsic/util/grpc/grpc.h"
 
 #include <atomic>
-#include <chrono>  //NOLINT
 #include <climits>
 #include <csignal>
 #include <cstdint>
@@ -25,6 +24,7 @@
 #include "intrinsic/util/status/status_conversion_grpc.h"
 #include "intrinsic/util/thread/thread.h"
 #include "src/proto/grpc/health/v1/health.grpc.pb.h"
+#include "src/proto/grpc/health/v1/health.pb.h"
 
 namespace intrinsic {
 
