@@ -5,9 +5,9 @@
 #include <gtest/gtest.h>
 
 #include <bitset>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
-#include <string>
 
 #include "flatbuffers/buffer.h"
 #include "intrinsic/icon/control/safety/extern/safety_status.fbs.h"
