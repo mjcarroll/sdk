@@ -3,7 +3,6 @@
 #include "intrinsic/skills/cc/skill_utils.h"
 
 #include <memory>
-#include <vector>
 
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
