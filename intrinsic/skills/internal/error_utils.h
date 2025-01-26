@@ -3,6 +3,7 @@
 #ifndef INTRINSIC_SKILLS_INTERNAL_ERROR_UTILS_H_
 #define INTRINSIC_SKILLS_INTERNAL_ERROR_UTILS_H_
 
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <string_view>

@@ -2,10 +2,6 @@
 
 #include "intrinsic/skills/internal/get_footprint_context_impl.h"
 
-#include <memory>
-#include <string>
-#include <utility>
-
 #include "absl/log/log.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
