@@ -4,6 +4,7 @@
 #define INTRINSIC_PLATFORM_PUBSUB_ZENOH_UTIL_ZENOH_HANDLE_H_
 
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <string>
 #include <type_traits>
