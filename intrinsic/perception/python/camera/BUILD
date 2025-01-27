@@ -10,7 +10,6 @@ package(default_visibility = [
 py_library(
     name = "_camera_utils",
     srcs = ["_camera_utils.py"],
-    srcs_version = "PY3",
     deps = [
         "//intrinsic/perception/proto:camera_config_py_pb2",
         "//intrinsic/perception/proto:dimensions_py_pb2",
@@ -27,7 +26,6 @@ py_library(
 py_library(
     name = "data_classes",
     srcs = ["data_classes.py"],
-    srcs_version = "PY3",
     deps = [
         ":_camera_utils",
         "//intrinsic/math/python:pose3",
@@ -46,7 +44,6 @@ py_library(
 py_library(
     name = "camera_client",
     srcs = ["camera_client.py"],
-    srcs_version = "PY3",
     deps = [
         "//intrinsic/perception/proto:camera_config_py_pb2",
         "//intrinsic/perception/proto:camera_settings_py_pb2",
@@ -63,7 +60,6 @@ py_library(
 py_library(
     name = "cameras",
     srcs = ["cameras.py"],
-    srcs_version = "PY3",
     deps = [
         ":_camera_utils",
         ":camera_client",

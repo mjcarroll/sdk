@@ -41,7 +41,6 @@ cc_library(
 py_library(
     name = "motion_planner_client_py",
     srcs = ["motion_planner_client.py"],
-    srcs_version = "PY3",
     deps = [
         "//intrinsic/icon/proto:joint_space_py_pb2",
         "//intrinsic/math/python:data_types",
