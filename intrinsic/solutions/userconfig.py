@@ -37,11 +37,15 @@ def get_user_config_dir() -> str:
   if platform.system() != "Linux":
     raise NotImplementedError(f"OS '{platform.system()}' is not supported!")
 
-  home_dir = os.environ.get("XDG_CONFIG_HOME") or os.environ.get("HOME")
-  if not home_dir:
-    raise RuntimeError("Neither $XDG_CONFIG_HOME nor $HOME are defined!")
+  config_dir = os.environ.get("XDG_CONFIG_HOME")
+  if config_dir:
+    return config_dir
 
-  return os.path.join(home_dir, ".config")
+  home_dir = os.environ.get("HOME")
+  if home_dir:
+    return os.path.join(home_dir, ".config")
+
+  raise RuntimeError("Neither $XDG_CONFIG_HOME nor $HOME are defined!")
 
 
 def read() -> Dict[str, str]:
