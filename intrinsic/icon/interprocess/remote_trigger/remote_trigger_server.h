@@ -77,7 +77,24 @@ class RemoteTriggerServer final {
   // A call to `Stop()` exits the server loop independently whether it's been
   // started via `Start()` or `StartAsync()`. A call to `Stop()` has no
   // effect if the server is already stopped.
-  void Stop();
+  //
+  // Use this to enter a "lame duck" mode and ensure the thread doesn't start
+  // any further requests. This can be useful on shutdown, where a request might
+  // get stuck until you call the corresponding HWM's `Shutdown()` method.
+  //
+  // Remember to call `JoinAsyncThread()` if you want to restart the server! If
+  // not, you can rely on the destructor to join the async thread, if any.
+  void RequestStop();
+
+  // If there is an async server thread (i.e. the server was started with
+  // `StartAsync()`), this joins that thread.
+  // This can block if there's an ongoing call, so be sure that there isn't, or
+  // that you have a way to unblock ongoing calls (for hardware modules, the
+  // `Shutdown()` method *should* do that).
+  //
+  // If there is no async server thread, or it's already joined, this is a
+  // no-op.
+  void JoinAsyncThread();
 
   // Queries the server once and executes the callback if a request is ready.
   // Does not execute the callback if the server is started already.

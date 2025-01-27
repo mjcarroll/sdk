@@ -64,7 +64,8 @@ RemoteTriggerServer::RemoteTriggerServer(
 RemoteTriggerServer::RemoteTriggerServer(RemoteTriggerServer&& other) noexcept
     : server_memory_name_("") {
   // Make sure that moved server is no longer running.
-  other.Stop();
+  other.RequestStop();
+  other.JoinAsyncThread();
   server_memory_name_ = std::exchange(other.server_memory_name_, "");
   callback_ = std::exchange(other.callback_, nullptr);
   is_running_.store(false);
@@ -78,7 +79,8 @@ RemoteTriggerServer& RemoteTriggerServer::operator=(
     RemoteTriggerServer&& other) noexcept {
   if (this != &other) {
     // Make sure that moved server is no longer running.
-    other.Stop();
+    other.RequestStop();
+    other.JoinAsyncThread();
 
     server_memory_name_ = std::exchange(other.server_memory_name_, "");
     callback_ = std::exchange(other.callback_, nullptr);
@@ -93,11 +95,9 @@ RemoteTriggerServer& RemoteTriggerServer::operator=(
 }
 
 RemoteTriggerServer::~RemoteTriggerServer() {
-  Stop();
+  RequestStop();
+  JoinAsyncThread();
 
-  if (async_thread_.joinable()) {
-    async_thread_.join();
-  }
   // Close `response_futex_`, but only if it's still there (if we're currently
   // destroying a moved-out-of RemoteTriggerServer, `response_futex_` is
   // nullptr)
@@ -118,6 +118,13 @@ void RemoteTriggerServer::Start() {
 
 absl::Status RemoteTriggerServer::StartAsync(
     const intrinsic::ThreadOptions& thread_options) {
+  // Report incomplete shutdown
+  if (!is_running_ && async_thread_.joinable()) {
+    return absl::FailedPreconditionError(
+        "RemoteTriggerServer is not running, but its async thread is active. "
+        "Did you call `RequestStop()` and *not* call `JoinAsyncThread()` "
+        "afterwards?");
+  }
   // System is already running.
   if (bool expected = false;
       !is_running_.compare_exchange_strong(expected, true)) {
@@ -130,16 +137,17 @@ absl::Status RemoteTriggerServer::StartAsync(
     async_thread_ = *std::move(thread);
     return absl::OkStatus();
   } else {
-    Stop();
+    RequestStop();
+    JoinAsyncThread();
     return thread.status();
   }
 }
 
 bool RemoteTriggerServer::IsStarted() const { return is_running_.load(); }
 
-void RemoteTriggerServer::Stop() {
-  is_running_.store(false);
+void RemoteTriggerServer::RequestStop() { is_running_.store(false); }
 
+void RemoteTriggerServer::JoinAsyncThread() {
   if (async_thread_.joinable()) {
     async_thread_.join();
   }
@@ -200,7 +208,8 @@ void RemoteTriggerServer::Run() {
     if (!wait_status.ok()) {
       INTRINSIC_RT_LOG(ERROR)
           << "unable to receive client request: " << wait_status.message();
-      Stop();
+      RequestStop();
+      JoinAsyncThread();
       return;
     }
 
@@ -212,7 +221,8 @@ void RemoteTriggerServer::Run() {
     // If the object was moved or went out of scope, the callback_ might be
     // invalid.
     if (callback_ == nullptr) {
-      Stop();
+      RequestStop();
+      JoinAsyncThread();
       return;
     }
     // Call the passed in user callback.
@@ -227,7 +237,8 @@ void RemoteTriggerServer::Run() {
     if (!post_status.ok()) {
       INTRINSIC_RT_LOG(ERROR)
           << "unable to send response to client: " << post_status.message();
-      Stop();
+      RequestStop();
+      JoinAsyncThread();
       return;
     }
   }

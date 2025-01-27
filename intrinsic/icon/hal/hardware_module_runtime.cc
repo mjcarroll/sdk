@@ -1006,10 +1006,12 @@ absl::Status HardwareModuleRuntime::Run(grpc::ServerBuilder& server_builder,
 
 absl::Status HardwareModuleRuntime::Stop() {
   callback_handler_->Shutdown();
-  apply_command_server_->Stop();
-  read_status_server_->Stop();
+  apply_command_server_->RequestStop();
+  read_status_server_->RequestStop();
   stop_requested_->store(true);
   auto status = hardware_module_.instance->Shutdown();
+  apply_command_server_->JoinAsyncThread();
+  read_status_server_->JoinAsyncThread();
   if (state_change_thread_.joinable()) {
     state_change_thread_.join();
   }
