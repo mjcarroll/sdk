@@ -9,8 +9,6 @@ package(default_visibility = ["//visibility:public"])
 py_binary(
     name = "get_metadata",
     srcs = ["examples/get_metadata.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":icon",
         "//intrinsic/util/grpc:connection",
@@ -29,7 +27,6 @@ py_library(
         "reactions.py",
         "state_variable_path.py",
     ],
-    srcs_version = "PY3",
     deps = [
         "//intrinsic/icon/proto:logging_mode_py_pb2",
         "//intrinsic/icon/proto:matrix_conversions",  # buildcleaner: keep to allow import
@@ -110,8 +107,6 @@ py_test(
 py_test(
     name = "icon_test",
     srcs = ["icon_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":icon",
         "//intrinsic/icon/proto:logging_mode_py_pb2",
@@ -131,7 +126,6 @@ py_test(
 py_binary(
     name = "joint_move",
     srcs = ["examples/joint_move.py"],
-    python_version = "PY3",
     deps = [
         ":create_action_utils",
         ":icon",
@@ -146,7 +140,6 @@ py_binary(
 py_binary(
     name = "operational_state",
     srcs = ["examples/operational_state.py"],
-    python_version = "PY3",
     deps = [
         ":icon",
         "//intrinsic/util/grpc:connection",
@@ -158,8 +151,6 @@ py_binary(
 py_test(
     name = "_session_test",
     srcs = ["_session_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":icon",
         "//intrinsic/icon/proto:service_py_pb2",
@@ -174,8 +165,6 @@ py_test(
 py_test(
     name = "actions_test",
     srcs = ["actions_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":icon",
         "//intrinsic/icon/actions:point_to_point_move_py_pb2",
@@ -186,8 +175,6 @@ py_test(
 py_test(
     name = "reactions_test",
     srcs = ["reactions_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":icon",
         "//intrinsic/icon/proto:types_py_pb2",
@@ -198,8 +185,6 @@ py_test(
 py_test(
     name = "proto_test",
     srcs = ["proto_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         "//intrinsic/icon/proto:cart_space_py_pb2",
         "//intrinsic/icon/proto:ik_options_py_pb2",
@@ -217,8 +202,6 @@ py_test(
 py_test(
     name = "grpc_proto_test",
     srcs = ["grpc_proto_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         "//intrinsic/icon/proto:cart_space_py_pb2",
         "//intrinsic/icon/proto:ik_options_py_pb2",

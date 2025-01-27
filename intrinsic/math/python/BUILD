@@ -9,7 +9,6 @@ package(default_visibility = [
 py_library(
     name = "proto_conversion",
     srcs = ["proto_conversion.py"],
-    srcs_version = "PY3",
     deps = [
         ":data_types",
         "//intrinsic/icon/proto:cart_space_py_pb2",
@@ -26,8 +25,6 @@ py_library(
 py_test(
     name = "proto_conversion_test",
     srcs = ["proto_conversion_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":data_types",
         ":proto_conversion",
@@ -48,7 +45,6 @@ py_test(
 py_library(
     name = "data_types",
     srcs = ["data_types.py"],
-    srcs_version = "PY3",
     deps = [
         ":math_types",
         ":pose3",
@@ -64,8 +60,6 @@ py_test(
     name = "data_types_test",
     size = "small",
     srcs = ["data_types_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":data_types",
         "//intrinsic/icon/proto:cart_space_py_pb2",
@@ -96,7 +90,6 @@ py_test(
     srcs = [
         "math_test_test.py",
     ],
-    python_version = "PY3",
     deps = [
         ":math_test",
         ":math_types",
@@ -122,7 +115,6 @@ py_test(
     srcs = [
         "math_types_test.py",
     ],
-    python_version = "PY3",
     deps = [
         ":math_test",
         ":math_types",
@@ -152,7 +144,6 @@ py_test(
     srcs = [
         "pose3_test.py",
     ],
-    python_version = "PY3",
     deps = [
         ":math_test",
         ":pose3",
@@ -185,7 +176,6 @@ py_test(
     srcs = [
         "rotation3_test.py",
     ],
-    python_version = "PY3",
     deps = [
         ":math_test",
         ":math_types",
@@ -217,7 +207,6 @@ py_test(
     srcs = [
         "quaternion_test.py",
     ],
-    python_version = "PY3",
     deps = [
         ":math_test",
         ":math_types",

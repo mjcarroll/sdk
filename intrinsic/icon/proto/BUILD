@@ -341,7 +341,6 @@ cc_proto_library(
 py_library(
     name = "matrix_conversions",
     srcs = ["matrix_conversions.py"],
-    srcs_version = "PY3",
     deps = [
         ":matrix_py_pb2",
         "@ai_intrinsic_sdks_pip_deps//numpy",
@@ -351,8 +350,6 @@ py_library(
 py_test(
     name = "matrix_conversions_test",
     srcs = ["matrix_conversions_test.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":matrix_conversions",
         ":matrix_py_pb2",
