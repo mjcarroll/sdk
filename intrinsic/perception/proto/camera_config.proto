@@ -34,7 +34,7 @@ message CameraConfig {
   repeated CameraSetting camera_settings = 5;
 
   // A list of per-sensor configurations. These include per-sensor calibrations
-  // and settings applied only to a particular sensor.
+  // and poses.
   // The specification of sensor configurations is optional.
   repeated SensorConfig sensor_configs = 6;
 }

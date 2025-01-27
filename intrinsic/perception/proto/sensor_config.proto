@@ -8,9 +8,8 @@ import "intrinsic/math/proto/pose.proto";
 import "intrinsic/perception/proto/camera_params.proto";
 
 // Specification of a single sensor within a camera. This includes intrinsic
-// calibration (including distortion params), per-sensor settings, and sensor
-// pose relative to the device coordinate system. Minimal specification includes
-// sensor ID only.
+// calibration (including distortion params) and sensor pose relative to the
+// device coordinate system. Minimal specification includes sensor ID only.
 message SensorConfig {
   reserved 3, 4;
   reserved "intrinsic_params", "distortion_params";
