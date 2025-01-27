@@ -208,8 +208,9 @@ def _equalize_floats_in_tolerance(
           and field.message_type.GetOptions().map_entry
       ):
         value_type = field.message_type.fields_by_name["value"]
-        # field is a map
-        for key, mapped_value_a in value_a.items():
+        # field is a map. We iterate over a copy of value_a.items() so that we
+        # can safely modify the map while doing so.
+        for key, mapped_value_a in list(value_a.items()):
           mapped_value_b = value_b.get(key)
           if mapped_value_b is None:
             continue
