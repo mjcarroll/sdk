@@ -2,7 +2,6 @@
 
 #include "intrinsic/icon/cc_client/robot_config.h"
 
-#include <string>
 #include <string_view>
 #include <vector>
 

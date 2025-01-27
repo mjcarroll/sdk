@@ -3,6 +3,7 @@
 #ifndef INTRINSIC_ICON_CC_CLIENT_CONDITION_H_
 #define INTRINSIC_ICON_CC_CLIENT_CONDITION_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>

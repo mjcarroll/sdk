@@ -2,6 +2,7 @@
 
 #include "intrinsic/icon/cc_client/condition.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -14,7 +15,6 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
-#include "google/protobuf/message.h"
 #include "google/protobuf/text_format.h"
 #include "intrinsic/icon/proto/types.pb.h"
 #include "intrinsic/util/status/status_macros.h"
