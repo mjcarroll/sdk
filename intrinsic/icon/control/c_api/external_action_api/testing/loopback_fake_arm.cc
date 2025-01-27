@@ -2,6 +2,7 @@
 
 #include "intrinsic/icon/control/c_api/external_action_api/testing/loopback_fake_arm.h"
 
+#include <cstddef>
 #include <optional>
 #include <string>
 

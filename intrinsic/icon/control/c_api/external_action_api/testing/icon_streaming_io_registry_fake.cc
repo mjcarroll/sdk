@@ -2,6 +2,7 @@
 
 #include "intrinsic/icon/control/c_api/external_action_api/testing/icon_streaming_io_registry_fake.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <optional>

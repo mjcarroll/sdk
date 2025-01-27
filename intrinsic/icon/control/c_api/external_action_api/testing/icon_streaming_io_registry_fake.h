@@ -3,6 +3,8 @@
 #ifndef INTRINSIC_ICON_CONTROL_C_API_EXTERNAL_ACTION_API_TESTING_ICON_STREAMING_IO_REGISTRY_FAKE_H_
 #define INTRINSIC_ICON_CONTROL_C_API_EXTERNAL_ACTION_API_TESTING_ICON_STREAMING_IO_REGISTRY_FAKE_H_
 
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>

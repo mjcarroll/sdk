@@ -2,6 +2,7 @@
 
 #include "intrinsic/icon/control/c_api/external_action_api/testing/icon_slot_map_fake.h"
 
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <utility>

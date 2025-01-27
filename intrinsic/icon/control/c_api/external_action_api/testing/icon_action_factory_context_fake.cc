@@ -2,6 +2,7 @@
 
 #include "intrinsic/icon/control/c_api/external_action_api/testing/icon_action_factory_context_fake.h"
 
+#include <cstddef>
 #include <cstdint>
 
 #include "absl/status/status.h"
