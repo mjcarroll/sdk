@@ -74,9 +74,9 @@ class RemoteTriggerServer final {
   bool IsStarted() const;
 
   // Stops the current server loop.
-  // A call to `Stop()` exits the server loop independently whether it's been
-  // started via `Start()` or `StartAsync()`. A call to `Stop()` has no
-  // effect if the server is already stopped.
+  // A call to `RequestStop()` exits the server loop independently whether it's
+  // been started via `Start()` or `StartAsync()`. A call to `RequestStop()` has
+  // no effect if the server is already stopped.
   //
   // Use this to enter a "lame duck" mode and ensure the thread doesn't start
   // any further requests. This can be useful on shutdown, where a request might
@@ -95,6 +95,11 @@ class RemoteTriggerServer final {
   // If there is no async server thread, or it's already joined, this is a
   // no-op.
   void JoinAsyncThread();
+
+  // Queries whether the server is ready to start.
+  // This returns true if the server is stopped and any asynchronous threads
+  // have already been joined.
+  bool IsReadyToStart() const;
 
   // Queries the server once and executes the callback if a request is ready.
   // Does not execute the callback if the server is started already.

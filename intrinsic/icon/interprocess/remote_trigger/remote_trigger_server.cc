@@ -145,6 +145,10 @@ absl::Status RemoteTriggerServer::StartAsync(
 
 bool RemoteTriggerServer::IsStarted() const { return is_running_.load(); }
 
+bool RemoteTriggerServer::IsReadyToStart() const {
+  return !IsStarted() && !async_thread_.joinable();
+}
+
 void RemoteTriggerServer::RequestStop() { is_running_.store(false); }
 
 void RemoteTriggerServer::JoinAsyncThread() {
