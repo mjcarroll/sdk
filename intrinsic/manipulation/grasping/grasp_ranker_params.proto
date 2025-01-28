@@ -59,11 +59,9 @@ message DiversityRankerParams {
 }
 
 message IkCollisionCheckerParams {
-  // Name of the end-of-arm-tooling. E.g., `suction_gripper`. Used
-  // for disabling collisions between the gripper and the target object at
-  // grasp pose. If None, disable all collisions when
-  // `check_collision_at_grasp_pose` is True.
-  optional string eoat_name = 5;
+  // Name of the EOAT (end-of-arm tool) to allow collision with the target
+  // object at grasp pose. If None, no effect.
+  optional string collision_excluded_eoat = 7;
 
   // Name of the ranker. Default to ik_collision_checker.
   optional string name = 6;
@@ -71,12 +69,9 @@ message IkCollisionCheckerParams {
   // Joint limits used in grasp/pregrasp pose IK checks.
   optional intrinsic_proto.JointLimitsUpdate joint_limits = 1;
 
-  // Whether to check collisions at grasp pose.
-  // If `eoat_name` is provided when constructing `IkCollisionChecker`,
-  // then `check_collision_at_grasp_pose=False` only disables collisions
-  // between gripper and the target object, and `True` enables all collisions.
-  // If `eoat_name` is not provided, then `check_collision_at_grasp_pose=False`
-  // disables all collisions, `True` enables all collisions.`
+  // Whether to check collisions at grasp pose. On top of this, if
+  // `collision_excluded_eoat` is specified, then collisions are
+  // ignored between the eoat and the target object at grasp pose.
   optional bool check_collision_at_grasp_pose = 2;
 
   // Whether to require grasp pose to have same kinematic branch as starting
@@ -86,6 +81,9 @@ message IkCollisionCheckerParams {
   // Passed to `MotionPlannerClient.compute_ik`.
   // This has to be 1 if `require_same_branch_ik` is set to True.
   optional int32 max_num_solutions = 4;
+
+  reserved 5;
+  reserved "eoat_name";
 }
 
 message StraightLineCheckerParams {

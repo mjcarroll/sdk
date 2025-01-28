@@ -39,4 +39,10 @@ message GraspExecutionPlannerParams {
   // pose to the postgrasp pose.
   optional intrinsic_proto.motion_planning.DynamicCartesianLimits
       postgrasp_motion_dynamic_cartesian_limits = 9;
+
+  // If specified, ignore collisions between the given EOAT (end-of-arm tool)
+  // and the target object at grasp pose. This isn't part of the
+  // path constraints because the target object is often unknown
+  // at construction time.
+  optional string collision_excluded_eoat = 10;
 }
