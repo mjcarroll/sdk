@@ -53,8 +53,8 @@ service ExecutiveService {
   // NOTE: Below, we use the following labels to refer to conjunctions of
   // behavior tree states:
   //  CANCELLABLE := RUNNING | SUSPENDING | SUSPENDED
-  //  WAITING := ACCEPTED | SUSPENDED | FAILED | SUCCEEDED | CANCELLED
-  //  TERMINAL := SUCCEEDED | FAILED | CANCELLED
+  //  WAITING := ACCEPTED | SUSPENDED | FAILED | SUCCEEDED | CANCELED
+  //  TERMINAL := SUCCEEDED | FAILED | CANCELED
 
   // Loads a behavior tree. Calling this while an operation already exists will
   // result in an error.
@@ -135,7 +135,7 @@ service ExecutiveService {
   // operation completed despite cancellation. On successful cancellation, the
   // operation is not deleted; instead, it becomes an operation with an
   // [Operation.error][] value with a [google.rpc.Status.code][] of 1,
-  // corresponding to `Code.CANCELLED`.
+  // corresponding to `Code.CANCELED`.
   //
   // Returns an error if the behavior tree is not in a cancellable state.
   rpc CancelOperation(google.longrunning.CancelOperationRequest)
@@ -146,7 +146,7 @@ service ExecutiveService {
   }
 
   // Waits until the specified operation is done (SUCCEEDED, FAILED, or
-  // CANCELLED) or reaches at most a specified timeout, returning the latest
+  // CANCELED) or reaches at most a specified timeout, returning the latest
   // state. If the operation is already done, the latest state is immediately
   // returned. If the timeout specified is greater than the default HTTP/RPC
   // timeout, the HTTP/RPC timeout is used. The default timeout is 60 minutes.
