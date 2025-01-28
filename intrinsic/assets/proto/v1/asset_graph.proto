@@ -1,0 +1,45 @@
+// Copyright 2023 Intrinsic Innovation LLC
+
+syntax = "proto3";
+
+package intrinsic_proto.assets.v1;
+
+import "intrinsic/assets/proto/id.proto";
+
+// A directed acyclic graph of assets.
+message AssetGraph {
+  // A map from node names to asset nodes.
+  //
+  // Node names are used to define edges and can be used for other purposes,
+  // such as to auto-generate asset instance names in a solution.
+  map<string, AssetNode> nodes = 1;
+
+  // May not entail cycles.
+  repeated AssetEdge edges = 2;
+}
+
+// A node in an AssetGraph.
+message AssetNode {
+  // The ID of the asset, which is defined elsewhere.
+  intrinsic_proto.assets.Id id = 1;
+}
+
+// An edge between two asset nodes in an AssetGraph.
+message AssetEdge {
+  message Configuration {}
+
+  // The name of the source asset node.
+  string source = 1;
+  // The name of the target asset node.
+  string target = 2;
+
+  // A description of the edge.
+  oneof edge_type {
+    // An edge from a Data asset to an asset configured by the Data payload's
+    // proto message type.
+    //
+    // This edge type is used to provide a suggested configuration for the
+    // target asset.
+    Configuration configures = 3;
+  }
+}

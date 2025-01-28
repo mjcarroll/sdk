@@ -8,6 +8,7 @@ import "intrinsic/assets/proto/asset_tag.proto";
 import "intrinsic/assets/proto/asset_type.proto";
 import "intrinsic/assets/proto/id.proto";
 import "intrinsic/assets/proto/metadata.proto";
+import "intrinsic/assets/proto/v1/search.proto";
 import "intrinsic/assets/proto/view.proto";
 import "intrinsic/assets/services/proto/service_manifest.proto";
 import "intrinsic/skills/proto/processed_skill_manifest.proto";
@@ -117,6 +118,12 @@ message ListAssetsRequest {
   // Optional filter to apply to the query to retrieve a filtered list of
   // assets.
   optional AssetFilter strict_filter = 4;
+
+  // Order by which to sort the assets.
+  intrinsic_proto.assets.v1.OrderBy order_by = 5;
+
+  // If true, sort assets in descending order.
+  bool sort_descending = 6;
 }
 
 message ListAssetsResponse {

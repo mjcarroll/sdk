@@ -1,0 +1,12 @@
+// Copyright 2023 Intrinsic Innovation LLC
+
+syntax = "proto3";
+
+package intrinsic_proto.assets.v1;
+
+enum OrderBy {
+  // Unspecified. Defaults to ORDER_BY_DISPLAY_NAME.
+  ORDER_BY_UNSPECIFIED = 0;
+  ORDER_BY_DISPLAY_NAME = 1;
+  ORDER_BY_ID = 2;
+}
