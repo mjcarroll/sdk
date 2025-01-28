@@ -2,6 +2,9 @@
 
 #include "intrinsic/icon/release/grpc_time_support.h"
 
+#include <cstdint>
+#include <ctime>
+
 #include "absl/log/check.h"
 #include "absl/time/time.h"
 #include "grpc/support/time.h"
