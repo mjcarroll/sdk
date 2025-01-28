@@ -50,3 +50,7 @@ message ProcessedSceneObjectManifest {
   // Currently, this is the same as SceneObjectAssets.
   ProcessedSceneObjectAssets assets = 2;
 }
+
+message SceneObjectManifests {
+  repeated SceneObjectManifest manifests = 1;
+}
