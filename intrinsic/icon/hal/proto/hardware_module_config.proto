@@ -48,4 +48,16 @@ message HardwareModuleConfig {
   // This is only an override: By default, hardware modules enable the malloc
   // guard on real hardware, and disable it in simulation
   optional bool disable_malloc_guard = 7;
+
+  // Defines the control rate for this hardware module.
+  //
+  // Any value set here takes precedence over other values set in the World or a
+  // hardware module's specific configuration.
+  //
+  // Take care to configure the corresponding Realtime Control Service to use
+  // the same control rate!
+  oneof control_rate {
+    float control_frequency_hz = 8;
+    int64 control_period_ns = 9;
+  }
 }
