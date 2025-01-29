@@ -203,12 +203,11 @@ message BehaviorTree {
         AnyWithAssignments from_world = 11;
 
         // When the proto is created/updated in the blackboard it is stored
-        // unpacked, i.e., the type within the Any proto must be accessible
-        // through the merge descriptor pool (retrieved from all skills).
+        // unpacked. Therefore the proto must be of a type that is a well-known
+        // or skill proto.
         google.protobuf.Any proto = 12;
-        // Protos must be of a type that is in the transitive closure of all
-        // well-known or skill proto types. The protos are stored packed in
-        // the blackboard.
+        // All protos must be of a type that is a well-known or skill proto. The
+        // protos are stored packed in the blackboard.
         AnyList protos = 13;
       }
     }
