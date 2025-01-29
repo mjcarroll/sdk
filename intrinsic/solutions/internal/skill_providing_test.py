@@ -2465,6 +2465,44 @@ Fields:
         self, test_message_wrapper.wrapped_message, expected_test_message
     )
 
+  def test_message_wrapper_to_any(self):
+    skill_info = self._utils.create_test_skill_info(
+        skill_id='ai.intrinsic.my_skill',
+        skill_version='42.0.0',
+        parameter_defaults=test_skill_params_pb2.TestMessageWrapped(),
+    )
+    skills = skill_providing.Skills(
+        self._utils.create_skill_registry_for_skill_info(skill_info),
+        self._utils.create_empty_resource_registry(),
+    )
+
+    expected_test_message = test_skill_params_pb2.TestMessage(
+        my_int32=5,
+        repeated_submessages=[
+            test_skill_params_pb2.SubMessage(),
+            test_skill_params_pb2.SubMessage(name='foo'),
+        ],
+    )
+    test_message_wrapper = (
+        skills.ai.intrinsic.my_skill.intrinsic_proto.test_data.TestMessage(
+            my_int32=5,
+            repeated_submessages=[
+                test_skill_params_pb2.SubMessage(),
+                test_skill_params_pb2.SubMessage(name='foo'),
+            ],
+        )
+    )
+
+    any_msg = test_message_wrapper.to_any()
+    unpacked_msg = test_skill_params_pb2.TestMessage()
+    any_msg.Unpack(unpacked_msg)
+
+    compare.assertProto2Equal(self, unpacked_msg, expected_test_message)
+    self.assertEqual(
+        any_msg.type_url,
+        'type.intrinsic.ai/skills/ai.intrinsic.my_skill/42.0.0/intrinsic_proto.test_data.TestMessage',
+    )
+
   def test_enum_wrapper_class(self):
     skill_info = self._utils.create_test_skill_info(
         skill_id='ai.intrinsic.my_skill',

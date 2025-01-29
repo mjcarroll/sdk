@@ -553,9 +553,7 @@ def gen_skill_class(
 
   wrapper_classes, enum_classes = skill_utils.update_message_class_modules(
       type_class,
-      info.skill_name,
-      info.package_name,
-      info.skill_proto.parameter_description,
+      info,
       message_classes_to_wrap,
       enum_descriptors_to_wrap,
   )

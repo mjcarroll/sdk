@@ -14,6 +14,7 @@ import time
 import typing
 from typing import Any, Callable, Container, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Type, Union
 
+from google.protobuf import any_pb2
 from google.protobuf import descriptor
 from google.protobuf import descriptor_pb2
 from google.protobuf import descriptor_pool
@@ -899,6 +900,7 @@ class MessageWrapper:
 
   # Class attributes
   _wrapped_type: Type[message.Message]
+  _skill_info: provided.SkillInfo
 
   # Instance attributes
   _wrapped_message: Optional[message.Message]
@@ -908,6 +910,14 @@ class MessageWrapper:
     """This constructor normally will not be called from outside."""
     self._wrapped_message = None
     self._blackboard_params = {}
+
+  def to_any(self) -> any_pb2.Any:
+    any_msg = any_pb2.Any()
+    any_msg.Pack(
+        self.wrapped_message,
+        type_url_prefix=type_url_prefix_for_skill(self._skill_info),
+    )
+    return any_msg
 
   def _set_params(self, **kwargs) -> List[str]:
     """Set parameters of message.
@@ -1039,9 +1049,7 @@ class MessageWrapper:
 
 def _gen_wrapper_class(
     wrapped_type: Type[message.Message],
-    skill_name: str,
-    skill_package: str,
-    field_doc_strings: Dict[str, str],
+    skill_info: provided.SkillInfo,
 ) -> Type[Any]:
   """Generates a new message wrapper class type.
 
@@ -1053,13 +1061,14 @@ def _gen_wrapper_class(
 
   Args:
     wrapped_type: Message to wrap.
-    skill_name: Name of the skill.
-    skill_package: Package name of the skill.
-    field_doc_strings: Dict mapping from field name to doc string comment.
+    skill_info: Information about the skill name, package, etc.
 
   Returns:
     A new type for a MessageWrapper sub-class.
   """
+  field_doc_strings: Dict[str, str] = dict(
+      skill_info.skill_proto.parameter_description.parameter_field_comments
+  )
   return type(
       # E.g.: 'Pose'
       wrapped_type.DESCRIPTOR.name,
@@ -1067,10 +1076,13 @@ def _gen_wrapper_class(
       {
           "__doc__": _gen_class_docstring(wrapped_type, field_doc_strings),
           # E.g.: 'move_robot.intrinsic_proto.Pose'.
-          "__qualname__": skill_name + "." + wrapped_type.DESCRIPTOR.full_name,
+          "__qualname__": (
+              skill_info.skill_name + "." + wrapped_type.DESCRIPTOR.full_name
+          ),
           # E.g.: 'intrinsic.solutions.skills.ai.intrinsic'.
-          "__module__": module_for_generated_skill(skill_package),
+          "__module__": module_for_generated_skill(skill_info.package_name),
           "_wrapped_type": wrapped_type,
+          "_skill_info": skill_info,
       },
   )
 
@@ -1487,9 +1499,7 @@ class _ClassPropertyRaisingRemovalError:
 
 def update_message_class_modules(
     cls: Type[Any],
-    skill_name: str,
-    skill_package: str,
-    parameter_description: skills_pb2.ParameterDescription,
+    skill_info: provided.SkillInfo,
     message_classes_to_wrap: dict[str, Type[message.Message]],
     enum_descriptors_to_wrap: dict[str, descriptor.EnumDescriptor],
 ) -> tuple[dict[str, Type[MessageWrapper]], dict[str, Type[enum.IntEnum]]]:
@@ -1499,9 +1509,7 @@ def update_message_class_modules(
 
   Args:
     cls: class to modify
-    skill_name: Name of the skill to correspoding to 'cls'.
-    skill_package: Package name of the skill to correspoding to 'cls'.
-    parameter_description: The skill's parameter description.
+    skill_info: SkillInfo containing name, parameters, etc.
     message_classes_to_wrap: Map from full proto message names to message
       classes, containing the message classes for which to generate wrapper
       classes under the skill class.
@@ -1515,18 +1523,15 @@ def update_message_class_modules(
     enum classes.
   """
   enum_classes: dict[str, Type[enum.IntEnum]] = {
-      enum_full_name: _gen_enum_class(enum_desc, skill_name, skill_package)
+      enum_full_name: _gen_enum_class(
+          enum_desc, skill_info.skill_name, skill_info.package_name
+      )
       for enum_full_name, enum_desc in enum_descriptors_to_wrap.items()
   }
 
   wrapper_classes: dict[str, Type[MessageWrapper]] = {}
   for message_full_name, message_type in message_classes_to_wrap.items():
-    wrapper_class = _gen_wrapper_class(
-        message_type,
-        skill_name,
-        skill_package,
-        dict(parameter_description.parameter_field_comments),
-    )
+    wrapper_class = _gen_wrapper_class(message_type, skill_info)
     wrapper_classes[message_full_name] = wrapper_class
 
   # The init function of a wrapper class may reference any other wrapper class
@@ -1535,8 +1540,8 @@ def update_message_class_modules(
   for message_full_name, wrapper_class in wrapper_classes.items():
     wrapper_class.__init__ = _gen_init_fun(
         wrapper_class.wrapped_type,
-        skill_name,
-        parameter_description,
+        skill_info.skill_name,
+        skill_info.skill_proto.parameter_description,
         message_full_name,
         wrapper_classes,
         enum_classes,
@@ -1551,7 +1556,12 @@ def update_message_class_modules(
   for message_full_name in sorted(wrapper_classes):
     wrapper_class = wrapper_classes[message_full_name]
     _attach_wrapper_class(
-        "", message_full_name, cls, wrapper_class, skill_name, skill_package
+        "",
+        message_full_name,
+        cls,
+        wrapper_class,
+        skill_info.skill_name,
+        skill_info.package_name,
     )
 
   # Create error properties for what used to be shortcuts of the form
@@ -1566,7 +1576,7 @@ def update_message_class_modules(
           cls,
           message_name,
           _ClassPropertyRaisingRemovalError(
-              skill_name,
+              skill_info.skill_name,
               message_name,
               message_full_name,
           ),
@@ -1579,8 +1589,8 @@ def update_message_class_modules(
         enum_full_name,
         cls,
         enum_class,
-        skill_name,
-        skill_package,
+        skill_info.skill_name,
+        skill_info.package_name,
     )
 
   # Add special enum shortcuts for enums that are nested directly within the
