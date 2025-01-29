@@ -36,6 +36,9 @@ type DeviceInfo struct {
 	// FullID is used for the internal communication to tell the full id of the device registered via
 	// partial id.
 	FullID string `json:"full_id"`
+	// Version provides the version running on the OS for guiding functionality that needs minimum
+	// versions of the installation image.
+	Version string `json:"version"`
 }
 
 // Nameservers sets DNS servers and search domains.
