@@ -7,7 +7,6 @@
 #include <iostream>
 #include <ostream>
 #include <string>
-#include <vector>
 
 #include "absl/flags/flag.h"
 #include "absl/log/check.h"
