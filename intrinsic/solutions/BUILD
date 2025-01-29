@@ -55,6 +55,7 @@ py_test(
         "//intrinsic/executive/proto:test_message_py_pb2",
         "//intrinsic/executive/proto:world_query_py_pb2",
         "//intrinsic/solutions/internal:behavior_call",
+        "//intrinsic/solutions/internal:skill_providing",
         "//intrinsic/solutions/testing:compare",
         "//intrinsic/solutions/testing:skill_test_utils",
         "//intrinsic/solutions/testing:test_skill_params_py_pb2",

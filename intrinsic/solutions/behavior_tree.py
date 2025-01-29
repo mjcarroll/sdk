@@ -3454,8 +3454,8 @@ class Data(Node):
   _operation: 'Data.OperationType'
   _cel_expression: Optional[str]
   _world_query: Optional[WorldQuery]
-  _proto: Optional[protobuf_message.Message]
-  _protos: Optional[List[protobuf_message.Message]]
+  _proto: Optional[protobuf_message.Message | skill_utils.MessageWrapper]
+  _protos: Optional[List[protobuf_message.Message | skill_utils.MessageWrapper]]
   _name: Optional[str]
   _node_id: Optional[int]
   _state: Optional[NodeState]
@@ -3475,8 +3475,12 @@ class Data(Node):
       operation: 'Data.OperationType' = OperationType.CREATE_OR_UPDATE,
       cel_expression: Optional[str] = None,
       world_query: Optional[WorldQuery] = None,
-      proto: Optional[protobuf_message.Message] = None,
-      protos: Optional[List[protobuf_message.Message]] = None,
+      proto: Optional[
+          protobuf_message.Message | skill_utils.MessageWrapper
+      ] = None,
+      protos: Optional[
+          List[protobuf_message.Message | skill_utils.MessageWrapper]
+      ] = None,
       name: Optional[str] = None,
   ):
     self._decorators = None
@@ -3548,11 +3552,21 @@ class Data(Node):
           )
 
       if self._proto is not None:
-        proto_message.data.create_or_update.proto.Pack(self._proto)
+        if isinstance(self._proto, skill_utils.MessageWrapper):
+          proto_message.data.create_or_update.proto.CopyFrom(
+              self._proto.to_any()
+          )
+        else:
+          proto_message.data.create_or_update.proto.Pack(self._proto)
 
       if self._protos is not None:
         for p in self._protos:
-          proto_message.data.create_or_update.protos.items.add().Pack(p)
+          if isinstance(p, skill_utils.MessageWrapper):
+            proto_message.data.create_or_update.protos.items.add().CopyFrom(
+                p.to_any()
+            )
+          else:
+            proto_message.data.create_or_update.protos.items.add().Pack(p)
 
     elif self._operation == Data.OperationType.REMOVE:
       proto_message.data.remove.blackboard_key = self._blackboard_key
@@ -3648,10 +3662,18 @@ class Data(Node):
         )
 
       if self._proto is not None:
+        contained_proto = self._proto
+        if isinstance(contained_proto, skill_utils.MessageWrapper):
+          contained_proto = contained_proto.wrapped_message
+          if contained_proto is None:
+            raise solutions_errors.FailedPreconditionError(
+                'The proto message in the Data node does not contain a message'
+                ' (None).'
+            )
         return blackboard_value.BlackboardValue(
-            self._proto.DESCRIPTOR.fields_by_name,
+            contained_proto.DESCRIPTOR.fields_by_name,
             self._blackboard_key,
-            self._proto.__class__,
+            contained_proto.__class__,
             None,
         )
 
@@ -3738,10 +3760,14 @@ class Data(Node):
     return self
 
   @property
-  def input_proto(self) -> Optional[protobuf_message.Message]:
+  def input_proto(
+      self,
+  ) -> Optional[protobuf_message.Message | skill_utils.MessageWrapper]:
     return self._proto
 
-  def set_input_proto(self, proto: protobuf_message.Message) -> Data:
+  def set_input_proto(
+      self, proto: protobuf_message.Message | skill_utils.MessageWrapper
+  ) -> Data:
     """Sets a specific proto for creating or updating a blackboard value.
 
     Args:
@@ -3759,10 +3785,14 @@ class Data(Node):
     return self
 
   @property
-  def input_protos(self) -> Optional[List[protobuf_message.Message]]:
+  def input_protos(
+      self,
+  ) -> Optional[List[protobuf_message.Message | skill_utils.MessageWrapper]]:
     return self._protos
 
-  def set_input_protos(self, protos: List[protobuf_message.Message]) -> Data:
+  def set_input_protos(
+      self, protos: List[protobuf_message.Message | skill_utils.MessageWrapper]
+  ) -> Data:
     """Sets list of specific protos for creating or updating a blackboard value.
 
     Args:

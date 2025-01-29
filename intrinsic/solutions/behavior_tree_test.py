@@ -23,6 +23,7 @@ from intrinsic.solutions import cel
 from intrinsic.solutions import errors as solutions_errors
 from intrinsic.solutions import proto_building
 from intrinsic.solutions.internal import behavior_call
+from intrinsic.solutions.internal import skill_providing
 from intrinsic.solutions.testing import compare
 from intrinsic.solutions.testing import skill_test_utils
 from intrinsic.solutions.testing import test_skill_params_pb2
@@ -3854,6 +3855,97 @@ class BehaviorTreeDataTest(parameterized.TestCase):
     node_proto.data.create_or_update.blackboard_key = 'bbfoo'
 
     compare.assertProto2Equal(self, node.proto, node_proto)
+
+  def test_init_message_wrapper(self):
+    """Tests if BehaviorTree.Data is correctly constructed."""
+    skill_utils = skill_test_utils.SkillTestUtils(
+        'testing/test_skill_params_proto_descriptors_transitive_set_sci.proto.bin'
+    )
+    skill_info = skill_utils.create_test_skill_info(
+        skill_id='ai.intrinsic.my_skill',
+        skill_version='42.0.0',
+        parameter_defaults=test_skill_params_pb2.TestMessageWrapped(),
+    )
+    skills = skill_providing.Skills(
+        skill_utils.create_skill_registry_for_skill_info(skill_info),
+        skill_utils.create_empty_resource_registry(),
+    )
+
+    test_msg = (
+        skills.ai.intrinsic.my_skill.intrinsic_proto.test_data.TestMessage(
+            my_int32=5,
+        )
+    )
+    node = bt.Data(name='foo')
+    node.set_operation(bt.Data.OperationType.CREATE_OR_UPDATE)
+    node.set_blackboard_key('bbfoo')
+    node.set_input_proto(test_msg)
+
+    expected_test_msg = test_skill_params_pb2.TestMessage(
+        my_int32=5,
+    )
+
+    expected_node_proto = behavior_tree_pb2.BehaviorTree.Node(name='foo')
+    expected_node_proto.data.create_or_update.proto.Pack(expected_test_msg)
+    expected_node_proto.data.create_or_update.proto.type_url = 'type.intrinsic.ai/skills/ai.intrinsic.my_skill/42.0.0/intrinsic_proto.test_data.TestMessage'
+    expected_node_proto.data.create_or_update.blackboard_key = 'bbfoo'
+
+    compare.assertProto2Equal(self, node.proto, expected_node_proto)
+
+    node_direct = bt.Data(name='foo', blackboard_key='bbfoo', proto=test_msg)
+    compare.assertProto2Equal(self, node_direct.proto, expected_node_proto)
+
+  def test_init_message_wrapper_list(self):
+    """Tests if BehaviorTree.Data is correctly constructed."""
+    skill_utils = skill_test_utils.SkillTestUtils(
+        'testing/test_skill_params_proto_descriptors_transitive_set_sci.proto.bin'
+    )
+    skill_info = skill_utils.create_test_skill_info(
+        skill_id='ai.intrinsic.my_skill',
+        skill_version='42.0.0',
+        parameter_defaults=test_skill_params_pb2.TestMessageWrapped(),
+    )
+    skills = skill_providing.Skills(
+        skill_utils.create_skill_registry_for_skill_info(skill_info),
+        skill_utils.create_empty_resource_registry(),
+    )
+
+    node = bt.Data(name='foo')
+    node.set_operation(bt.Data.OperationType.CREATE_OR_UPDATE)
+    node.set_blackboard_key('bbfoo')
+    node.set_input_protos([
+        skills.ai.intrinsic.my_skill.intrinsic_proto.test_data.TestMessage(
+            my_int32=i,
+        )
+        for i in range(5)
+    ])
+
+    expected_node_proto = behavior_tree_pb2.BehaviorTree.Node(name='foo')
+    for i in range(5):
+      expected_test_msg = test_skill_params_pb2.TestMessage(
+          my_int32=i,
+      )
+      expected_node_proto.data.create_or_update.protos.items.add().Pack(
+          expected_test_msg,
+          type_url_prefix=(
+              'type.intrinsic.ai/skills/ai.intrinsic.my_skill/42.0.0'
+          ),
+      )
+    expected_node_proto.data.create_or_update.blackboard_key = 'bbfoo'
+
+    compare.assertProto2Equal(self, node.proto, expected_node_proto)
+
+    node_direct = bt.Data(
+        name='foo',
+        blackboard_key='bbfoo',
+        protos=[
+            skills.ai.intrinsic.my_skill.intrinsic_proto.test_data.TestMessage(
+                my_int32=i,
+            )
+            for i in range(5)
+        ],
+    )
+    compare.assertProto2Equal(self, node_direct.proto, expected_node_proto)
 
   @parameterized.named_parameters(
       dict(
