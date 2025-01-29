@@ -8,6 +8,7 @@ import "google/longrunning/operations.proto";
 import "intrinsic/assets/proto/asset_type.proto";
 import "intrinsic/assets/proto/id.proto";
 import "intrinsic/assets/proto/metadata.proto";
+import "intrinsic/assets/proto/v1/search.proto";
 import "intrinsic/assets/scene_objects/proto/scene_object_manifest.proto";
 import "intrinsic/assets/services/proto/service_manifest.proto";
 import "intrinsic/skills/proto/processed_skill_manifest.proto";
@@ -71,6 +72,12 @@ message ListInstalledAssetsRequest {
   int64 page_size = 1;
   string page_token = 2;
   optional Filter strict_filter = 3;
+
+  // Order by which to sort the assets.
+  intrinsic_proto.assets.v1.OrderBy order_by = 4;
+
+  // If true, sort assets in descending order.
+  bool sort_descending = 5;
 }
 
 message InstalledAsset {
