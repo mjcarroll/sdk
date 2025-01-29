@@ -2,10 +2,12 @@
 
 #include "intrinsic/icon/examples/blended_joint_move_lib.h"
 
+#include <cstddef>
 #include <iostream>
 #include <memory>
 #include <optional>
 #include <ostream>
+#include <string>
 #include <vector>
 
 #include "absl/log/log.h"

@@ -3,6 +3,7 @@
 #include "intrinsic/icon/examples/joint_move_lib.h"
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "absl/log/log.h"

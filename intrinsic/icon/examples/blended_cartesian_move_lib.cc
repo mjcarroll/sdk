@@ -2,6 +2,7 @@
 
 #include "intrinsic/icon/examples/blended_cartesian_move_lib.h"
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>

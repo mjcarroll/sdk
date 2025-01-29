@@ -8,7 +8,6 @@
 #include <memory>
 #include <ostream>
 #include <string>
-#include <type_traits>
 
 #include "absl/log/log.h"
 #include "absl/status/status.h"
