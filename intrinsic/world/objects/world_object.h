@@ -16,6 +16,7 @@
 #include "intrinsic/world/proto/object_world_refs.pb.h"
 #include "intrinsic/world/proto/object_world_service.pb.h"
 #include "intrinsic/world/proto/outfeed_component.pb.h"
+#include "intrinsic/world/proto/simulation_component.pb.h"
 #include "intrinsic/world/proto/spawner_component.pb.h"
 
 namespace intrinsic {
@@ -97,6 +98,12 @@ class WorldObject : public TransformNode {
   // only set if the object was added to the world as an outfeed.
   std::optional<const intrinsic_proto::world::OutfeedComponent*>
   GetOutfeedComponent() const;
+
+  // Returns the simulation component corresponding to this world object. This
+  // is expected to be set only for objects with at least one physical link or
+  // sensor, and have simulation properties, e.g. is static.
+  std::optional<const intrinsic_proto::world::SimulationComponent*>
+  GetSimulationComponent() const;
 
   // Returns a reference to this object as an ObjectReference. If you need a
   // more a more general reference to a frame *or* object, see

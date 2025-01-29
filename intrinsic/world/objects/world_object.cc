@@ -186,6 +186,16 @@ WorldObject::GetOutfeedComponent() const {
   return std::nullopt;
 }
 
+std::optional<const intrinsic_proto::world::SimulationComponent*>
+WorldObject::GetSimulationComponent() const {
+  const intrinsic_proto::world::ObjectComponent& proto =
+      GetData().Proto().object_component();
+  if (proto.has_simulation_component()) {
+    return &proto.simulation_component();
+  }
+  return std::nullopt;
+}
+
 intrinsic_proto::world::ObjectReference WorldObject::ObjectReference() const {
   intrinsic_proto::world::ObjectReference result;
   result.mutable_by_name()->set_object_name(GetData().Proto().name());
