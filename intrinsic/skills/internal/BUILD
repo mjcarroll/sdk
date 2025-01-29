@@ -588,12 +588,12 @@ cc_library(
         "//intrinsic/skills/proto:skills_cc_proto",
         "//intrinsic/util/proto:source_code_info_view",
         "//intrinsic/util/status:status_macros",
-        "@com_github_google_re2//:re2",
         "@com_google_absl//absl/log",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
         "@com_google_protobuf//:protobuf",
+        "@com_googlesource_code_re2//:re2",
     ],
 )
 

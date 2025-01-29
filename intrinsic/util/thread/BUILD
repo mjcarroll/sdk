@@ -130,7 +130,6 @@ cc_library(
     hdrs = ["util.h"],
     deps = [
         "//intrinsic/util/status:status_macros",
-        "@com_github_google_re2//:re2",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/functional:any_invocable",
@@ -140,6 +139,7 @@ cc_library(
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/time",
+        "@com_googlesource_code_re2//:re2",
     ],
 )
 

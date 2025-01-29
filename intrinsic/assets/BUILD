@@ -72,12 +72,12 @@ cc_library(
         "//intrinsic/util/status:annotate",
         "//intrinsic/util/status:status_macros",
         "@boringssl//:crypto",
-        "@com_github_google_re2//:re2",
         "@com_google_absl//absl/log:check",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
+        "@com_googlesource_code_re2//:re2",
     ],
 )
 
