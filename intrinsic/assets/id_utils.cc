@@ -2,6 +2,7 @@
 
 #include "intrinsic/assets/id_utils.h"
 
+#include <cstddef>
 #include <map>
 #include <string>
 #include <vector>
