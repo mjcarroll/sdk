@@ -86,6 +86,6 @@ class BehaviorTreeRegistry:
       tree_proto = tree
     assert tree_proto.description
     skill_id = tree_proto.description.id
-    version = str(uuid.uuid4()).replace('-', '_')
-    tree_proto.description.id_version = skill_id + '.0.0.1sideload' + version
+    version = str(uuid.uuid4()).replace('-', '')
+    tree_proto.description.id_version = skill_id + '.0.0.1+sideload' + version
     self._register_or_update_behavior_tree(tree_proto)

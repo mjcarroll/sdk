@@ -338,6 +338,7 @@ class SkillsTest(parameterized.TestCase):
     )
 
     skill_id = 'ai.intrinsic.my_skill'
+    skill_version = '42.0.0'
     resource_slot = 'a'
     resource_name = 'some-name'
     resource_capability = 'some-type'
@@ -350,6 +351,7 @@ class SkillsTest(parameterized.TestCase):
     skill_registry_stub.GetSkills.return_value = (
         self._utils.create_get_skills_response(
             skill_id=skill_id,
+            skill_version=skill_version,
             parameter_defaults=test_skill_params_pb2.TestMessage(),
             resource_selectors={resource_slot: resource_capability},
         )
@@ -401,6 +403,7 @@ class SkillsTest(parameterized.TestCase):
     )
     expected_proto.resources[resource_slot].handle = resource_name
     expected_proto.parameters.Pack(parameters)
+    expected_proto.parameters.type_url = f'type.intrinsic.ai/skills/{skill_id}/{skill_version}/intrinsic_proto.test_data.TestMessage'
 
     compare.assertProto2Equal(self, expected_proto, skill.proto)
 

@@ -96,6 +96,7 @@ class SkillTestUtils:
       skill_id: str,
       parameter_defaults: message.Message,
       resource_selectors: Optional[dict[str, str]] = None,
+      skill_version: str | None = None,
   ) -> skills_pb2.Skill:
     """Creates a skill proto for a skill with parameters.
 
@@ -105,13 +106,18 @@ class SkillTestUtils:
         type of this message will be used as the skill's parameter message type.
       resource_selectors: A mapping from resource selector names to capability
         names.
+      skill_version: An optional version string to generate id_version.
 
     Returns:
       The skill proto.
     """
     id_parts = skill_id.split('.')
+    id_version = None
+    if skill_version is not None:
+      id_version = f'{skill_id}.{skill_version}'
     skill_info = skills_pb2.Skill(
         id=skill_id,
+        id_version=id_version,
         skill_name=id_parts[-1],
         package_name='.'.join(id_parts[:-1]),
     )
@@ -211,6 +217,7 @@ class SkillTestUtils:
       skill_id: str,
       parameter_defaults: test_skill_params_pb2.TestMessage,
       resource_selectors: Optional[dict[str, str]] = None,
+      skill_version: str | None = None,
   ) -> skill_registry_pb2.GetSkillsResponse:
     """Creates a GetSkillsResponse for a skill with parameters.
 
@@ -220,12 +227,13 @@ class SkillTestUtils:
         type of this message will be used as the skill's parameter message type.
       resource_selectors: A mapping from resource selector names to capability
         names.
+      skill_version: An optional version string to generate id_version.
 
     Returns:
       The skill proto.
     """
     skill_info = self.create_test_skill_info(
-        skill_id, parameter_defaults, resource_selectors
+        skill_id, parameter_defaults, resource_selectors, skill_version
     )
 
     skill_registry_response = skill_registry_pb2.GetSkillsResponse()

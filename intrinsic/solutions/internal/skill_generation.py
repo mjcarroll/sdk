@@ -888,7 +888,10 @@ class GeneratedSkill(provided.SkillBase):
       )
 
     if self._param_message is not None:
-      proto.parameters.Pack(self._param_message)
+      proto.parameters.Pack(
+          self._param_message,
+          type_url_prefix=skill_utils.type_url_prefix_for_skill(self._info),
+      )
 
     for slot, handle in self._resources.items():
       proto.resources[slot].handle = handle.name

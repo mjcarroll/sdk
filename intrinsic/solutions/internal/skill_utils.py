@@ -50,6 +50,7 @@ _PROTO_PACKAGE_SEPARATOR = "."
 RESOURCE_SLOT_DECONFLICT_SUFFIX = "_resource"
 
 INTRINSIC_TYPE_URL_PREFIX = "type.intrinsic.ai/"
+TYPE_URL_PREFIX = "type.googleapis.com/"
 INTRINSIC_TYPE_URL_AREA_SKILLS = "skills"
 TYPE_URL_SEPARATOR = "/"
 
@@ -83,6 +84,8 @@ def type_url_prefix_for_skill(skill_info: provided.SkillInfo) -> str:
   Returns:
     A type URL prefix that can be passed into Any.Pack.
   """
+  if not skill_info.skill_proto.id_version:
+    return TYPE_URL_PREFIX
   skill_id = skill_info.id
   skill_version = id_utils.version_from(skill_info.id_version)
   return f"{INTRINSIC_TYPE_URL_PREFIX}{INTRINSIC_TYPE_URL_AREA_SKILLS}{TYPE_URL_SEPARATOR}{skill_id}{TYPE_URL_SEPARATOR}{skill_version}"
