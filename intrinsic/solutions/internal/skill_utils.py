@@ -21,6 +21,7 @@ from google.protobuf import duration_pb2
 from google.protobuf import message
 from google.protobuf import message_factory
 import grpc
+from intrinsic.assets import id_utils
 from intrinsic.icon.proto import joint_space_pb2
 from intrinsic.math.proto import pose_pb2
 from intrinsic.math.python import data_types
@@ -48,6 +49,10 @@ _PROTO_PACKAGE_SEPARATOR = "."
 
 RESOURCE_SLOT_DECONFLICT_SUFFIX = "_resource"
 
+INTRINSIC_TYPE_URL_PREFIX = "type.intrinsic.ai/"
+INTRINSIC_TYPE_URL_AREA_SKILLS = "skills"
+TYPE_URL_SEPARATOR = "/"
+
 
 def module_for_generated_skill(skill_package: str) -> str:
   """Generates the module name for a generated skill class.
@@ -65,6 +70,22 @@ def module_for_generated_skill(skill_package: str) -> str:
     return skills_python_package + "." + skill_package
   else:
     return skills_python_package
+
+
+def type_url_prefix_for_skill(skill_info: provided.SkillInfo) -> str:
+  """Generates a skill specific type URL prefix.
+
+  The specific prefix allows lookup of a packed proto by the proto registry.
+
+  Args:
+    skill_info: Skill Info that contains an id_version.
+
+  Returns:
+    A type URL prefix that can be passed into Any.Pack.
+  """
+  skill_id = skill_info.id
+  skill_version = id_utils.version_from(skill_info.id_version)
+  return f"{INTRINSIC_TYPE_URL_PREFIX}{INTRINSIC_TYPE_URL_AREA_SKILLS}{TYPE_URL_SEPARATOR}{skill_id}{TYPE_URL_SEPARATOR}{skill_version}"
 
 
 @dataclasses.dataclass

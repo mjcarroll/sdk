@@ -130,6 +130,7 @@ py_library(
     srcs = ["skill_utils.py"],
     deps = [
         ":skill_parameters",
+        "//intrinsic/assets:id_utils_py",
         "//intrinsic/icon/proto:joint_space_py_pb2",
         "//intrinsic/math/proto:pose_py_pb2",
         "//intrinsic/math/python:data_types",

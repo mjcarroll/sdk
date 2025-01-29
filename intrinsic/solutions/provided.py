@@ -144,6 +144,7 @@ class SkillInfo(abc.ABC):
 
   Attributes:
     id: Skill ID (e.g. 'ai.intrinsic.move_robot').
+    id_version: Skill ID and version (e.g. 'ai.intrinsic.move_robot.1.2.1').
     skill_name: Skill name (e.g. 'move_robot').
     package_name: Skill package name (e.g. 'ai.intrinsic').
     skill_proto: proto with skill information that this instance represents.
@@ -154,6 +155,11 @@ class SkillInfo(abc.ABC):
   @property
   @abc.abstractmethod
   def id(self) -> str:
+    ...
+
+  @property
+  @abc.abstractmethod
+  def id_version(self) -> str:
     ...
 
   @property

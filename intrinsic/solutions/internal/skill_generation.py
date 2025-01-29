@@ -135,6 +135,10 @@ class SkillInfoImpl(provided.SkillInfo):
     return self._skill_proto.id
 
   @property
+  def id_version(self) -> str:
+    return self._skill_proto.id_version
+
+  @property
   def skill_name(self) -> str:
     # Use skill ID as ground truth. Don't use the 'skill_name' in the proto
     # which is a display name that might contain, e.g., spaces.
