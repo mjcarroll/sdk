@@ -832,7 +832,7 @@ def _get_nested_classes(
 
 
 def collect_message_classes_to_wrap(
-    param_descriptor: descriptor.Descriptor,
+    message_descriptor: descriptor.Descriptor,
     message_classes: dict[str, Type[message.Message]],
     collected_classes: dict[str, Type[message.Message]],
     collected_enums: dict[str, descriptor.EnumDescriptor],
@@ -840,10 +840,12 @@ def collect_message_classes_to_wrap(
   """Collects message classes for which wrapper classes should be generated.
 
   Recursively collects all message types and enums which are used by the
-  fields of the message specified by 'param_descriptor'.
+  fields of the message specified by 'message_descriptor'.
+  The collected message and enum types will be recorded in the collected_classes
+  and collected_enums inputs.
 
   Args:
-    param_descriptor: parameter proto descriptor
+    message_descriptor: proto descriptor
     message_classes: Mapping from full proto message name to message class for
       all messages in the skill's hermetic descriptor pool.
     collected_classes: Subset of classes from 'message_classes' which have been
@@ -852,7 +854,12 @@ def collect_message_classes_to_wrap(
       containing all collected enums up to this point.
   """
 
-  for field in param_descriptor.fields:
+  if message_descriptor.full_name in collected_classes:
+    return
+  collected_classes[message_descriptor.full_name] = message_classes[
+      message_descriptor.full_name
+  ]
+  for field in message_descriptor.fields:
     if field.enum_type is not None:
       enum_type = typing.cast(descriptor.EnumDescriptor, field.enum_type)
       collected_enums[enum_type.full_name] = enum_type
@@ -867,24 +874,17 @@ def collect_message_classes_to_wrap(
         # of the map's values for collection.
         map_value_field = field.message_type.fields_by_name["value"]
         if map_value_field.message_type is not None:
-          message_full_name = map_value_field.message_type.full_name
           message_descriptor = map_value_field.message_type
         else:
           continue
       else:
-        message_full_name = field.message_type.full_name
         message_descriptor = field.message_type
-
-      if message_full_name not in collected_classes:
-        collected_classes[message_full_name] = message_classes[
-            message_full_name
-        ]
-        collect_message_classes_to_wrap(
-            message_descriptor,
-            message_classes,
-            collected_classes,
-            collected_enums,
-        )
+      collect_message_classes_to_wrap(
+          message_descriptor,
+          message_classes,
+          collected_classes,
+          collected_enums,
+      )
 
 
 class MessageWrapper:

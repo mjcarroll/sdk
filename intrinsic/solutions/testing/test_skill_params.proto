@@ -92,6 +92,14 @@ message TestMessageWrapped {
   TestMessage test_message = 1;
 }
 
+message ReturnValue {
+  int64 a_number = 1;
+}
+
+message TestMessageReturn {
+  ReturnValue return_value = 1;
+}
+
 message VariousEnumsMessage {
   enum VariousEnumsEnum {
     VARIOUS_ENUMS_ENUM_UNSPECIFIED = 0;

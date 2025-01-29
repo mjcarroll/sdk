@@ -149,6 +149,7 @@ class SkillTestUtils:
       parameter_defaults: message.Message,
       resource_selectors: Optional[dict[str, str]] = None,
       skill_description: Optional[str] = None,
+      return_value_defaults: message.Message | None = None,
   ) -> skills_pb2.Skill:
     """Creates a skill proto for a skill with parameters and return values.
 
@@ -160,6 +161,8 @@ class SkillTestUtils:
       resource_selectors: A mapping from resource selector names to capability
         names.
       skill_description: The description of the skill.
+      return_value_defaults: Defaults values for the skill's return value. If
+        not set the parameter_defaults are taken.
 
     Returns:
       The skill proto.
@@ -183,8 +186,13 @@ class SkillTestUtils:
         self._file_descriptor_set
     )
 
+    return_value_message_full_name = parameter_defaults.DESCRIPTOR.full_name
+    if return_value_defaults is not None:
+      return_value_message_full_name = (
+          return_value_defaults.DESCRIPTOR.full_name
+      )
     skill_info.return_value_description.return_value_message_full_name = (
-        parameter_defaults.DESCRIPTOR.full_name
+        return_value_message_full_name
     )
 
     # Prevents infinite recursion due to recursive messages

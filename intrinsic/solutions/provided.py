@@ -193,6 +193,10 @@ class SkillInfo(abc.ABC):
   def parameter_descriptor(self) -> descriptor.Descriptor:
     ...
 
+  @abc.abstractmethod
+  def return_value_descriptor(self) -> descriptor.Descriptor:
+    ...
+
   @property
   @abc.abstractmethod
   def field_names(self) -> Set[str]:

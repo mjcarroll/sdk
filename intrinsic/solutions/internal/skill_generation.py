@@ -181,6 +181,11 @@ class SkillInfoImpl(provided.SkillInfo):
         self._skill_proto.parameter_description.parameter_message_full_name
     )
 
+  def return_value_descriptor(self) -> descriptor.Descriptor:
+    return self._message_pool.FindMessageTypeByName(
+        self._skill_proto.return_value_description.return_value_message_full_name
+    )
+
   @property
   def field_names(self) -> Set[str]:
     return self._field_names
@@ -527,6 +532,13 @@ def gen_skill_class(
   if info.skill_proto.HasField("parameter_description"):
     skill_utils.collect_message_classes_to_wrap(
         info.parameter_descriptor(),
+        info.message_classes,
+        message_classes_to_wrap,
+        enum_descriptors_to_wrap,
+    )
+  if info.skill_proto.HasField("return_value_description"):
+    skill_utils.collect_message_classes_to_wrap(
+        info.return_value_descriptor(),
         info.message_classes,
         message_classes_to_wrap,
         enum_descriptors_to_wrap,

@@ -2156,9 +2156,10 @@ Returns:
     )
 
   def test_wrapper_access(self):
-    skill_info = self._utils.create_test_skill_info(
+    skill_info = self._utils.create_test_skill_info_with_return_value(
         skill_id='ai.intrinsic.my_skill',
         parameter_defaults=test_skill_params_pb2.TestMessageWrapped(),
+        return_value_defaults=test_skill_params_pb2.TestMessageReturn(),
     )
     skills = skill_providing.Skills(
         self._utils.create_skill_registry_for_skill_info(skill_info),
@@ -2168,6 +2169,18 @@ Returns:
     my_skill = skills.ai.intrinsic.my_skill
 
     # Id notation: skill.<full message name>
+    self.assertIsInstance(
+        my_skill.intrinsic_proto.test_data.TestMessageWrapped(),
+        skill_utils.MessageWrapper,
+    )
+    self.assertIsInstance(
+        my_skill.intrinsic_proto.test_data.TestMessageReturn(),
+        skill_utils.MessageWrapper,
+    )
+    self.assertIsInstance(
+        my_skill.intrinsic_proto.test_data.ReturnValue(),
+        skill_utils.MessageWrapper,
+    )
     self.assertIsInstance(
         my_skill.intrinsic_proto.test_data.SubMessage(),
         skill_utils.MessageWrapper,
