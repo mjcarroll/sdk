@@ -29,4 +29,5 @@ message ForceControlSettings {
   // will be truncated. Useful for masking small wrench artifacts such as cable
   // tugging or sensor drift.
   intrinsic_proto.icon.Wrench sensed_wrench_deadband = 5;
+
 }
