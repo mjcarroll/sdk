@@ -44,8 +44,15 @@ Publisher::~Publisher() {
 
 absl::Status Publisher::Publish(const google::protobuf::Message& message,
                                 absl::Time event_time) const {
+  google::protobuf::Any message_packed;
+  message_packed.PackFrom(message);
+  return Publish(std::move(message_packed), event_time);
+}
+
+absl::Status Publisher::Publish(google::protobuf::Any message,
+                                absl::Time event_time) const {
   intrinsic_proto::pubsub::PubSubPacket wrapper;
-  wrapper.mutable_payload()->PackFrom(message);
+  *wrapper.mutable_payload() = std::move(message);
   // When the pubsub message was sent out.
   absl::Time publish_time = absl::Now();
   INTR_ASSIGN_OR_RETURN(*wrapper.mutable_publish_time(),

@@ -7,6 +7,10 @@
 #include <string>
 
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
+#include "absl/time/clock.h"
+#include "absl/time/time.h"
+#include "google/protobuf/any.pb.h"
 #include "google/protobuf/message.h"
 
 namespace intrinsic {
@@ -29,6 +33,13 @@ class Publisher {
                        absl::Time event_time) const;
 
   absl::Status Publish(const google::protobuf::Message& message) const {
+    return Publish(message, absl::Now());
+  }
+
+  absl::Status Publish(google::protobuf::Any message,
+                       absl::Time event_time) const;
+
+  absl::Status Publish(google::protobuf::Any message) const {
     return Publish(message, absl::Now());
   }
 
