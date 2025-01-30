@@ -154,10 +154,15 @@ absl::Status LoopbackHardwareModule::Init(
     LOG(INFO) << "ICON is driving the loopback hardware module clock.";
   } else {
     LOG(INFO) << "The loopback hardware module is driving ICON's clock.";
-
-    INTR_ASSIGN_OR_RETURN(
-        cycle_duration_,
-        intrinsic::ToAbslDuration(loopback_config.cycle_duration()));
+    if (auto control_period_from_module_config = config.GetControlPeriod();
+        !absl::IsNotFound(control_period_from_module_config.status())) {
+      INTR_RETURN_IF_ERROR(control_period_from_module_config.status());
+      cycle_duration_ = control_period_from_module_config.value();
+    } else {
+      INTR_ASSIGN_OR_RETURN(
+          cycle_duration_,
+          intrinsic::ToAbslDuration(loopback_config.cycle_duration()));
+    }
 
     intrinsic::ThreadOptions thread_options = config.GetIconThreadOptions();
     thread_options.SetName("LoopbackHardwareModuleThread");
