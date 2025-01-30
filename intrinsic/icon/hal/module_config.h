@@ -8,6 +8,7 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
+#include "absl/time/time.h"
 #include "intrinsic/icon/control/realtime_clock_interface.h"
 #include "intrinsic/icon/hal/proto/hardware_module_config.pb.h"
 #include "intrinsic/icon/hardware_modules/sim_bus/sim_bus_hardware_module.pb.h"
@@ -77,6 +78,15 @@ class ModuleConfig {
   absl::string_view GetSharedMemoryNamespace() const;
 
   bool DisableMallocGuard() const { return config_.disable_malloc_guard(); }
+
+  // Returns the control period as defined in the underlying
+  // HardwareModuleConfig.
+  //
+  // Returns NotFoundError if the config does not have a control period *or*
+  // control frequency value.
+  // Returns InvalidArgumentError if the control period / frequency is invalid
+  // (less than or equal to zero).
+  absl::StatusOr<absl::Duration> GetControlPeriod() const;
 
  private:
   intrinsic_proto::icon::HardwareModuleConfig config_;
