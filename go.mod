@@ -8,6 +8,7 @@ require (
 	cloud.google.com/go/firestore v1.17.0
 	cloud.google.com/go/logging v1.12.0
 	cloud.google.com/go/longrunning v0.6.2
+	cloud.google.com/go/secretmanager v1.14.2
 	cloud.google.com/go/storage v1.43.0
 	contrib.go.opencensus.io/exporter/ocagent v0.7.0
 	contrib.go.opencensus.io/exporter/prometheus v0.4.2
