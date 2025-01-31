@@ -8,6 +8,13 @@ import "intrinsic/icon/proto/logging_mode.proto";
 import "intrinsic/icon/server/config/realtime_control_config.proto";
 import "intrinsic/icon/server/config/services_config.proto";
 
+message DeactivatedHardwareConfiguration {
+  // Hardware module names that will not be connected to on startup.
+  repeated string hardware_module_names = 1;
+  // Part names that will not be initialized on startup.
+  repeated string part_names = 2;
+}
+
 // Top-level config for MainLoop and real-time control servers.
 message IconMainConfig {
   // ICON main loop frequency.
@@ -44,6 +51,10 @@ message IconMainConfig {
   // Disables the malloc guard in the ICON server. This means memory allocation
   // in action's Enter(), Control() or Sense() functions will not be caught.
   bool disable_malloc_guard = 14;
+
+  // Configuration for components that ICON will not connect to or initialize on
+  // startup.
+  DeactivatedHardwareConfiguration deactivated_hardware_configuration = 15;
 
   reserved 9;
 }
