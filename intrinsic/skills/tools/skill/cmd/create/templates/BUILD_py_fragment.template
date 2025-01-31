@@ -42,6 +42,7 @@ py_test(
     main = "{{.SkillNameSnakeCase}}_test.py",
     deps = [
         ":{{.SkillNameSnakeCase}}_py",
+        "@ai_intrinsic_sdks//intrinsic/skills/testing:skill_test_utils",
     ],
 )
 

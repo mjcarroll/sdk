@@ -1,0 +1,42 @@
+# Copyright 2023 Intrinsic Innovation LLC
+
+# proto-file: intrinsic/skills/proto/skill_manifest.proto
+# proto-message: intrinsic_proto.skills.SkillManifest
+
+id {
+  package: "ai.intrinsic"
+  name: "echo"
+}
+display_name: "Echo"
+vendor {
+  display_name: "Intrinsic"
+}
+documentation {
+  description: "A skill that echos its parameters as its result."
+}
+options {
+  supports_cancellation: false
+  python_config {
+    skill_module: "intrinsic.skills.testing.echo_skill"
+    proto_module: "intrinsic.skills.testing.echo_skill_pb2"
+    create_skill: "intrinsic.skills.testing.echo_skill.EchoSkill"
+  }
+}
+parameter {
+  message_full_name: "intrinsic_proto.skills.EchoSkillParams"
+  default_value {
+    [type.googleapis.com/intrinsic_proto.skills.EchoSkillParams] {
+      foo: "bar"
+    }
+  }
+}
+return_type {
+  message_full_name: "intrinsic_proto.skills.EchoSkillReturn"
+}
+status_info: [
+  {
+    code: 10123
+    title: "Test status code"
+    recovery_instructions: "Run faster"
+  }
+]

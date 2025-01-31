@@ -5,8 +5,9 @@
 load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_proto_library")
 load("@com_google_protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
 load("@com_google_protobuf//bazel:proto_library.bzl", "proto_library")
-load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
 load("//bazel:go_macros.bzl", "go_proto_library")
+load("//intrinsic/skills/build_defs:skill.bzl", "py_skill", "skill_manifest")
 
 package(
     default_testonly = True,
@@ -27,6 +28,39 @@ cc_proto_library(
     deps = [":echo_skill_proto"],
 )
 
+py_proto_library(
+    name = "echo_skill_py_pb2",
+    visibility = [
+        "//intrinsic/skills/internal:__pkg__",
+        "//intrinsic/skills/python:__pkg__",
+    ],
+    deps = [":echo_skill_proto"],
+)
+
+py_library(
+    name = "echo_skill_py",
+    srcs = ["echo_skill.py"],
+    visibility = ["//intrinsic/skills/internal:__pkg__"],
+    deps = [
+        ":echo_skill_py_pb2",
+        "//intrinsic/skills/python:skill_interface",
+        "//intrinsic/skills/python:skill_interface_utils",
+        "//intrinsic/util:decorators",
+    ],
+)
+
+py_test(
+    name = "echo_skill_py_test",
+    srcs = ["echo_skill_py_test.py"],
+    data = [":echo_skill_py_manifest"],
+    deps = [
+        ":echo_skill_py",
+        ":echo_skill_py_pb2",
+        ":skill_test_utils",
+        "@com_google_absl_py//absl/testing:absltest",
+    ],
+)
+
 cc_library(
     name = "echo_skill",
     srcs = ["echo_skill.cc"],
@@ -41,6 +75,26 @@ cc_library(
         "//intrinsic/util/status:status_macros",
         "@com_google_absl//absl/status:statusor",
         "@com_google_protobuf//:protobuf",
+    ],
+)
+
+skill_manifest(
+    name = "echo_skill_py_manifest",
+    src = "echo_skill_manifest_py.textproto",
+    visibility = [
+        "//intrinsic/icon/release:__pkg__",
+        "//intrinsic/skills/generator:__pkg__",
+        "//intrinsic/skills/internal:__pkg__",
+    ],
+    deps = [":echo_skill_proto"],
+)
+
+py_skill(
+    name = "echo_skill_py_skill",
+    manifest = ":echo_skill_py_manifest",
+    deps = [
+        ":echo_skill_py",
+        ":echo_skill_py_pb2",
     ],
 )
 
@@ -126,6 +180,57 @@ py_library(
         "//intrinsic/skills/internal:skill_repository_py",
         "//intrinsic/skills/python:skill_interface",
         "//intrinsic/util:decorators",
+    ],
+)
+
+py_library(
+    name = "skill_test_utils",
+    srcs = ["skill_test_utils.py"],
+    visibility = [
+        "//intrinsic:public_api_users",
+    ],
+    deps = [
+        "//intrinsic/assets:id_utils_py",
+        "//intrinsic/geometry/service:geometry_service_py_pb2_grpc",
+        "//intrinsic/icon/release:file_helpers_py",
+        "//intrinsic/logging/proto:context_py_pb2",
+        "//intrinsic/motion_planning:motion_planner_client_py",
+        "//intrinsic/motion_planning/proto:motion_planner_service_py_pb2_grpc",
+        "//intrinsic/resources/proto:resource_handle_py_pb2",
+        "//intrinsic/skills/internal:execute_context_impl_py",
+        "//intrinsic/skills/internal:get_footprint_context_impl_py",
+        "//intrinsic/skills/internal:preview_context_impl_py",
+        "//intrinsic/skills/proto:skill_manifest_py_pb2",
+        "//intrinsic/skills/python:execute_request",
+        "//intrinsic/skills/python:get_footprint_request",
+        "//intrinsic/skills/python:preview_request",
+        "//intrinsic/skills/python:skill_canceller",
+        "//intrinsic/skills/python:skill_interface",
+        "//intrinsic/skills/python:skill_logging_context",
+        "//intrinsic/util/path_resolver:path_resolver_py",
+        "//intrinsic/world/proto:object_world_service_py_pb2_grpc",
+        "//intrinsic/world/python:object_world_client",
+        "@com_google_protobuf//:protobuf_python",
+    ],
+)
+
+py_test(
+    name = "skill_test_utils_py_test",
+    srcs = ["skill_test_utils_test.py"],
+    data = [
+        ":echo_skill_py_manifest",
+    ],
+    main = "skill_test_utils_test.py",
+    deps = [
+        ":echo_skill_py_pb2",
+        ":skill_test_utils",
+        "//intrinsic/assets:id_utils_py",
+        "//intrinsic/logging/proto:log_item_py_pb2",
+        "//intrinsic/skills/proto:skill_manifest_py_pb2",
+        "//intrinsic/skills/python:skill_logging_context",
+        "//intrinsic/solutions/testing:compare",
+        "@com_google_absl_py//absl/testing:absltest",
+        "@com_google_absl_py//absl/testing:parameterized",
     ],
 )
 

@@ -4,14 +4,29 @@ Copyright 2023 Intrinsic Innovation LLC
 
 import unittest
 
+from intrinsic.skills.testing import skill_test_utils as stu
+
 from {{if .BazelPackage}}{{strJoin .BazelPackage "."}}.{{end}}{{.SkillNameSnakeCase}} import {{.SkillNameUpperCamelCase}}
 from {{if .BazelPackage}}{{strJoin .BazelPackage "."}}.{{end}}{{.SkillNameSnakeCase}}_pb2 import {{.SkillNameUpperCamelCase}}Params
 
 
 class {{.SkillNameUpperCamelCase}}Test(unittest.TestCase):
 
-    def test_create_skill(self):
+    def test_execute_skill(self):
         skill = {{.SkillNameUpperCamelCase}}()
+
+        # Execute the skill
+        params = {{.SkillNameUpperCamelCase}}Params(
+            text="hello world",
+        )
+        context = stu.make_test_execute_context()
+        request = stu.make_test_execute_request(params)
+
+        with self.assertLogs() as log_output:
+            skill.execute(request, context)
+
+        output = log_output[0][0].message
+        self.assertEqual(output, '"text" parameter passed in skill params: hello world')
 
 
 if __name__ == '__main__':

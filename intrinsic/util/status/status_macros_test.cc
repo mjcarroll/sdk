@@ -5,7 +5,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <cstddef>
 #include <memory>
 #include <string>
 #include <string_view>
