@@ -6,17 +6,7 @@
 name: "loopback_hardware_module"
 module_config {
   [type.googleapis.com/intrinsic_proto.icon.LoopbackConfig] {
-    cycle_duration: {
-      seconds: 0
-      nanos: 4000000
-    }
   }
 }
 drives_realtime_clock: false
-simulation_module_config {
-  cycle_duration: {
-    seconds: 0
-    nanos: 4000000
-  }
-}
-
+control_period_ns: 4000000
