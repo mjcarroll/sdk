@@ -156,6 +156,7 @@ go_library(
         "//intrinsic/assets/proto:metadata_go_proto",
         "//intrinsic/assets/proto:release_tag_go_proto",
         "//intrinsic/skills/tools/resource/cmd:bundleimages",
+        "//intrinsic/skills/tools/skill/cmd/directupload",
         "//intrinsic/tools/inctl/cmd:root",
         "//intrinsic/tools/inctl/util:printer",
         "@com_github_google_go_containerregistry//pkg/v1/google:go_default_library",

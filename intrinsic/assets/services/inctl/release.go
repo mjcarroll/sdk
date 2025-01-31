@@ -27,11 +27,30 @@ import (
 	mpb "intrinsic/assets/proto/metadata_go_proto"
 	releasetagpb "intrinsic/assets/proto/release_tag_go_proto"
 	"intrinsic/skills/tools/resource/cmd/bundleimages"
+	"intrinsic/skills/tools/skill/cmd/directupload/directupload"
 	"intrinsic/tools/inctl/cmd/root"
 	"intrinsic/tools/inctl/util/printer"
 )
 
-func authOpt() remote.Option {
+type imageTransfererOpts struct {
+	cmd             *cobra.Command
+	conn            *grpc.ClientConn
+	useDirectUpload bool
+}
+
+func imageTransferer(opts imageTransfererOpts) imagetransfer.Transferer {
+	var transferer imagetransfer.Transferer
+	if opts.useDirectUpload {
+		dopts := []directupload.Option{
+			directupload.WithDiscovery(directupload.NewCatalogTarget(opts.conn)),
+			directupload.WithOutput(opts.cmd.OutOrStdout()),
+		}
+		transferer = directupload.NewTransferer(opts.cmd.Context(), dopts...)
+	}
+	return transferer
+}
+
+func remoteOpt() remote.Option {
 	return remote.WithAuthFromKeychain(google.Keychain)
 }
 
@@ -134,6 +153,8 @@ func GetCommand() *cobra.Command {
 			target := args[0]
 			dryRun := flags.GetFlagDryRun()
 
+			useDirectUpload := true
+
 			var conn *grpc.ClientConn
 			var transferer imagetransfer.Transferer
 			if !dryRun {
@@ -143,7 +164,11 @@ func GetCommand() *cobra.Command {
 					return fmt.Errorf("failed to create client connection: %v", err)
 				}
 				defer conn.Close()
-				transferer = imagetransfer.RemoteTransferer(remote.WithContext(cmd.Context()), authOpt())
+				transferer = imageTransferer(imageTransfererOpts{
+					cmd:             cmd,
+					conn:            conn,
+					useDirectUpload: useDirectUpload,
+				})
 			}
 
 			asset, err := processAsset(target, transferer, flags)
@@ -156,9 +181,6 @@ func GetCommand() *cobra.Command {
 			}
 			idVersion := idutils.IDVersionFromProtoUnchecked(asset.GetMetadata().GetIdVersion())
 			printer.PrintSf("Releasing service %q to the asset catalog", idVersion)
-			if err != nil {
-				return errors.Wrap(err, "could not dial catalog")
-			}
 			if dryRun {
 				printer.PrintS("Skipping call to asset catalog (dry-run)")
 				return nil
