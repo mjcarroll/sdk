@@ -1009,6 +1009,11 @@ absl::Status HardwareModuleRuntime::Stop() {
   callback_handler_->Shutdown();
   apply_command_server_->RequestStop();
   read_status_server_->RequestStop();
+  deactivate_server_->RequestStop();
+  enable_motion_server_->RequestStop();
+  clear_faults_server_->RequestStop();
+  prepare_server_->RequestStop();
+  activate_server_->RequestStop();
   stop_requested_->store(true);
   auto status = hardware_module_.instance->Shutdown();
   apply_command_server_->JoinAsyncThread();

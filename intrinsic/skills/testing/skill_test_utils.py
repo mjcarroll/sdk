@@ -1,6 +1,6 @@
 # Copyright 2023 Intrinsic Innovation LLC
 
-"""dfdsfdsProvides utils for skill testing."""
+"""Provides utils for skill testing."""
 
 from __future__ import annotations
 
