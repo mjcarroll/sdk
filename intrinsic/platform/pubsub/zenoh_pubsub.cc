@@ -25,7 +25,6 @@
 #include "intrinsic/platform/pubsub/zenoh_publisher_data.h"
 #include "intrinsic/platform/pubsub/zenoh_pubsub_data.h"
 #include "intrinsic/platform/pubsub/zenoh_subscription_data.h"
-#include "intrinsic/platform/pubsub/zenoh_util/zenoh_config.h"
 #include "intrinsic/platform/pubsub/zenoh_util/zenoh_handle.h"
 #include "intrinsic/util/status/status_macros.h"
 

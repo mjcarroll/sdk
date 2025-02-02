@@ -2,6 +2,7 @@
 
 #include "intrinsic/platform/pubsub/publisher_stats.h"
 
+#include <cstdint>
 #include <limits>
 
 #include "absl/container/flat_hash_map.h"
