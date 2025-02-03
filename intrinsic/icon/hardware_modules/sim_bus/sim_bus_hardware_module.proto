@@ -149,7 +149,9 @@ message SimBusModuleConfig {
   optional intrinsic_proto.icon.DigitalIOs dio_config = 5;
   // Duration of a single control cycle. Use this to override any value from the
   // World. Should only be needed for testing.
-  optional google.protobuf.Duration cycle_duration = 6;
+  //
+  // DEPRECATED: use the control_rate oneof in HardwareModuleConfig instead
+  optional google.protobuf.Duration cycle_duration = 6 [deprecated = true];
   // Overrides sim server address (in hostname:port format). Only use this for
   // testing! If omitted, the HWM retrieves the hostname from the ModuleConfig,
   // and the port from the World entity.
