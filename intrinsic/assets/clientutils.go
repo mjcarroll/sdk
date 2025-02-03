@@ -28,19 +28,11 @@ import (
 )
 
 const (
-	// TestGlobalCatalogProject is a test project that uses the global asset catalog.
-	// See GetSkillCatalogProject for details.
-	TestGlobalCatalogProject = "test-global-catalog-project"
-	// TestProjectSpecificCatalogProject is a test project that uses a project-specific catalog.
-	// See GetSkillCatalogProject for details.
-	TestProjectSpecificCatalogProject = "test-project-specific-catalog-project"
-
 	defaultCatalogProject = "intrinsic-assets-prod"
 )
 
 var (
-	catalogEndpointAddressRegex = regexp.MustCompile(`(^|/)www\.endpoints\.([^\.]+).cloud.goog`)
-	catalogAssetAddressRegex    = regexp.MustCompile(`(^|/)assets[-]?([^\.]*)\.intrinsic\.ai`)
+	catalogAssetAddressRegex = regexp.MustCompile(`(^|/)assets[-]?([^\.]*)\.intrinsic\.ai`)
 
 	assetAddressToProjectSuffix = map[string]string{
 		"":    "prod",
