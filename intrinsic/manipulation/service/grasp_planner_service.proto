@@ -10,7 +10,6 @@ import "intrinsic/manipulation/grasping/grasp.proto";
 import "intrinsic/manipulation/grasping/grasp_execution_planner_params.proto";
 import "intrinsic/manipulation/grasping/grasp_planner_params.proto";
 import "intrinsic/manipulation/grasping/grasp_ranker_params.proto";
-import "intrinsic/manipulation/proto/workspace.proto";
 import "intrinsic/world/proto/object_world_refs.proto";
 
 // Parameters to plan grasps by the GraspPlannerService
@@ -43,16 +42,6 @@ message GPSPlanGraspExecutionParams {
 message GPSContinuousPlanningParams {
   // The parameters to run continuous grasp planning.
   GPSPlanGraspsParams plan_grasps_params = 1;
-}
-
-message ScenePerceptionInfo {
-  // Name of the scene perceiver for this planner.
-  string scene_perceiver_name = 1;
-  // The zone estimates the field of view of the camera.
-  // The robot needs to be out of this region before we perceive a scene.
-  intrinsic_proto.manipulation.OrientedBoundingBoxWorkspace camera_space = 2;
-  // The robot to check.
-  string robot_name = 3;
 }
 
 // A request to register a grasp planner with a given id.
