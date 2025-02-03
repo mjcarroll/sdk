@@ -12,10 +12,34 @@ from {{if .BazelPackage}}{{strJoin .BazelPackage "."}}.{{end}}{{.SkillNameSnakeC
 
 class {{.SkillNameUpperCamelCase}}Test(unittest.TestCase):
 
-    def test_execute_skill(self):
+    def test_get_footprint(self):
         skill = {{.SkillNameUpperCamelCase}}()
 
-        # Execute the skill
+        params = {{.SkillNameUpperCamelCase}}Params(
+            text="hello world",
+        )
+        context = stu.make_test_get_footprint_context()
+        request = stu.make_test_get_footprint_request(params)
+
+        result = skill.get_footprint(request, context)
+        self.assertTrue(result.lock_the_universe)
+
+    def test_preview(self):
+        skill = {{.SkillNameUpperCamelCase}}()
+
+        params = {{.SkillNameUpperCamelCase}}Params(
+            text="hello world",
+        )
+        context = stu.make_test_preview_context()
+        request = stu.make_test_preview_request(params)
+
+        # Update this test when you implement preview
+        with self.assertRaises(NotImplementedError):
+            skill.preview(request, context)
+
+    def test_execute(self):
+        skill = {{.SkillNameUpperCamelCase}}()
+
         params = {{.SkillNameUpperCamelCase}}Params(
             text="hello world",
         )
