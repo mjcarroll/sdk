@@ -89,7 +89,7 @@ message ListAssetsRequest {
     optional string display_name = 3;
 
     // Filter assets by asset tag.
-    intrinsic_proto.assets.AssetTag asset_tag = 4;
+    optional intrinsic_proto.assets.AssetTag asset_tag = 4;
 
     // Only return default versions of assets.
     optional bool only_default = 5;
