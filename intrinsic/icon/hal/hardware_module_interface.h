@@ -133,6 +133,10 @@ class HardwareModuleInterface {
   // The init phase is considered part of the non-realtime bringup phase.
   // `init_context` provides the Hardware Module configuration and other
   // utilities.
+  //
+  // It is recommended to not fail if the hardware connection could not be
+  // established during `Init()` since this inconvenient for the user to recover
+  // from. This should be retried during the next `ClearFaults()` call.
   virtual absl::Status Init(HardwareModuleInitContext& init_context) = 0;
 
   // Gives the hardware module a chance to prepare itself for activation. This
@@ -152,20 +156,24 @@ class HardwareModuleInterface {
   // `RealtimeClock::Reset()` *must not* be called in parallel to
   // `RealtimeClock::TickBlockingWith*()`.
   //
+  // It is recommended to not fail if the hardware connection could not be
+  // established during `Prepare()` since this inconvenient for the user to
+  // recover from. This should be retried during the next `ClearFaults()` call.
+  //
   // ICON calls `Activate()` after a successful call to `Prepare()` on all
   // hardware modules.
-  // Returns kAborted to indicate a fatal fault, which requires a restart of the
-  // process. The Hardware Module runtime will perform the process restart on
-  // the next clear faults call via the ResourceHealth interface.
+  // All failures of `Prepare()` are considered fatal faults. The Hardware
+  // Module runtime will perform the process restart on the next clear faults
+  // call via the ResourceHealth interface.
   virtual absl::Status Prepare() { return absl::OkStatus(); }
 
   // Activates the hardware module.
   // A call to `Activate()` signals the hardware module that ICON has
   // successfully connected to the hardware module and starts the realtime loop.
   // Prior to this, there's no call to `ReadStatus` happening.
-  // Returns kAborted to indicate a fatal fault, which requires a restart of the
-  // process. The Hardware Module runtime will perform the process restart on
-  // the next clear faults call via the ResourceHealth interface.
+  // All failures of `Activate()` are considered fatal faults. The Hardware
+  // Module runtime will perform the process restart on the next clear faults
+  // call via the ResourceHealth interface.
   virtual RealtimeStatus Activate() = 0;
 
   // Deactivates the hardware module.
@@ -177,9 +185,9 @@ class HardwareModuleInterface {
   // call to `Deactivate()` is semantically different from `Shutdown()` in which
   // a subsequent call to `Activate()` is designed to succeed when the hardware
   // module is deactivated.
-  // Returns kAborted to indicate a fatal fault, which requires a restart of the
-  // process. The Hardware Module runtime will perform the process restart on
-  // the next clear faults call via the ResourceHealth interface.
+  // All failures of `Deactivate()` are considered fatal faults. The Hardware
+  // Module runtime will perform the process restart on the next clear faults
+  // call via the ResourceHealth interface.
   virtual RealtimeStatus Deactivate() = 0;
 
   // Enables motion commands for the hardware modules.
