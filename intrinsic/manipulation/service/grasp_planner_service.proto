@@ -38,12 +38,6 @@ message GPSPlanGraspExecutionParams {
   intrinsic_proto.icon.JointVec start_robot_joint_positions = 4;
 }
 
-// The parameters to start continuous grasp planning.
-message GPSContinuousPlanningParams {
-  // The parameters to run continuous grasp planning.
-  GPSPlanGraspsParams plan_grasps_params = 1;
-}
-
 // A request to register a grasp planner with a given id.
 message RegisterGraspPlannerRequest {
   // The ID of the planner. This ID will be used later to plan grasps.
@@ -58,11 +52,8 @@ message RegisterGraspPlannerRequest {
   intrinsic_proto.grasping.GraspExecutionPlannerParams
       grasp_execution_planner_params = 5;
 
-  // The parameters to start continuous grasp planning.
-  optional GPSContinuousPlanningParams continuous_planning_params = 4;
-
-  reserved 3;
-  reserved "scene_perception_info";
+  reserved 3, 4;
+  reserved "scene_perception_info", "continuous_planning_params";
 }
 
 message RegisterGraspPlannerResponse {

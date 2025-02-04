@@ -75,9 +75,6 @@ class GraspPlannerClient:
       planner_id: str,
       grasp_planner_params: grasp_planner_params_pb2.GraspPlannerParams,
       grasp_execution_planner_params: grasp_execution_planner_params_pb2.GraspExecutionPlannerParams,
-      continuous_planning_params: (
-          grasp_planner_service_pb2.GPSContinuousPlanningParams | None
-      ) = None,
   ) -> None:
     """Registers a GraspPlanner.
 
@@ -86,8 +83,6 @@ class GraspPlannerClient:
       grasp_planner_params: The parameters used to construct a grasp planner.
       grasp_execution_planner_params: The parameters used to construct a grasp
         execution planner.
-      continuous_planning_params: The parameters used to perform continuous
-        grasp planning. If None, do not start continuous grasp planning.
 
     Raises:
       RuntimeError: If registration fails.
@@ -97,7 +92,6 @@ class GraspPlannerClient:
             planner_id=planner_id,
             grasp_planner_params=grasp_planner_params,
             grasp_execution_planner_params=grasp_execution_planner_params,
-            continuous_planning_params=continuous_planning_params,
         ),
         **self._connection_params,
     )
