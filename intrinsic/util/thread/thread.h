@@ -7,7 +7,6 @@
 #include <type_traits>
 #include <utility>
 
-#include "absl/base/attributes.h"
 #include "intrinsic/util/status/status_macros.h"
 #include "intrinsic/util/thread/stop_token.h"
 
