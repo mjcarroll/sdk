@@ -66,3 +66,20 @@ cc_library(
         ":twist",
     ],
 )
+
+cc_library(
+    name = "inertia_utils",
+    srcs = ["inertia_utils.cc"],
+    hdrs = ["inertia_utils.h"],
+    deps = [
+        ":almost_equals",
+        "//intrinsic/eigenmath",
+        "//intrinsic/icon/utils:realtime_status",
+        "//intrinsic/icon/utils:realtime_status_macro",
+        "//intrinsic/icon/utils:realtime_status_or",
+        "//intrinsic/kinematics/types:to_fixed_string",
+        "//intrinsic/world/proto:robot_payload_cc_proto",
+        "@com_gitlab_libeigen_eigen//:eigen",
+        "@com_google_absl//absl/strings:string_view",
+    ],
+)

@@ -6,6 +6,7 @@
 #include "absl/status/statusor.h"
 #include "intrinsic/eigenmath/types.h"
 #include "intrinsic/kinematics/validate_link_parameters.h"
+#include "intrinsic/math/inertia_utils.h"
 #include "intrinsic/math/pose3.h"
 #include "intrinsic/math/proto_conversion.h"
 #include "intrinsic/util/status/status_macros.h"
@@ -30,7 +31,7 @@ absl::Status RobotPayload::SetTipTCog(const Pose3d& tip_t_cog) {
 absl::Status RobotPayload::SetInertia(const eigenmath::Matrix3d& inertia) {
   // Allow a zero matrix to handle point masses.
   if (!inertia.isZero()) {
-    INTR_RETURN_IF_ERROR(intrinsic::kinematics::ValidateInertia(inertia));
+    INTR_RETURN_IF_ERROR(intrinsic::ValidateInertia(inertia));
   }
 
   inertia_in_cog_ = inertia;

@@ -14,7 +14,6 @@ icon::RealtimeStatus ValidateMass(double mass_kg);
 // positive definite (symmetric and with positive eigenvalues) and that its
 // eigenvalues fulfill the triangle inequalities.
 icon::RealtimeStatus ValidateInertia(const eigenmath::Matrix3d& inertia);
-
 }  // namespace intrinsic::kinematics
 
 #endif  // INTRINSIC_KINEMATICS_VALIDATE_LINK_PARAMETERS_H_

@@ -9,7 +9,6 @@ cc_library(
     deps = [
         "//intrinsic/eigenmath",
         "//intrinsic/icon/utils:realtime_status",
-        "//intrinsic/kinematics/types:to_fixed_string",
-        "@com_gitlab_libeigen_eigen//:eigen",
+        "//intrinsic/math:inertia_utils",
     ],
 )

@@ -20,6 +20,7 @@ cc_library(
         ":robot_payload_base",
         "//intrinsic/eigenmath",
         "//intrinsic/kinematics:validate_link_parameters",
+        "//intrinsic/math:inertia_utils",
         "//intrinsic/math:pose3",
         "//intrinsic/math:proto_conversion",
         "//intrinsic/util/status:status_macros",
