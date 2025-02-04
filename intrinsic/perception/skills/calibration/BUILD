@@ -53,19 +53,3 @@ py_proto_library(
     name = "sample_calibration_poses_py_pb2",
     deps = [":sample_calibration_poses_proto"],
 )
-
-proto_library(
-    name = "optimize_robot_and_camera_poses_proto",
-    srcs = ["optimize_robot_and_camera_poses.proto"],
-    deps = ["//intrinsic/math/proto:pose_proto"],
-)
-
-py_proto_library(
-    name = "optimize_robot_and_camera_poses_py_pb2",
-    deps = [":optimize_robot_and_camera_poses_proto"],
-)
-
-cc_proto_library(
-    name = "optimize_robot_and_camera_poses_cc_proto",
-    deps = [":optimize_robot_and_camera_poses_proto"],
-)
