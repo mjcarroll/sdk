@@ -56,7 +56,7 @@ absl::StatusOr<Queryable> Queryable::Create(
   Queryable queryable(key, callback);
   if (imw_ret_t rv = Zenoh().imw_create_queryable(
           queryable.GetKeyExpression().data(), &ZenohQueryableCallback,
-          queryable.link_.get());
+          queryable.link_.get(), nullptr);
       rv != IMW_OK) {
     return absl::InvalidArgumentError(absl::StrFormat(
         "Failed to create queryable for key '%s' (code %d)", key, rv));

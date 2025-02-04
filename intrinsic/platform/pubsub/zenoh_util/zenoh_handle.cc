@@ -106,7 +106,8 @@ void ZenohHandle::Initialize() {
 #endif
 
   if (handle == nullptr) {
-    LOG(FATAL) << "Cannot open the shared library at: " << path;
+    LOG(FATAL) << "Cannot open the shared library at: " << path
+               << " dlerror() output: " << dlerror();
   }
   GET_FUNCTION_PTR(handle, imw_init);
   GET_FUNCTION_PTR(handle, imw_fini);

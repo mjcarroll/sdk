@@ -44,8 +44,13 @@ typedef std::function<void(const char *, const void *, const size_t)>
 
 typedef std::function<void(const char *)> imw_on_done_functor_t;
 
+struct imw_queryable_options_t {
+  bool is_ros_service = false;
+};
+
 struct imw_query_options_t {
   uint64_t timeout_ms = 0;
+  bool call_ros_service = false;
 };
 
 struct QueryContext {
@@ -98,9 +103,9 @@ struct ZenohHandle {
 
   std::add_pointer_t<int(const char *keyexpr)> imw_keyexpr_is_canon;
 
-  std::add_pointer_t<imw_ret_t(const char *keyexpr,
-                               imw_queryable_callback_fn *callback,
-                               void *user_context)>
+  std::add_pointer_t<imw_ret_t(
+      const char *keyexpr, imw_queryable_callback_fn *callback,
+      void *user_context, imw_queryable_options_t *options)>
       imw_create_queryable;
 
   std::add_pointer_t<imw_ret_t(const char *keyexpr,
