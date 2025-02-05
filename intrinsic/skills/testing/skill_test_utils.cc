@@ -181,7 +181,7 @@ intrinsic_proto::resources::ResourceHandle SkillTestFactory::RunService(
   grpc::ServerBuilder builder;
   std::shared_ptr<grpc::ServerCredentials> creds =
       grpc::InsecureServerCredentials();  // NOLINT (insecure)
-  builder.AddListeningPort("[::1]:0", creds, &port);
+  builder.AddListeningPort("localhost:0", creds, &port);
   builder.AddChannelArgument(GRPC_ARG_ALLOW_REUSEPORT, 0);
   builder.RegisterService(service);
   // Keep the server running until the factory is destroyed.
@@ -191,7 +191,7 @@ intrinsic_proto::resources::ResourceHandle SkillTestFactory::RunService(
 
   intrinsic_proto::resources::ResourceHandle handle;
   handle.mutable_connection_info()->mutable_grpc()->set_address(
-      absl::StrCat("[::1]:", port));
+      absl::StrCat("localhost:", port));
   return handle;
 }
 
