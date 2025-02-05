@@ -2,6 +2,7 @@
 
 # Testing utilities for skills.
 
+load("@ai_intrinsic_sdks_pip_deps//:requirements.bzl", "requirement")
 load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_proto_library")
 load("@com_google_protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
 load("@com_google_protobuf//bazel:proto_library.bzl", "proto_library")
@@ -210,6 +211,7 @@ py_library(
         "//intrinsic/util/path_resolver:path_resolver_py",
         "//intrinsic/world/proto:object_world_service_py_pb2_grpc",
         "//intrinsic/world/python:object_world_client",
+        requirement("grpcio"),
         "@com_google_protobuf//:protobuf_python",
     ],
 )
@@ -225,10 +227,14 @@ py_test(
         ":echo_skill_py_pb2",
         ":skill_test_utils",
         "//intrinsic/assets:id_utils_py",
+        "//intrinsic/assets/services/examples/calcserver:calc_server_py",
+        "//intrinsic/assets/services/examples/calcserver:calc_server_py_pb2",
+        "//intrinsic/assets/services/examples/calcserver:calc_server_py_pb2_grpc",
         "//intrinsic/logging/proto:log_item_py_pb2",
         "//intrinsic/skills/proto:skill_manifest_py_pb2",
         "//intrinsic/skills/python:skill_logging_context",
         "//intrinsic/solutions/testing:compare",
+        requirement("grpcio"),
         "@com_google_absl_py//absl/testing:absltest",
         "@com_google_absl_py//absl/testing:parameterized",
     ],

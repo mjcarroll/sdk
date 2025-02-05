@@ -4,10 +4,12 @@
 
 from __future__ import annotations
 
+import concurrent.futures
 from typing import Optional, cast
 from unittest import mock
 
 from google.protobuf import empty_pb2
+import grpc
 from intrinsic.assets import id_utils
 from intrinsic.icon.release import file_helpers
 from intrinsic.logging.proto import context_pb2
@@ -29,6 +31,65 @@ from intrinsic.world.proto import object_world_service_pb2_grpc
 from intrinsic.world.python import object_world_client
 
 _TEST_WORLD_ID = "world"
+
+
+def _make_local_server() -> tuple[grpc.Server, str]:
+  server = grpc.server(concurrent.futures.ThreadPoolExecutor())
+  port = server.add_insecure_port("localhost:0")
+  address = f"localhost:{port}"
+  return server, address
+
+
+def make_grpc_server_with_channel() -> tuple[grpc.Server, grpc.Channel]:
+  """Makes a gRPC server and channel suitable for use by unit tests.
+
+  Use this to create fakes of services built into a context object, like the
+  world service.
+
+  To use the server, the caller must:
+
+    1. Add a servicer to the returned service
+    2. Call server.start()
+
+  Returns:
+    A gRPC server
+    A channel that can be used to communicate with the server
+  """
+  server, address = _make_local_server()
+  channel = grpc.insecure_channel(address)
+  return server, channel
+
+
+def make_grpc_server_with_resource_handle(
+    resource_name: str,
+) -> tuple[grpc.Server, resource_handle_pb2.ResourceHandle]:
+  """Makes a gRPC server and resource handle suitable for use by unit tests.
+
+  Use this function to create connections with services passed in via the
+  EquipmentPack on a context object.
+
+  To use the server, the caller must:
+
+    1. Add a servicer to the returned service
+    2. Call server.start()
+
+  Args:
+    resource_name: the name of a resource as used in the dependencies section of
+      a skill manifest.
+
+  Returns:
+    A gRPC server
+    A resource handle that can be put into a context object to be used by a
+      skill in a unit test.
+  """
+  server, address = _make_local_server()
+  handle = resource_handle_pb2.ResourceHandle(
+      connection_info=resource_handle_pb2.ResourceConnectionInfo(
+          grpc=resource_handle_pb2.ResourceGrpcConnectionInfo(address=address),
+      ),
+      name=resource_name,
+  )
+  return server, handle
 
 
 def make_test_execute_request(
