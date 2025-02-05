@@ -137,8 +137,8 @@ func AccountsDomain(env string) string {
 	}
 }
 
-// AccountsProject returns the accounts project for the given environment.
-func AccountsProject(env string) string {
+// AccountsProjectFromEnv returns the accounts project for the given environment.
+func AccountsProjectFromEnv(env string) string {
 	switch env {
 	case Prod:
 		return AccountsProjectProd
@@ -149,6 +149,16 @@ func AccountsProject(env string) string {
 	default:
 		return ""
 	}
+}
+
+// AccountsProjectFromProject returns the accounts project for the given project.
+// Accepts both portal and compute projects.
+func AccountsProjectFromProject(project string) string {
+	environment, err := FromProject(project)
+	if err != nil {
+		environment = FromComputeProject(project)
+	}
+	return AccountsProjectFromEnv(environment)
 }
 
 // AssetsDomain returns the assets domain for the given environment.
