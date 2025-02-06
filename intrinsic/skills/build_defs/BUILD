@@ -21,6 +21,7 @@ bzl_library(
         ":manifest_bzl",
         "//bazel:container_bzl",
         "//bazel:python_oci_image_bzl",
+        "@bazel_skylib//lib:paths",
     ],
 )
 

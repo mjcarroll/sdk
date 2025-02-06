@@ -23,6 +23,7 @@ bzl_library(
     deps = [
         ":container_bzl",
         "@aspect_bazel_lib//lib:tar",
+        "@bazel_skylib//lib:paths",
     ],
 )
 

@@ -2,6 +2,7 @@
 
 """Build rules for creating Skill artifacts."""
 
+load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@rules_python//python:defs.bzl", "py_binary")
 load("//bazel:container.bzl", "container_image")
 load("//bazel:python_oci_image.bzl", "python_oci_image")
@@ -394,7 +395,7 @@ def _intrinsic_skill(name, image, manifest, **kwargs):
         data_path = "/",
         labels = labels,
         symlinks = {
-            "/skills/skill_service_config.proto.bin": _SKILL_USER_DIR + "/" + package_path() + skill_service_config_name + ".pbbin",
+            "/skills/skill_service_config.proto.bin": paths.join(_SKILL_USER_DIR, native.package_name(), skill_service_config_name + ".pbbin"),
         },
         **kwargs
     )
@@ -407,12 +408,9 @@ def _intrinsic_skill(name, image, manifest, **kwargs):
         testonly = kwargs.get("testonly"),
     )
 
-def package_path():
-    return native.package_name() + "/" if native.package_name() else ""
-
 def build_symlinks(skill_service_name):
     return {
-        "/skills/skill_service": _SKILL_USER_DIR + "/" + package_path() + skill_service_name,
+        "/skills/skill_service": paths.join(_SKILL_USER_DIR, native.package_name(), skill_service_name),
     }
 
 def cc_skill(
@@ -508,7 +506,7 @@ def py_skill(
         directory = _SKILL_USER_DIR,
         data_path = "/",
         symlinks = build_symlinks(binary_name) | {
-            "/skills/skill_service.runfiles": _SKILL_USER_DIR + "/" + native.repository_name()[1:] + "/" + package_path() + binary_name + ".runfiles",
+            "/skills/skill_service.runfiles": paths.join(_SKILL_USER_DIR, native.repo_name(), native.package_name(), binary_name + ".runfiles"),
         },
         workdir = "/",
         compatible_with = kwargs.get("compatible_with"),

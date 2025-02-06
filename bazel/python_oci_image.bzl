@@ -3,6 +3,7 @@
 """Helpers for dealing with Python docker images."""
 
 load("@aspect_bazel_lib//lib:tar.bzl", "mtree_mutate", "mtree_spec", "tar")
+load("@bazel_skylib//lib:paths.bzl", "paths")
 load(
     "//bazel:container.bzl",
     "container_image",
@@ -152,9 +153,17 @@ def python_oci_image(
     layers = python_layers(name, binary, **layer_kwargs)
 
     binary_label = native.package_relative_label(binary)
-    binary_path = "/" + binary_label.package + "/" + binary_label.name
+    binary_path = paths.join("/", kwargs.get("directory", ""), binary_label.package, binary_label.name)
+
     if kwargs.get("cmd") == None:
-        kwargs["cmd"] = [kwargs.get("directory", "") + binary_path]
+        kwargs["cmd"] = [binary_path]
+
+    # By default, the runfiles path is prefixed by the repo name while the binary path is not. Adding a symlink to fix the runfiles detection logic in case the repo is not empty.
+    if native.repo_name():
+        binary_runfiles_path = paths.join("/", kwargs.get("directory", ""), native.repo_name(), binary_label.package, binary_label.name + ".runfiles")
+        symlinks = (symlinks or {}) | {
+            binary_path + ".runfiles": binary_runfiles_path,
+        }
 
     if extra_tars:
         layers.extend(extra_tars)
