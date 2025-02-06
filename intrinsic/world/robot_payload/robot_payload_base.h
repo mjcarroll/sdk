@@ -28,15 +28,19 @@ class RobotPayloadBase {
   // payloads center of mass. Unit is kg*m^2.
   const eigenmath::Matrix3d& inertia() const { return inertia_in_cog_; }
 
+  // Uses IsApprox to compare the payloads with `kStdError` as
+  // precision.
   bool operator==(const RobotPayloadBase& other) const;
+
+  // Returns true if the two payloads are almost equal given the precision.
+  bool IsApprox(const intrinsic::RobotPayloadBase& other,
+                double precision) const;
 
  protected:
   // This constructor is protected to force the use of the factory method in the
   // derived class. The factory method ensures that the payload is valid.
   RobotPayloadBase(double mass, const Pose3d& tip_t_cog,
                    const eigenmath::Matrix3d& inertia);
-
-  static bool MassAlmostEqual(double mass, double other_mass);
 
   double mass_kg_;
   Pose3d tip_t_cog_;

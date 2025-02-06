@@ -2,10 +2,10 @@
 
 #include "intrinsic/world/robot_payload/robot_payload_base.h"
 
-#include <cstdlib>
 #include <ostream>
 
 #include "intrinsic/eigenmath/types.h"
+#include "intrinsic/math/almost_equals.h"
 #include "intrinsic/math/pose3.h"
 #include "intrinsic/world/proto/robot_payload.pb.h"
 
@@ -20,15 +20,8 @@ RobotPayloadBase::RobotPayloadBase(double mass, const Pose3d& tip_t_cog,
                                    const eigenmath::Matrix3d& inertia)
     : mass_kg_(mass), tip_t_cog_(tip_t_cog), inertia_in_cog_(inertia) {}
 
-bool RobotPayloadBase::MassAlmostEqual(double mass, double other_mass) {
-  return std::abs(mass - other_mass) <
-         Eigen::NumTraits<double>::dummy_precision();
-}
-
 bool RobotPayloadBase::operator==(const RobotPayloadBase& other) const {
-  return MassAlmostEqual(mass_kg_, other.mass_kg_) &&
-         tip_t_cog_.isApprox(other.tip_t_cog_) &&
-         inertia_in_cog_.isApprox(other.inertia_in_cog_);
+  return IsApprox(other, kStdError);
 }
 
 std::ostream& operator<<(std::ostream& os, const RobotPayloadBase& payload) {
@@ -38,4 +31,10 @@ std::ostream& operator<<(std::ostream& os, const RobotPayloadBase& payload) {
   return os;
 }
 
+bool RobotPayloadBase::IsApprox(const intrinsic::RobotPayloadBase& other,
+                                double precision) const {
+  return intrinsic::AlmostEquals(mass(), other.mass(), precision) &&
+         tip_t_cog().isApprox(other.tip_t_cog(), precision) &&
+         inertia().isApprox(other.inertia(), precision);
+}
 }  // namespace intrinsic

@@ -20,6 +20,7 @@ cc_library(
         ":robot_payload_base",
         "//intrinsic/eigenmath",
         "//intrinsic/kinematics:validate_link_parameters",
+        "//intrinsic/math:almost_equals",
         "//intrinsic/math:inertia_utils",
         "//intrinsic/math:pose3",
         "//intrinsic/math:proto_conversion",
@@ -36,6 +37,7 @@ cc_library(
     hdrs = ["robot_payload_base.h"],
     deps = [
         "//intrinsic/eigenmath",
+        "//intrinsic/math:almost_equals",
         "//intrinsic/math:pose3",
         "//intrinsic/world/proto:robot_payload_cc_proto",
     ],

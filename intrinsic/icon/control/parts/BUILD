@@ -35,6 +35,7 @@ cc_library(
         "//intrinsic/icon/utils:realtime_status_or",
         "//intrinsic/kinematics:validate_link_parameters",
         "//intrinsic/kinematics/types:to_fixed_string",
+        "//intrinsic/math:almost_equals",
         "//intrinsic/math:pose3",
         "//intrinsic/world/proto:robot_payload_cc_proto",
         "//intrinsic/world/robot_payload:robot_payload_base",

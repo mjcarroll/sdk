@@ -9,6 +9,7 @@
 #include "intrinsic/icon/utils/realtime_status_or.h"
 #include "intrinsic/kinematics/types/to_fixed_string.h"
 #include "intrinsic/kinematics/validate_link_parameters.h"
+#include "intrinsic/math/almost_equals.h"
 #include "intrinsic/math/pose3.h"
 #include "intrinsic/world/robot_payload/robot_payload_base.h"
 
@@ -17,7 +18,7 @@ namespace intrinsic::icon {
 RealtimeStatusOr<RealtimeRobotPayload> RealtimeRobotPayload::Create(
     double mass, const Pose3d& tip_t_cog, const eigenmath::Matrix3d& inertia) {
   RealtimeRobotPayload payload;
-  if (!MassAlmostEqual(mass, 0.0)) {
+  if (!AlmostEquals(mass, 0.0)) {
     INTRINSIC_RT_RETURN_IF_ERROR(kinematics::ValidateMass(mass));
   }
   if (!inertia.isZero()) {

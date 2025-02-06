@@ -4,8 +4,8 @@
 
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
-#include "intrinsic/eigenmath/types.h"
 #include "intrinsic/kinematics/validate_link_parameters.h"
+#include "intrinsic/math/almost_equals.h"
 #include "intrinsic/math/inertia_utils.h"
 #include "intrinsic/math/pose3.h"
 #include "intrinsic/math/proto_conversion.h"
@@ -16,7 +16,7 @@ namespace intrinsic {
 
 absl::Status RobotPayload::SetMass(double mass_kg) {
   // Allow a zero mass for robots without payload.
-  if (!MassAlmostEqual(mass_kg, 0.0)) {
+  if (!AlmostEquals(mass_kg, 0.0)) {
     INTR_RETURN_IF_ERROR(intrinsic::kinematics::ValidateMass(mass_kg));
   }
   mass_kg_ = mass_kg;
