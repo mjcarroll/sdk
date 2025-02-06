@@ -138,7 +138,6 @@ py_binary(
 
 python_oci_image(
     name = "calc_server_py_image",
-    base = "@distroless_base",
     binary = ":calc_server_main_py",
     data_path = "/",
 )

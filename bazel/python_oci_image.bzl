@@ -126,7 +126,7 @@ def python_layers(name, binary, **kwargs):
 def python_oci_image(
         name,
         binary,
-        base = Label("@distroless_python3"),
+        base = None,
         extra_tars = None,
         symlinks = None,
         **kwargs):
@@ -144,6 +144,9 @@ def python_oci_image(
       symlinks: if specified, symlinks to add to the final image (analogous to rules_docker container_image#sylinks).
       **kwargs: extra arguments to pass on to the oci_image target.
     """
+
+    if base == None:
+        base = Label("@distroless_python3")
 
     layer_kwargs = {key: value for key, value in kwargs.items() if key in ["compatible_with", "data_path", "directory", "testonly", "visibility"]}
     layers = python_layers(name, binary, **layer_kwargs)
