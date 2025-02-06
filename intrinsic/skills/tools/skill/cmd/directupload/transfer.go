@@ -113,15 +113,17 @@ func (dt *directTransfer) Write(ref name.Reference, img crv1.Image) error {
 		}
 	}
 
-	retryTracker := atomic.NewUint32(0)
+	numAttempts := atomic.NewUint32(0)
+	// The initial attempt is not counted as a retry.
+	maxAttempts := 1 + dt.maxRetries
 	err := backoff.Retry(func() error {
 		if dt.ctx.Err() != nil {
 			return backoff.Permanent(dt.ctx.Err())
 		}
-		attempt := retryTracker.Inc()
+		attempt := numAttempts.Inc()
 		err := dt.uploader.UploadImage(dt.ctx, ref.String(), img)
 		if err != nil {
-			log.Errorf("attempt %d/%d: failed to upload image (%s): %s", attempt, dt.maxRetries, ref, err)
+			log.Errorf("attempt %d/%d: failed to upload image (%s): %s", attempt, maxAttempts, ref, err)
 			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 				return backoff.Permanent(err)
 			}
