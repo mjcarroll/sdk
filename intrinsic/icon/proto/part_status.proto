@@ -145,6 +145,9 @@ message RobotStatus {
   // The operational status of the robot's server.
   intrinsic_proto.icon.OperationalStatus operational_status = 6;
 
+  // THe current speed override value.
+  optional double speed_override = 7;
+
   reserved 1;
 }
 
