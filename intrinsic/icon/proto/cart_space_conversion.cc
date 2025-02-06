@@ -99,28 +99,38 @@ absl::StatusOr<CartesianLimits> FromProto(
   CartesianLimits out;
   INTR_ASSIGN_OR_RETURN(
       out.min_translational_position,
-      RepeatedDoubleToVector3d(proto.min_translational_position()));
+      RepeatedDoubleToVector3d(proto.min_translational_position()),
+      _ << "while reading min_translation_position from CartesianLimits proto");
   INTR_ASSIGN_OR_RETURN(
       out.max_translational_position,
-      RepeatedDoubleToVector3d(proto.max_translational_position()));
+      RepeatedDoubleToVector3d(proto.max_translational_position()),
+      _ << "while reading max_translation_position from CartesianLimits proto");
   INTR_ASSIGN_OR_RETURN(
       out.min_translational_velocity,
-      RepeatedDoubleToVector3d(proto.min_translational_velocity()));
+      RepeatedDoubleToVector3d(proto.min_translational_velocity()),
+      _ << "while reading min_translation_velocity from CartesianLimits proto");
   INTR_ASSIGN_OR_RETURN(
       out.max_translational_velocity,
-      RepeatedDoubleToVector3d(proto.max_translational_velocity()));
+      RepeatedDoubleToVector3d(proto.max_translational_velocity()),
+      _ << "while reading max_translation_velocity from CartesianLimits proto");
   INTR_ASSIGN_OR_RETURN(
       out.min_translational_acceleration,
-      RepeatedDoubleToVector3d(proto.min_translational_acceleration()));
+      RepeatedDoubleToVector3d(proto.min_translational_acceleration()),
+      _ << "while reading min_translation_acceleration from CartesianLimits "
+           "proto");
   INTR_ASSIGN_OR_RETURN(
       out.max_translational_acceleration,
-      RepeatedDoubleToVector3d(proto.max_translational_acceleration()));
+      RepeatedDoubleToVector3d(proto.max_translational_acceleration()),
+      _ << "while reading max_translation_acceleration from CartesianLimits "
+           "proto");
   INTR_ASSIGN_OR_RETURN(
       out.min_translational_jerk,
-      RepeatedDoubleToVector3d(proto.min_translational_jerk()));
+      RepeatedDoubleToVector3d(proto.min_translational_jerk()),
+      _ << "while reading min_translation_jerk from CartesianLimits proto");
   INTR_ASSIGN_OR_RETURN(
       out.max_translational_jerk,
-      RepeatedDoubleToVector3d(proto.max_translational_jerk()));
+      RepeatedDoubleToVector3d(proto.max_translational_jerk()),
+      _ << "while reading max_translation_jerk from CartesianLimits proto");
   out.max_rotational_velocity = proto.max_rotational_velocity();
   out.max_rotational_acceleration = proto.max_rotational_acceleration();
   out.max_rotational_jerk = proto.max_rotational_jerk();
