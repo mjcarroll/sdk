@@ -388,6 +388,9 @@ GrpcEnvelope::GrpcEnvelope(GrpcEnvelope::Config config)
   if (config_.icon_impl_factory) {
     absl::MutexLock l(&icon_impl_mutex_);
     icon_impl_ = config_.icon_impl_factory();
+    if (!icon_impl_.status().ok()) {
+      LOG(ERROR) << "ICON factory returned error: " << icon_impl_.status();
+    }
   }
   StartServer();
 }
@@ -451,11 +454,17 @@ absl::Status GrpcEnvelope::RebuildIconImpl() {
   icon_impl_ = absl::UnavailableError("Restarting ICON service...");
   // Then use the factory to create a new ICON implementation.
   if (!config_.icon_impl_factory) {
-    return absl::InternalError(
+    auto error = absl::InternalError(
         "Missing ICON factory, please report this as a bug");
+    LOG(ERROR) << error;
+    return error;
   }
   icon_impl_ = config_.icon_impl_factory();
   // If the factory returned an error, we want to forward that.
+  if (!icon_impl_.status().ok()) {
+    LOG(ERROR) << "ICON factory returned error: " << icon_impl_.status();
+  }
+
   return icon_impl_.status();
 }
 
