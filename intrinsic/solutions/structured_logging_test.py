@@ -1096,10 +1096,10 @@ payload:<
 
   def test_format_robot_status_event_source(self):
     formatted = structured_logging.format_event_source(
-        '/icon/robot-sim/robot_status'
+        '/icon/robot/robot_status'
     )
 
-    self.assertEqual(formatted, 'icon_robot_sim_robot_status')
+    self.assertEqual(formatted, 'icon_robot_robot_status')
 
   @parameterized.named_parameters(
       dict(
