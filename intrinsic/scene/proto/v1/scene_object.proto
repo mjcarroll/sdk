@@ -4,6 +4,7 @@ syntax = "proto3";
 
 package intrinsic_proto.scene_object.v1;
 
+import "intrinsic/scene/proto/v1/collision_rules.proto";
 import "intrinsic/scene/proto/v1/entity.proto";
 import "intrinsic/scene/proto/v1/object_properties.proto";
 import "intrinsic/scene/proto/v1/simulation_spec.proto";
@@ -33,5 +34,9 @@ message SceneObject {
 
   // Simulation specification.
   SimulationSpec simulation_spec = 5;
+
+  // Collision rules for the scene object. These rules specify any margins or
+  // exclusions between the entities of this scene object.
+  optional CollisionRules collision_rules = 6;
 
 }

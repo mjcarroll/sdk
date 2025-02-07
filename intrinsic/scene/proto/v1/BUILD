@@ -10,6 +10,29 @@ package(default_visibility = [
 ])
 
 proto_library(
+    name = "collision_rules_proto",
+    srcs = ["collision_rules.proto"],
+)
+
+cc_proto_library(
+    name = "collision_rules_cc_proto",
+    deps = [":collision_rules_proto"],
+)
+
+go_proto_library(
+    name = "collision_rules_go_proto",
+    deps = [":collision_rules_proto"],
+)
+
+py_proto_library(
+    name = "collision_rules_py_pb2",
+    visibility = [
+        "//visibility:public",
+    ],
+    deps = [":collision_rules_proto"],
+)
+
+proto_library(
     name = "entity_proto",
     srcs = ["entity.proto"],
     deps = [
@@ -75,6 +98,7 @@ proto_library(
     name = "scene_object_proto",
     srcs = ["scene_object.proto"],
     deps = [
+        ":collision_rules_proto",
         ":entity_proto",
         ":object_properties_proto",
         ":simulation_spec_proto",
@@ -89,9 +113,10 @@ cc_proto_library(
 go_proto_library(
     name = "scene_object_go_proto",
     go_deps = [
-        "//intrinsic/scene/proto/v1:entity_go_proto",
-        "//intrinsic/scene/proto/v1:object_properties_go_proto",
-        "//intrinsic/scene/proto/v1:simulation_spec_go_proto",
+        ":collision_rules_go_proto",
+        ":entity_go_proto",
+        ":object_properties_go_proto",
+        ":simulation_spec_go_proto",
     ],
     deps = [":scene_object_proto"],
 )
