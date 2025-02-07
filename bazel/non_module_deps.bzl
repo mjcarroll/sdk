@@ -13,10 +13,10 @@ def _non_module_deps_impl(ctx):  # @unused
     #   a stable Linux (here: Debian bullseye), of this pick a current build.
     # - Verify the image contains expected /lib/x86_64-linux-gnu/libc* and defines correct
     #   __GLIBC_MINOR__ in /usr/include/features.h
-    # - If system files are not found, add them in ../BUILD.sysroot
+    # - If system files are not found, add them in ../sysroot.BUILD.bazel
     http_archive(
         name = "com_googleapis_storage_chrome_linux_amd64_sysroot",
-        build_file = Label("//intrinsic/production/external:BUILD.sysroot"),
+        build_file = Label("//intrinsic/production/external:sysroot.BUILD.bazel"),
         sha256 = "5df5be9357b425cdd70d92d4697d07e7d55d7a923f037c22dc80a78e85842d2c",
         urls = [
             # features.h defines GLIBC 2.31.
