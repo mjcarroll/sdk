@@ -4,7 +4,14 @@ syntax = "proto3";
 
 package intrinsic_proto.resources;
 
+// NOTE(b/388324748): This is in the process of being deprecated and
+// removed. Please use ServiceState instead:
+// intrinsic/assets/services/proto/v1/service_state.proto
+// See go/intrinsic-service-state-design for details.
+
 message OperationalStatus {
+  option deprecated = true;
+
   enum State {
     // Indicates that the resource instance is in an unspecified state. It may
     // be possible to get back to a known state by calling `ClearFaults` rpc.
