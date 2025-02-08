@@ -243,43 +243,6 @@ _skill_service_config_manifest = rule(
     },
 )
 
-def _skill_labels_impl(ctx):
-    manifest_pbbin_file = ctx.attr.manifest[SkillManifestInfo].manifest_binary_file
-
-    outputfile = ctx.actions.declare_file(ctx.label.name + ".labels")
-
-    arguments = ctx.actions.args().add(
-        "--manifest",
-        manifest_pbbin_file,
-    ).add(
-        "--output",
-        outputfile.path,
-    )
-
-    ctx.actions.run(
-        outputs = [outputfile],
-        inputs = [manifest_pbbin_file],
-        executable = ctx.executable._skill_labels_gen,
-        arguments = [arguments],
-    )
-
-    return DefaultInfo(files = depset([outputfile]))
-
-_skill_labels = rule(
-    implementation = _skill_labels_impl,
-    attrs = {
-        "manifest": attr.label(
-            mandatory = True,
-            providers = [SkillManifestInfo],
-        ),
-        "_skill_labels_gen": attr.label(
-            default = Label("//intrinsic/skills/build_defs:skilllabelsgen_main"),
-            executable = True,
-            cfg = "exec",
-        ),
-    },
-)
-
 SkillInfo = provider(
     "provided by intrinsic_skill() rule",
     fields = ["bundle_tar"],
@@ -375,15 +338,6 @@ def _intrinsic_skill(name, image, manifest, **kwargs):
         tags = ["manual", "avoid_dep"],
     )
 
-    labels = "_%s_labels" % name
-    _skill_labels(
-        name = labels,
-        manifest = manifest,
-        testonly = kwargs.get("testonly"),
-        visibility = ["//visibility:private"],
-        tags = ["manual", "avoid_dep"],
-    )
-
     image_name = "%s_image" % name
     container_image(
         name = image_name,
@@ -393,7 +347,6 @@ def _intrinsic_skill(name, image, manifest, **kwargs):
             skill_service_config_name,
         ],
         data_path = "/",
-        labels = labels,
         symlinks = {
             "/skills/skill_service_config.proto.bin": paths.join(_SKILL_USER_DIR, native.package_name(), skill_service_config_name + ".pbbin"),
         },

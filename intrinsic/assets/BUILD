@@ -129,7 +129,6 @@ go_library(
     deps = [
         ":idutils",
         ":imagetransfer",
-        "//intrinsic/assets/proto:id_go_proto",
         "//intrinsic/kubernetes/workcell_spec:imagetags",
         "//intrinsic/kubernetes/workcell_spec/proto:image_go_proto",
         "//intrinsic/kubernetes/workcell_spec/proto:installer_go_grpc_proto",
@@ -142,7 +141,6 @@ go_library(
         "@org_golang_google_grpc//:go_default_library",
         "@org_golang_google_grpc//codes:go_default_library",
         "@org_golang_google_grpc//status:go_default_library",
-        "@org_golang_google_protobuf//proto",
     ],
 )
 

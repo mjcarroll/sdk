@@ -2,7 +2,7 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
-load("//bazel:go_macros.bzl", "go_library", "go_test")
+load("//bazel:go_macros.bzl", "go_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -80,43 +80,5 @@ go_binary(
         "//intrinsic/util/proto:protoio",
         "@com_github_golang_glog//:go_default_library",
         "@io_bazel_rules_go//proto/wkt:descriptor_go_proto",
-    ],
-)
-
-go_library(
-    name = "skilllabelsgen",
-    srcs = ["skilllabelsgen.go"],
-    deps = [
-        "//intrinsic/assets:idutils",
-        "//intrinsic/skills/proto:skill_manifest_go_proto",
-        "@com_github_golang_glog//:go_default_library",
-    ],
-)
-
-go_binary(
-    name = "skilllabelsgen_main",
-    srcs = ["skilllabelsgen_main.go"],
-    visibility = ["//visibility:public"],
-    deps = [
-        ":skilllabelsgen",
-        "//intrinsic/production:intrinsic",
-        "//intrinsic/skills/proto:skill_manifest_go_proto",
-        "//intrinsic/util/proto:protoio",
-        "@com_github_golang_glog//:go_default_library",
-    ],
-)
-
-go_test(
-    name = "skilllabelsgen_test",
-    srcs = ["skilllabelsgen_test.go"],
-    data = [
-        "//intrinsic/skills/build_defs/tests:no_op_skill_cc_manifest",
-        "//intrinsic/skills/build_defs/tests:no_op_skill_py_manifest",
-    ],
-    deps = [
-        ":skilllabelsgen",
-        "//intrinsic/skills/proto:skill_manifest_go_proto",
-        "//intrinsic/util/proto:protoio",
-        "//intrinsic/util/testing:testio",
     ],
 )

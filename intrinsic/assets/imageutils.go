@@ -18,10 +18,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/proto"
 	"intrinsic/assets/idutils"
 	"intrinsic/assets/imagetransfer"
-	idpb "intrinsic/assets/proto/id_go_proto"
 	"intrinsic/kubernetes/workcell_spec/imagetags"
 	ipb "intrinsic/kubernetes/workcell_spec/proto/image_go_proto"
 	installerpb "intrinsic/kubernetes/workcell_spec/proto/installer_go_grpc_proto"
@@ -44,22 +42,7 @@ const (
 	remoteWriteTries = 5
 
 	maxImageTagLength = 128
-
-	dockerLabelSkillIDKey = "ai.intrinsic.asset-id"
-
-	// The following labels are DEPRECATED and should not be used other than for backwards
-	// compatibility.
-	deprecatedDockerLabelSkillIDProtoKey = "ai.intrinsic.skill-id"
-	deprecatedDockerLabelPackageName     = "ai.intrinsic.package-name"
-	deprecatedDockerLabelSkillName       = "ai.intrinsic.skill-name"
 )
-
-// SkillInstallerParams contains parameters used to install a docker image that
-// contains a skill.
-type SkillInstallerParams struct {
-	SkillID   string // the skill's id
-	ImageName string // the image name of the skill
-}
 
 // TargetType determines how the "target" target command-line argument will be
 // used.
@@ -337,32 +320,6 @@ func GetArchiveFromBazelLabel(target string) (string, error) {
 	return "", fmt.Errorf("given build target does not appear to be a skill image rule")
 }
 
-// SkillIDFromTarget gets the skill ID from the given target and registry.
-func SkillIDFromTarget(target string, targetType TargetType) (string, error) {
-	switch targetType {
-	case Build:
-		archivePath, err := GetArchiveFromBazelLabel(target)
-		if err != nil {
-			return "", fmt.Errorf("could not extract a skill id from the given build target %s: %v", target, err)
-		}
-		return SkillIDFromTarget(archivePath, Archive)
-	case Archive:
-		image, err := GetImage(target, targetType)
-		if err != nil {
-			return "", fmt.Errorf("could not read image: %v", err)
-		}
-		installerParams, err := GetSkillInstallerParams(image)
-		if err != nil {
-			return "", fmt.Errorf("could not extract installer parameters: %v", err)
-		}
-		return installerParams.SkillID, nil
-	case ID:
-		return target, nil
-	default:
-		return "", fmt.Errorf("unimplemented target type: %v", targetType)
-	}
-}
-
 // ReadImage reads the image from the given path.
 func ReadImage(imagePath string) (containerregistry.Image, error) {
 	log.Printf("Reading image tarball %q", imagePath)
@@ -371,43 +328,6 @@ func ReadImage(imagePath string) (containerregistry.Image, error) {
 		return nil, errors.Wrapf(err, "creating tarball image from %q", imagePath)
 	}
 	return image, nil
-}
-
-// GetSkillInstallerParams retrieves docker image labels that are needed by the
-// installer.
-func GetSkillInstallerParams(image containerregistry.Image) (*SkillInstallerParams, error) {
-	configFile, err := image.ConfigFile()
-	if err != nil {
-		return nil, errors.Wrapf(err, "could not extract installer labels from image file")
-	}
-	imageLabels := configFile.Config.Labels
-	skillID, ok := imageLabels[dockerLabelSkillIDKey]
-	if !ok {
-		// Backward-compatibility for deprecated image labels.
-		idProto := &idpb.Id{}
-		if skillIDBinary, ok := imageLabels[deprecatedDockerLabelSkillIDProtoKey]; !ok {
-			skillName, skillNameOK := imageLabels[deprecatedDockerLabelSkillName]
-			skillPackage, skillPackageOK := imageLabels[deprecatedDockerLabelPackageName]
-			if !skillNameOK || !skillPackageOK {
-				return nil, fmt.Errorf("cannot recover skill ID from image labels")
-			} else if skillID, err = idutils.IDFrom(skillPackage, skillName); err != nil {
-				return nil, fmt.Errorf("invalid skill ID: %v", err)
-			}
-		} else if err := proto.Unmarshal([]byte(skillIDBinary), idProto); err != nil {
-			return nil, fmt.Errorf("cannot unmarshal Id proto from the label %q: %v", deprecatedDockerLabelSkillIDProtoKey, err)
-		} else if skillID, err = idutils.IDFromProto(idProto); err != nil {
-			return nil, fmt.Errorf("invalid Id proto: %v", err)
-		}
-	}
-	skillIDLabel, err := idutils.ToLabel(skillID)
-	if err != nil {
-		return nil, fmt.Errorf("could not convert skill ID %q to label: %v", skillID, err)
-	}
-	imageName := fmt.Sprintf("skill-%s", skillIDLabel)
-	return &SkillInstallerParams{
-		SkillID:   skillID,
-		ImageName: imageName,
-	}, nil
 }
 
 // InstallContainerParams holds parameters for InstallContainer.

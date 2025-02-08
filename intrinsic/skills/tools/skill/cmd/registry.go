@@ -128,43 +128,35 @@ func pushFromRef(imgRef string, image containerregistry.Image, imageName string,
 // skill image to the container registry.
 //
 // Returns the image and associated SkillInstallerParams.
-func PushSkill(target string, opts PushOptions) (*imagepb.Image, *imageutils.SkillInstallerParams, error) {
+func PushSkill(target string, imageName string, opts PushOptions) (*imagepb.Image, error) {
 	targetType := imageutils.TargetType(opts.Type)
 	if targetType != imageutils.Build && targetType != imageutils.Archive {
-		return nil, nil, fmt.Errorf("type must be in {%s,%s}", imageutils.Build, imageutils.Archive)
+		return nil, fmt.Errorf("type must be in {%s,%s}", imageutils.Build, imageutils.Archive)
 	}
 
 	image, err := imageutils.GetImage(target, targetType)
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not read image: %v", err)
+		return nil, fmt.Errorf("could not read image: %v", err)
 	}
-	installerParams, err := imageutils.GetSkillInstallerParams(image)
+	imgpb, err := push(image, imageName, opts)
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not extract labels from image object: %v", err)
+		return nil, err
 	}
-	imgpb, err := push(image, installerParams.ImageName, opts)
-	if err != nil {
-		return nil, nil, err
-	}
-	return imgpb, installerParams, err
+	return imgpb, err
 }
 
 // PushSkillFromRef is a helper function that takes an image ref and pushes the
 // skill image to the container registry.
 //
 // Returns the image and associated SkillInstallerParams.
-func PushSkillFromRef(imgRef string, opts PushOptions) (*imagepb.Image, *imageutils.SkillInstallerParams, error) {
+func PushSkillFromRef(imgRef string, imageName string, opts PushOptions) (*imagepb.Image, error) {
 	image, err := imageutils.GetImageFromRef(imgRef, opts.RegistryOpts.Transferer)
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not read image: %v", err)
+		return nil, fmt.Errorf("could not read image: %v", err)
 	}
-	installerParams, err := imageutils.GetSkillInstallerParams(image)
+	imgpb, err := pushFromRef(imgRef, image, imageName, opts)
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not extract labels from image object: %v", err)
+		return nil, err
 	}
-	imgpb, err := pushFromRef(imgRef, image, installerParams.ImageName, opts)
-	if err != nil {
-		return nil, nil, err
-	}
-	return imgpb, installerParams, err
+	return imgpb, err
 }
