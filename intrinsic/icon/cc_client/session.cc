@@ -42,7 +42,6 @@
 #include "intrinsic/logging/proto/context.pb.h"
 #include "intrinsic/platform/common/buffers/realtime_write_queue.h"
 #include "intrinsic/util/grpc/channel_interface.h"
-#include "intrinsic/util/grpc/grpc.h"
 #include "intrinsic/util/proto_time.h"
 #include "intrinsic/util/status/status_builder.h"
 #include "intrinsic/util/status/status_conversion_grpc.h"
