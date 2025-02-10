@@ -24,6 +24,9 @@ func rolesInit(root *cobra.Command) {
 
 var listRolesCmdHelp = `
 List available roles.
+
+Example:
+  inctl customer roles list
 `
 
 var listRolesCmd = &cobra.Command{
