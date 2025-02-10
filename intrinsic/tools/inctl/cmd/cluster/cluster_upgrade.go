@@ -29,6 +29,9 @@ import (
 var (
 	clusterName  string
 	rollbackFlag bool
+	baseFlag     string
+	osFlag       string
+	userDataFlag string
 )
 
 // client helps run auth'ed requests for a specific cluster
@@ -169,16 +172,29 @@ func (c *client) getMode(ctx context.Context) (string, error) {
 }
 
 // run runs an update if one is pending
-func (c *client) run(ctx context.Context, rollback bool) error {
+func (c *client) run(ctx context.Context) error {
 	req := clustermanagerpb.SchedulePlatformUpdateRequest{
 		Project:    c.project,
 		Org:        c.org,
 		ClusterId:  c.cluster,
 		UpdateType: clustermanagerpb.SchedulePlatformUpdateRequest_UPDATE_TYPE_FORWARD,
 	}
-	if rollback {
+	if rollbackFlag {
 		req.UpdateType = clustermanagerpb.SchedulePlatformUpdateRequest_UPDATE_TYPE_ROLLBACK
+	} else if osFlag != "" || baseFlag != "" {
+		req.Versions = &clustermanagerpb.UpdateVersions{}
+		if baseFlag != "" {
+			req.Versions.BaseVersion = version.TranslateBaseUIToAPI(baseFlag)
+		}
+		if osFlag != "" {
+			req.Versions.OsVersion = version.TranslateOSUIToAPI(osFlag)
+		}
+		if userDataFlag != "" {
+			req.Versions.UserData = userDataFlag
+		}
+		req.UpdateType = clustermanagerpb.SchedulePlatformUpdateRequest_UPDATE_TYPE_VERSIONED
 	}
+
 	_, err := c.grpcClient.SchedulePlatformUpdate(ctx, &req)
 	if err != nil {
 		return fmt.Errorf("cluster upgrade run: %w", err)
@@ -307,7 +323,7 @@ var runCmd = &cobra.Command{
 			return fmt.Errorf("cluster upgrade client:\n%w", err)
 		}
 		defer c.close()
-		err = c.run(ctx, rollbackFlag)
+		err = c.run(ctx)
 		if err != nil {
 			return fmt.Errorf("cluster upgrade run:\n%w", err)
 		}
@@ -433,7 +449,10 @@ func init() {
 	clusterUpgradeCmd.PersistentFlags().StringVar(&clusterName, "cluster", "", "Name of cluster to upgrade.")
 	clusterUpgradeCmd.MarkPersistentFlagRequired("cluster")
 	clusterUpgradeCmd.AddCommand(runCmd)
-	runCmd.PersistentFlags().BoolVar(&rollbackFlag, "rollback", false, "Whether to trigger a rollback update instead")
+	runCmd.PersistentFlags().BoolVar(&rollbackFlag, "rollback", false, "Whether to trigger a rollback update instead.")
+	runCmd.PersistentFlags().StringVar(&osFlag, "os", "", "The os version to upgrade to.")
+	runCmd.PersistentFlags().StringVar(&baseFlag, "base", "", "The base version to upgrade to.")
+	runCmd.PersistentFlags().StringVar(&userDataFlag, "user-data", "", "Optional data describing the update.")
 	clusterUpgradeCmd.AddCommand(modeCmd)
 	clusterUpgradeCmd.AddCommand(acceptCmd)
 }
