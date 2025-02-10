@@ -17,7 +17,7 @@ import (
 
 	"intrinsic/config/environments"
 	accaccesscontrolgrpcpb "intrinsic/kubernetes/accounts/service/api/accesscontrol/v1/accesscontrol_go_grpc_proto"
-	accresourcemanagerv1grpcpb "intrinsic/kubernetes/accounts/service/api/resourcemanager/v1/resourcemanagerv1_go_grpc_proto"
+	accresourcemanagergrpcpb "intrinsic/kubernetes/accounts/service/api/resourcemanager/v1/resourcemanager_go_grpc_proto"
 	"intrinsic/tools/inctl/auth/auth"
 	"intrinsic/tools/inctl/util/orgutil"
 )
@@ -45,7 +45,7 @@ var newAccessControlV1Client = func(ctx context.Context) (accessControlV1Client,
 }
 
 // Aliases for convenience
-type resourceManagerV1Client = accresourcemanagerv1grpcpb.ResourceManagerServiceClient
+type resourceManagerV1Client = accresourcemanagergrpcpb.ResourceManagerServiceClient
 type accessControlV1Client = accaccesscontrolgrpcpb.AccessControlServiceClient
 
 func newSecureAccountsAccessControlAPIKeyClient(ctx context.Context, env, org string) (accaccesscontrolgrpcpb.AccessControlServiceClient, error) {
@@ -58,12 +58,12 @@ func newSecureAccountsAccessControlAPIKeyClient(ctx context.Context, env, org st
 
 // newSecureAccountsTokensServiceAPIKeyClient creates a new secure ResourceManagerClient using API keys.
 // Suitable for calling the ressourcemanager via HTTPS from any environment.
-func newSecureAccountsResourceManagerAPIKeyClient(ctx context.Context, env, org string) (accresourcemanagerv1grpcpb.ResourceManagerServiceClient, error) {
+func newSecureAccountsResourceManagerAPIKeyClient(ctx context.Context, env, org string) (accresourcemanagergrpcpb.ResourceManagerServiceClient, error) {
 	conn, err := newConnAuthStore(ctx, environments.AccountsDomain(env), org)
 	if err != nil {
 		return nil, err
 	}
-	return accresourcemanagerv1grpcpb.NewResourceManagerServiceClient(conn), nil
+	return accresourcemanagergrpcpb.NewResourceManagerServiceClient(conn), nil
 }
 
 // Can be overwridden/injected in tests.

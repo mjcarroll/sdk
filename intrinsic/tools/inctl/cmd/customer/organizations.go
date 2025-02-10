@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	accresourcemanager1pb "intrinsic/kubernetes/accounts/service/api/resourcemanager/v1/resourcemanagerv1_go_grpc_proto"
+	accresourcemanager1pb "intrinsic/kubernetes/accounts/service/api/resourcemanager/v1/resourcemanager_go_grpc_proto"
 )
 
 func init() {

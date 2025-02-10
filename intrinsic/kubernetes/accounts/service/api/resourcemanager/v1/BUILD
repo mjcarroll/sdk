@@ -8,8 +8,8 @@ package(default_visibility = [
 ])
 
 proto_library(
-    name = "resourcemanagerv1_proto",
-    srcs = ["resourcemanagerv1.proto"],
+    name = "resourcemanager_proto",
+    srcs = ["resourcemanager.proto"],
     deps = [
         "@com_github_grpc_ecosystem_grpc_gateway_v2//protoc-gen-openapiv2/options:options_proto",
         "@com_google_googleapis//google/api:annotations_proto",
@@ -20,18 +20,18 @@ proto_library(
 )
 
 go_proto_library(
-    name = "resourcemanagerv1_go_proto",
+    name = "resourcemanager_go_proto",
     go_deps = [
         "@com_github_grpc_ecosystem_grpc_gateway_v2//protoc-gen-openapiv2/options:options",
         "@org_golang_google_genproto_googleapis_api//annotations",
         "@com_google_cloud_go_longrunning//autogen/longrunningpb",
     ],
-    deps = [":resourcemanagerv1_proto"],
+    deps = [":resourcemanager_proto"],
 )
 
 go_grpc_library(
-    name = "resourcemanagerv1_go_grpc_proto",
-    srcs = [":resourcemanagerv1_proto"],
+    name = "resourcemanager_go_grpc_proto",
+    srcs = [":resourcemanager_proto"],
     deps = [
         "@com_github_grpc_ecosystem_grpc_gateway_v2//protoc-gen-openapiv2/options",
         "@com_google_cloud_go_longrunning//autogen/longrunningpb",
