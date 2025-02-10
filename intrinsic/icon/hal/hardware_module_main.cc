@@ -103,7 +103,6 @@ absl::StatusOr<HardwareModuleExitCode> ModuleMain(int argc, char** argv) {
     if (!hwm_main_config->module_config.has_disable_malloc_guard()) {
       hwm_main_config->module_config.set_disable_malloc_guard(false);
     }
-
     INTR_ASSIGN_OR_RETURN(
         auto shm_manager,
         SharedMemoryManager::Create(

@@ -60,7 +60,7 @@ void ThreadBody(StopToken stop_token, absl::AnyInvocable<void(StopToken)> f,
   RtLogInitForThisThread();
   icon::InitRtStackTrace();
 
-  f(stop_token);
+    f(stop_token);
 }
 
 }  // namespace

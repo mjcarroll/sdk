@@ -324,6 +324,7 @@ class HardwareModuleRuntime::CallbackHandler final {
         CancelPendingRequests("Request cancelled due to error in ApplyCommand");
       }
     }
+
   }
 
   // Sets the internal state *and* the state in shared memory directly. Only
