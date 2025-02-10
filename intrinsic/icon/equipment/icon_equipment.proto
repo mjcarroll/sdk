@@ -36,6 +36,7 @@ message Icon2AdioPart {
     IconTarget icon_target = 3 [deprecated = true];
   }
   repeated string icon_parts = 6;
+
 }
 
 message Icon2ForceTorqueSensorPart {
