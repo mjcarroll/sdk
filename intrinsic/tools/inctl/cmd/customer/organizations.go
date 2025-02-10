@@ -37,7 +37,7 @@ You must have permissions to create new organization on your current organizatio
 
 Example:
 
-		inctl customer create --identifier=my-org --display-name="My Organization"
+		inctl customer create --identifier=exampleorg --display-name="My Organization"
 `
 
 var createCmd = &cobra.Command{

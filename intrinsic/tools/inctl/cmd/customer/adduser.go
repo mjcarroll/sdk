@@ -54,7 +54,7 @@ Use the --roles flag (comma-separated list) to assign roles to the user after th
 
 Example:
 
-		inctl customer add-user --email=user@example.com --organization=myorg --roles=owner
+		inctl customer add-user --email=user@example.com --organization=exampleorg --roles=owner
 `
 
 var addUser = &cobra.Command{
@@ -147,7 +147,7 @@ List all memberships and invitations of an organization.
 
 Example:
 
-		inctl customer list-users --organization=myorg
+		inctl customer list-users --organization=exampleorg
 `
 
 var listUsers = &cobra.Command{
