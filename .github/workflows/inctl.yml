@@ -1,0 +1,49 @@
+name: Build inctl
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  build-inctl:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # v1.3.1
+        with:
+          tool-cache: verbose_failures
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+      - name: Cache Bazel
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84  # v3.3.2
+        with:
+          path: |
+            ~/.cache/bazel
+          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelrc', 'WORKSPACE') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+      - name: Build inctl
+        run: bazel build //intrinsic/tools/inctl:inctl_external
+      - name: Upload inctl binary to artifact storage
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808  # v4.3.3
+        with:
+          name: inctl
+          path: bazel-bin/intrinsic/tools/inctl/inctl_external_/inctl_external
+
+  release-inctl:
+    runs-on: ubuntu-latest
+    needs: build-inctl
+    steps:
+      - name: Download public repo artifact
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e  # v4.1.7
+        with:
+          name: inctl
+      - uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191  # v2.0.8
+        with:
+          files: inctl
